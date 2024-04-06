@@ -1,0 +1,56 @@
+{% extends "base_customer.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{%  block content %}
+
+ <div class="profile-card">
+
+            <div class="profile-header">
+              <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
+              <div class="profile-details">
+
+                        <p>
+                            {{ user[9] }} {{ user[10] }}
+                        </p>
+                <h2>@{{ user[1] }}</h2>
+                <h2 class="profile-bio">{{user.bio}}</h2>
+                        <a href="" class="btn">Edit Profile</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+</div>
+  <div class="bottom-container">
+         <div class="flex">
+            <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+        </div>
+        <div class="card-container" id="favoritesTab">
+            {% if favorites == 'Empty' %}
+                <div class="horizontal-card">
+                        <div class="horizontal-card-content">
+                            {% if type == 'visit' %}
+                                <h2>{{ profile.user.first_name }} has not saved any post yet</h2>
+                            {% else %}
+                                <h2>You have not saved any post yet</h2>
+                            {% endif %}
+                            <h6> </h6>
+                        </div>
+                </div>
+            {% else %}
+                {% for favorite in favorites %}
+                    <div class="card">
+                        <div class="profile-for_card">
+
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
+
+</body>
+</html>
+{% endblock %}

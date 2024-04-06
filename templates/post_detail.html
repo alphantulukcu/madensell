@@ -1,0 +1,146 @@
+{% extends "base_customer.html" %}
+{% block title %}
+Post
+{% endblock %}
+
+{% block content %}
+                    <div class="detailed-post">
+                        <div class="slideshow-container">
+
+                            <div class="mySlides fade">
+                              <div class="numbertext"></div>
+                              <img src="/static/blankDark_image.jpg" style="width:100% " >
+                            </div>
+
+                            <div class="mySlides fade">
+                              <div class="numbertext" ></div>
+                              <img src="/static/blankDark_image.jpg" style="width:100% " >
+                            </div>
+
+                            <div class="mySlides fade">
+                              <div class="numbertext"></div>
+                                <img src="/static/blankDark_image.jpg" style="width:100% " >
+                            </div>
+                            <a class="prev" onclick="plusSlides(-1)">❮</a>
+                            <a class="next" onclick="plusSlides(1)">❯</a>
+
+                        </div>
+
+                            <div style="text-align:center">
+                              <span class="dot" onclick="currentSlide(1)"></span>
+                              <span class="dot" onclick="currentSlide(2)"></span>
+                              <span class="dot" onclick="currentSlide(3)"></span>
+                            </div>
+                    </div>
+        </div>
+        <div class="right-container">
+            <div class="detailed-post">
+                <div class="profile-header">
+                    <img src="{{ product[11] }}" class="profile-image" alt="Profile Image">
+                    <div class="profile-details">
+                         <form action="" method="get">
+                                    <button type="submit">
+                                        <p>
+                                            {{ product[9] }}
+                                        </p>
+                                    </button>
+                                </form>
+
+                        <h2>@{{ product[13] }}</h2>
+                        <h2 class="profile-bio">point: {{product[10]}}</h2>
+                    </div>
+                </div>
+                <br>
+                <div class="detailed-post-content">
+                    <h2>{{product[3]}}</h2>
+                    <h1>{{product[24]}} / {{product[22]}}</h1>
+                    <h6>{{product[4]}}</h6>
+                    {% if product[2] == 0 %}
+                        <h3>Free</h3>
+                    {% else %}
+                            <h3>{{product[2]}}₺</h3>
+                    {% endif %}
+                    <h1>{{product[7]}} ago</h1>
+                    <br>
+                    <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                        <input type="hidden" class="form-input" id="comment" name="comment" value="" >
+                         <input type="number" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
+                        <br>
+                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Add to Basket</button>
+                    </form>
+                </div>
+            </div>
+            <div class="comment-container" >
+                <h2>Comments</h2>
+                <div class="scroll-container">
+                 {% for comment in comments %}
+                    <div class="comment-card">
+                        <div class="comment-header">
+                            <img src=static/default.png" class="comment-image" alt="Profile Image">
+                            <div class="comment-details">
+                                 <form action="" method="post">
+                                            <button type="submit">
+                                                <p>{{comment[5]}} {{comment[6]}}</p>
+                                            </button>
+                                        </form>
+                                <h2>{{comment[3]}}</h2>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                         <input type="text" class="form-input" id="comment" name="comment" placeholder="Add your comment" >
+                        <input type="hidden" class="form-input" id="numofproducts" name="numofproducts" value="" >
+
+                        <br>
+                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Comment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <!-- Optional JavaScript -->
+    <!-- Popper.js first, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+<script>
+let slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+}
+</script>
+
+<script>
+  function showProfiles() {
+      soldPopUp = document.getElementById('sold-pop-up');
+      soldPopUp.style.display = 'flex';
+  }
+</script>
+
+
+{% endblock %}

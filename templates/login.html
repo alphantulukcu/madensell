@@ -1,0 +1,41 @@
+{% extends "base_login.html" %}
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+
+        <div class="login-form-container">
+            <div class="">
+                <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
+
+                <h3 class="text-center text-3xl font-bold mb-6">Login
+                </h3>
+                <form action="{{ url_for('login') }}" method="POST">
+                    {% if message %}
+                        <div class="bg-yellow-100 text-yellow-800 rounded-md p-4 mb-4">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                    <div class="mb-4">
+                      <label for="username" class="label">User Name:</label>
+                      <input type="text" class="form-input" id="username" name="username" placeholder="Enter User Name" required>
+                    </div>
+
+                    <div class="mb-4">
+                      <label for="password" class="label">Password:</label>
+                      <input type="password" class="form-input" id="password" name="password" placeholder="Enter Password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                  </form>
+                  <form action="{{ url_for('customer_register') }}" id='addForm2'  method="GET">
+                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">Register for Customers</button>
+                  </form>
+                  <form action="{{ url_for('business_register') }}" id='addForm3'  method="GET">
+                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">Register for Businesses</button>
+                  </form>
+            </div>
+            </div>
+
+   {% endblock %}
+

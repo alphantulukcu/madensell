@@ -1,0 +1,105 @@
+{% extends "base_customer.html" %}
+{% block title %}
+Basket
+{% endblock %}
+
+{% block content %}
+            <div class="scroll-container">
+                  {% if posts == 'Empty' %}
+                        <div class="horizontal-card">
+                                <div class="card-content">
+                                    <h2>Anyone have not shared any post yet</h2>
+                                    <h6> </h6>
+                                </div>
+                        </div>
+                    {% else %}
+                        {% for post in products %}
+                             <div class="horizontal-card">
+
+                                <img class="horizontal-card-img" src="static/blankDark_image.jpg">
+                                <div class="card-content">
+                                <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                        <button type="submit">
+                                            <h2>{{ post[6] }}</h2>
+                                        </button>
+                                    </form>
+
+                                <div class="card-price">
+                                     {% if post[5] == 0 %}
+                                        <h3>Free</h3>
+                                    {% else %}
+                                            <h3>{{ post[5] }}₺</h3>
+                                    {% endif %}
+                                </div>
+                                    <h1 style="color: #FFFFFF">Number of Products:</h1>
+                                    <form action="{{ url_for('basket', product_id=post[0]) }}" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+
+                                        <input type="number" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="{{ post[3] }}" >
+                                        <br>
+                                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Update</button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+            </div>
+        </div>
+        <div class="right-container">
+            <div class="detailed-post">
+                    <div class="detailed-post-content">
+                    <h2>Order Summary:</h2>
+                    <h1 style="color: #FFFFFF">Total Price:</h1>
+                        <h3>{{total_sum}}₺</h3>
+                    <br>
+                    </div>
+                    <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Order Now!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    <!-- Optional JavaScript -->
+    <!-- Popper.js first, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+<script>
+let slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+}
+</script>
+
+<script>
+  function showProfiles() {
+      soldPopUp = document.getElementById('sold-pop-up');
+      soldPopUp.style.display = 'flex';
+  }
+</script>
+
+
+{% endblock %}

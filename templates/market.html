@@ -1,0 +1,96 @@
+{% extends "base_customer.html" %}
+{% block title %}
+Market
+{% endblock %}
+
+{% block content %}
+
+            <div class="card-container">
+               <form class="filter-card" action="{{ url_for('market') }}" method="post">
+                    <div class="form-group">
+                        <select class="form-input" id="post_categories" name="post_categories" >
+                            <option value="">Select a Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category[0] }}" {% if cell == category[1] %}selected{% endif %}>{{ category[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <select class="form-input" id="post_subcategories" name="post_subcategories">
+                            <option value="">Select a Subcategory</option>
+                            {% for subcategory in subcategories %}
+                                    <option value="{{ subcategory[0] }}" {% if cell == subcategory[1] %}selected{% endif %}>{{ subcategory[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-input" id="post_sort" name="post_sort">
+                            <option value="-created_at"> Sort by: </option>
+                            <option value="created_at" {% if cell == "created_at" %}selected{% endif %}>Oldest to Newest</option>
+                            <option value="-created_at" {% if cell == "-created_at" %}selected{% endif %}>Newest to Oldest</option>
+                            <option value="price" {% if cell == "price" %}selected{% endif %}>Price: Low to High</option>
+                            <option value="-price" {% if cell == "-price" %}selected{% endif %}>Price: High to Low</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="filter-button">Filter <i class="fa-solid fa-filter" style="color: #ffffff;"></i></button>
+                </form>
+            </div>
+
+        </div>
+</div>
+
+
+<div class="bottom-container">
+        <div class="card-container">
+                  {% if posts == 'Empty' %}
+                        <div class="card">
+                                <div class="card-content">
+                                    <h2>Anyone have not shared any post yet</h2>
+                                    <h6> </h6>
+                                </div>
+                        </div>
+                    {% else %}
+                        {% for post in products %}
+                             <div class="card">
+                                <div class="profile-for_card">
+                                    <img class="profile-for_card" src="{{ post[11] }}" >
+                                    <form action="" method="post">
+                                        <button type="submit">
+                                            <p>{{ post[9] }}</p>
+                                        </button>
+                                    </form>
+
+                                </div>
+                                <img class="card-img" src="static/blankDark_image.jpg">
+                                <div class="card-content">
+                                <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                        <button type="submit">
+                                            <h2>{{ post[3] }}</h2>
+                                        </button>
+                                    </form>
+                                    <h1>{{ post[16] }} / {{ post[14] }}</h1>
+
+                                </div>
+                                <div class="card-price">
+                                     {% if post.price == 0 %}
+                                        <h3>Free</h3>
+                                    {% else %}
+                                            <h3>{{ post[2] }}₺</h3>
+                                    {% endif %}
+                                </div>
+                                <div class="card-bottom">
+                                    <h1>{{ post[7] }} ago</h1>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- Popper.js first, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+{% endblock %}

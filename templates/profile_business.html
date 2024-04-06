@@ -1,0 +1,73 @@
+{% extends "base_business.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{%  block content %}
+
+ <div class="profile-card">
+
+            <div class="profile-header">
+              <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
+              <div class="profile-details">
+
+                        <p>{{ user[9] }}</p>
+
+                <h2>@{{ user[1] }}</h2>
+                <h2 class="profile-bio">Overall point: {{ user[10] }}</h2>
+                        <a href="" class="btn">Edit Profile</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+</div>
+  <div class="bottom-container">
+         <div class="flex">
+            <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+        </div>
+         <div class="card-container" id="postTab">
+                    {% if products == 'Empty' %}
+                        <div class="horizontal-card">
+                                <div class="horizontal-card-content">
+                                        <h2>You have not shared any post yet</h2>
+                                </div>
+                        </div>
+                    {% else %}
+                        {% for post in products %}
+                            <div class="card">
+                                <div class="profile-for_card">
+                                    <img class="profile-for_card" src="static/default.png" >
+                                    <form action="" method="post">
+                                        <button type="submit">
+                                            <p>{{ post[9] }}</p>
+                                        </button>
+                                    </form>
+
+                                </div>
+                                <img class="card-img" src="static/blank_image.jpg">
+                                <div class="card-content">
+                                    <form action="" method="post">
+                                        <button type="submit">
+                                            <h2>{{post[3]}}</h2>
+                                        </button>
+                                    </form>
+                                    <h1>{{post[16]}} / {{post[14]}}</h1>
+
+                                </div>
+                                <div class="card-price">
+                                     {% if post[2] == 0 %}
+                                        <h3>Free</h3>
+                                    {% else %}
+                                            <h3>{{post[2]}}₺</h3>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+        </div>
+
+</body>
+</html>
+{% endblock %}
