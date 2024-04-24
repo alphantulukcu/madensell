@@ -55,44 +55,35 @@ def customer_register():
         first_name = request.form['first_name'].title()
         last_name = request.form['last_name'].title()
         password = request.form['password']
-        birth_date = request.form['birth_date']
         phone = request.form['phone']
         address = request.form['address']
-        # Validate birthdate
-        min_date = date(1920, 1, 1)
-        max_date = date.today()
-        birth_date = date.fromisoformat(birth_date)
 
-        if not (min_date <= birth_date <= max_date):
-            message =  "Invalid birthdate!"
+        pp_path = os.path.join('static', 'default.png')
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        account = cursor.fetchone()
+        user_exists = account is not None
+        if user_exists:
+            message = "Email already exists"
             return render_template('register_customer.html', message=message)
         else:
-            pp_path = os.path.join('static', 'default.png')
-            conn = mysql.connector.connect(**config)
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
-            account = cursor.fetchone()
-            user_exists = account is not None
-            if user_exists:
-                message = "Email already exists"
-                return render_template('register_customer.html', message=message)
-            else:
-                cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 1, address, phone))
-                conn.commit()
-                cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
-                user_id = cursor.fetchone()
-                user_id = user_id[0]
-                cursor.execute(
-                    """   
-                                    INSERT INTO customer(user_id, first_name, last_name, profile_image)
-                                    VALUES (%s, %s, %s, %s);
-                                """,
-                    (user_id, first_name, last_name, pp_path))
-                conn.commit()
-                cursor.execute(
-                    'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
-                    (email, password))
-                return redirect(url_for('login'))
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 1, address, phone))
+            conn.commit()
+            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
+            user_id = cursor.fetchone()
+            user_id = user_id[0]
+            cursor.execute(
+                """   
+                                INSERT INTO customer(user_id, first_name, last_name, profile_image)
+                                VALUES (%s, %s, %s, %s);
+                            """,
+                (user_id, first_name, last_name, pp_path))
+            conn.commit()
+            cursor.execute(
+                'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
+                (email, password))
+            return redirect(url_for('login'))
     return render_template('register_customer.html', message=message)
 
 @app.route("/business-register", methods=["POST", "GET"])
@@ -103,44 +94,38 @@ def business_register():
         username = request.form['username']
         business_name = request.form['business_name'].title()
         password = request.form['password']
-        birth_date = request.form['birth_date']
         phone = request.form['phone']
         address = request.form['address']
         # Validate birthdate
         min_date = date(1920, 1, 1)
         max_date = date.today()
-        birth_date = date.fromisoformat(birth_date)
 
-        if not (min_date <= birth_date <= max_date):
-            message =  "Invalid birthdate!"
+        pp_path = os.path.join('static', 'default.png')
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+        account = cursor.fetchone()
+        user_exists = account is not None
+        if user_exists:
+            message = "Email already exists"
             return render_template('register_business.html', message=message)
         else:
-            pp_path = os.path.join('static', 'default.png')
-            conn = mysql.connector.connect(**config)
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
-            account = cursor.fetchone()
-            user_exists = account is not None
-            if user_exists:
-                message = "Email already exists"
-                return render_template('register_business.html', message=message)
-            else:
-                cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 2, address, phone))
-                conn.commit()
-                cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
-                user_id = cursor.fetchone()
-                user_id = user_id[0]
-                cursor.execute(
-                    """   
-                                    INSERT INTO business(user_id, business_name, overall_point, profile_image)
-                                    VALUES (%s, %s, %s, %s);
-                                """,
-                    (user_id, business_name, 0, pp_path))
-                conn.commit()
-                cursor.execute(
-                    'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
-                    (email, password))
-                return redirect(url_for('login'))
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 2, address, phone))
+            conn.commit()
+            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
+            user_id = cursor.fetchone()
+            user_id = user_id[0]
+            cursor.execute(
+                """   
+                                INSERT INTO business(user_id, business_name, overall_point, profile_image)
+                                VALUES (%s, %s, %s, %s);
+                            """,
+                (user_id, business_name, 0, pp_path))
+            conn.commit()
+            cursor.execute(
+                'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
+                (email, password))
+            return redirect(url_for('login'))
     return render_template('register_business.html', message=message)
 
 
@@ -181,6 +166,53 @@ def profile():
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))
+
+
+@app.route("/customer-edit-profile", methods=["POST", "GET"])
+def customer_edit_profile():
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        message = ''
+        if request.method == 'POST' and 'username' in request.form:
+            email = request.form['email']
+            username = request.form['username']
+            first_name = request.form['first_name'].title()
+            last_name = request.form['last_name'].title()
+            phone = request.form['phone']
+            address = request.form['address']
+            # Validate birthdate
+
+            pp_path = os.path.join('static', 'default.png')
+            conn = mysql.connector.connect(**config)
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+            account = cursor.fetchone()
+            user_exists = account is not None and user[0] != account[0]
+            if user_exists:
+                message = "Email already exists"
+                return render_template('edit_profile_customer.html', message=message)
+            else:
+                #update customer with procedure here
+                cursor.callproc('UpdateCustomerProfile', [
+                    session['userid'],
+                    email,
+                    username,
+                    first_name,
+                    last_name,
+                    phone,
+                    address
+                ])
+                conn.commit()  # Commit the transaction
+                message = "Profile updated successfully!"
+                return redirect(url_for('profile'))
+        return render_template('edit_profile_customer.html', user=user)
+
+
 
 
 @app.route("/add-product", methods=["POST", "GET"])
@@ -238,7 +270,6 @@ def market():
             subcategory_id = int(request.form['post_subcategories'])
             sort = request.form['post_sort']
 
-
         else:
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
@@ -256,6 +287,7 @@ def market():
             products = cursor.fetchall()
 
             return render_template('market.html', products=products, categories=category, subcategories=subcategory)
+
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
 def post_detail(product_id):
