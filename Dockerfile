@@ -1,17 +1,9 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim-buster
-
-# Set the working directory in the container
-WORKDIR /madensell
-
-# Copy the current directory contents into the container at /app
-COPY . /madensell
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Define environment variable
-ENV NAME World
-
-# Run app.py when the container launches with specified host and port
-CMD ["python", "app.py"]
+FROM python:3.9-slim-buster
+RUN apt-get update
+RUN apt-get install -y pkg-config
+RUN apt-get install -y gcc
+RUN apt-get install -y default-libmysqlclient-dev
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .

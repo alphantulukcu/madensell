@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+       <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="/static/default_dark.css" id="theme-stylesheet" rel="stylesheet" type="text/css" media="all">
-    <link href="/static/fontawesomefree/css/fontawesome.css" rel="stylesheet" type="text/css">
-    <link href="/static/fontawesomefree/css/brands.css" rel="stylesheet" type="text/css">
-    <link href="/static/fontawesomefree/css/solid.css" rel="stylesheet" type="text/css">
+    <link href="static/default_dark.css" id="theme-stylesheet" rel="stylesheet" type="text/css" media="all">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs/build/css/themes/default.min.css" />
 </head>
@@ -18,7 +15,7 @@
     <div class="navbar fixed top-0 left-0 right-0" id="navbar">
         <div class="navbar-brand">
             <a href="" class="btn" id="logo">
-                <img src="/static/Logo_white.png" alt="Logo" id="logoImg">
+                <img src="/static/logo_white.png" alt="Logo" id="logoImg">
             </a>
             <h1>{% block title %} {% endblock %}</h1>
         </div>
@@ -28,9 +25,9 @@
         </form>
         <div class="navbar-menu" id="navbar-menu">
             <!-- Add navigation links here -->
-            <a href="{{url_for('add_product')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i> Add</a>
-            <a href="" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i> Market</a>
-            <a href="" class="btn"><i class="icon-color fa-solid fa-user"></i> Profile</a>
+            <a href="{{url_for('market')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i> Market</a>
+            <a href="{{url_for('profile')}}" class="btn"><i class="icon-color fa-solid fa-user"></i> Profile</a>
+            <a href="{{url_for('basket', product_id=0)}}" class="btn"><i class="icon-color fa-solid fa-user"></i> Basket</a>
             <a href="{{url_for('logout')}}" class="btn"><i class="icon-color fa-solid fa-right-from-bracket"></i> Logout</a>
             <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
         </div>
@@ -81,37 +78,13 @@
     </div>
 
     <a href="https://w3.bilkent.edu.tr/www/" target="_blank" class="btn">
-        <img class="mt-4 "src="/static/bilkent.png" alt="Bilkent">
+        <img class="mt-4 " src="static/bilkent.png" alt="Bilkent">
     </a>
     <p class="mt-4">&copy; 2024 Fackd by Bilkent University. All rights reserved.</p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
-<script>
-    document.getElementById('addForm').addEventListener('submit', function() {
-        // When the form is submitted, show the spinner
-        document.getElementById('spinner').style.display = 'flex';
-    });
-
-    document.getElementById('addForm2').addEventListener('submit', function() {
-        // When the form is submitted, show the spinner
-        document.getElementById('spinner').style.display = 'flex';
-    });
-</script>
-<script>
-    window.onscroll = function() {scrollFunction()};
-
-    function scrollFunction() {
-        if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-            document.getElementById("navbar").style.padding = "5px 5px";
-            document.getElementById("logo").style.fontSize = "25px";
-        } else {
-            document.getElementById("navbar").style.padding = "35px 10px";
-            document.getElementById("logo").style.fontSize = "35px";
-        }
-    }
-</script>
 <script src="https://cdn.jsdelivr.net/npm/alertifyjs/build/alertify.min.js"></script>
 </body>
 </html>

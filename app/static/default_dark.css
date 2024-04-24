@@ -827,7 +827,7 @@ body {
     border-width: 2px;
     background-position: center;
     background-size: cover;
-    background-image:url('../static/blank_image.jpg');
+    background-image:url('ge.jpg');
     overflow: hidden;
 }
 

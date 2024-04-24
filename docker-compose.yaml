@@ -1,12 +1,11 @@
-version: '3.8'
+version: '3'
 services:
   web:
     image: madensell
-    build: .
-    volumes:
-      - ./madensell:/madensell
     ports:
       - "8000:8000"
-    environment:
-      - FLASK_ENV=development
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: python app.py
 
