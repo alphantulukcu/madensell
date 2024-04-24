@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - db
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0.26
+    environment:
+      MYSQL_DATABASE: madensell
+      MYSQL_USER: fackd
+      MYSQL_PASSWORD: Konur123
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
