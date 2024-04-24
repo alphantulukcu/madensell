@@ -5,8 +5,15 @@ from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+firebase_admin.initialize_app(cred)
+
 
 app = Flask(__name__)
+
 
 # Obtain connection string information from the portal
 
@@ -19,6 +26,27 @@ config = {
   'ssl_ca': 'DigiCertGlobalRootCA.crt.pem'
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
+
+def add_picture(pic):
+
+    # set the storage bucket to add the image to
+    bucket = storage.bucket()
+
+    # sets the location and image name
+    # if you need to store inside a folder use the following
+    # blob = bucket.blob("testfolder/" + pic.filename)
+    blob = bucket.blob(pic.filename)
+    
+    # uploads the image
+    blob.upload_from_string(pic.read(), content_type=pic.content_type)
+
+    # makes the image's url public so it can be viewed by anyone
+    # this can be configured for more advance features dealing with auth
+    blob.make_public()
+
+    # returns url
+    url = blob.public_url
+    return url
 
 @app.route('/')
 
@@ -185,6 +213,7 @@ def customer_edit_profile():
             last_name = request.form['last_name'].title()
             phone = request.form['phone']
             address = request.form['address']
+            profile_image = add_picture(request.files['profile_image'])
             # Validate birthdate
 
             pp_path = os.path.join('static', 'default.png')
@@ -205,7 +234,8 @@ def customer_edit_profile():
                     first_name,
                     last_name,
                     phone,
-                    address
+                    address, 
+                    profile_image
                 ])
                 conn.commit()  # Commit the transaction
                 message = "Profile updated successfully!"
