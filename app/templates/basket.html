@@ -16,7 +16,7 @@ Basket
                         {% for post in products %}
                              <div class="horizontal-card">
 
-                                <img class="horizontal-card-img" src="../static/blankDark_image.jpg">
+                                <img class="horizontal-card-img" src="/static/blankDark_image.jpg">
                                 <div class="card-content">
                                 <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
                                         <button type="submit">
@@ -59,47 +59,7 @@ Basket
                 </div>
             </div>
         </div>
-
-    <!-- Optional JavaScript -->
-    <!-- Popper.js first, then Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
-
-<script>
-let slideIndex = 1;
-showSlides(slideIndex);
-
-function plusSlides(n) {
-  showSlides(slideIndex += n);
-}
-
-function currentSlide(n) {
-  showSlides(slideIndex = n);
-}
-
-function showSlides(n) {
-  let i;
-  let slides = document.getElementsByClassName("mySlides");
-  let dots = document.getElementsByClassName("dot");
-  if (n > slides.length) {slideIndex = 1}
-  if (n < 1) {slideIndex = slides.length}
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  for (i = 0; i < dots.length; i++) {
-    dots[i].className = dots[i].className.replace(" active", "");
-  }
-  slides[slideIndex-1].style.display = "block";
-  dots[slideIndex-1].className += " active";
-}
-</script>
-
-<script>
-  function showProfiles() {
-      soldPopUp = document.getElementById('sold-pop-up');
-      soldPopUp.style.display = 'flex';
-  }
-</script>
+</div>
 
 
 {% endblock %}

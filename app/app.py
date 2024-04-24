@@ -14,9 +14,7 @@ config = {
   'host':'madensell.mysql.database.azure.com',
   'user':'fackd',
   'password':'Konur123',
-  'database':'madensell',
-  'client_flags': [mysql.connector.ClientFlag.SSL],
-  'ssl_ca': 'DigiCertGlobalRootCA.crt.pem'
+  'database':'madensell'
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
@@ -42,7 +40,7 @@ def login():
             session['user_type'] = user[5]
             return redirect(url_for('profile'))
         else:
-            message = 'Please enter correct email / password !' + username + password + user
+            message = 'Please enter correct email / password !' + username + password
     return render_template('login.html', message=message)
 
 
@@ -325,7 +323,7 @@ def post_detail(product_id):
         product = cursor.fetchone()
 
         cursor.execute(
-            'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s',
+            'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
             (product_id,))
         comments = cursor.fetchall()
 
