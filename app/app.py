@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import firebase_admin
 from firebase_admin import credentials, storage
 
-cred = credentials.Certificate("app/madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
 })
