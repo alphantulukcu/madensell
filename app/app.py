@@ -347,12 +347,23 @@ def market():
                 'SELECT subcategory_id, subcategory_name FROM subcategory',
                 ())
             subcategory = cursor.fetchall()
-            cursor.execute(
-                'SELECT * FROM product p, business b, subcategory s, category c WHERE p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id',
-                ())
-            products = cursor.fetchall()
+            
+        cursor.execute('''
+            SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+            FROM product p
+            JOIN business b ON p.business_id = b.user_id
+            JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+            JOIN category c ON s.category_id = c.category_id
+            LEFT JOIN images i ON p.product_id = i.product_id
+            GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+        ''')
+        all_products = cursor.fetchall()
 
-            return render_template('market.html', products=products, categories=category, subcategories=subcategory)
+        # Separate products with and without images
+        products_with_images = [prod for prod in all_products if prod[-1] is not None]
+        products_without_images = [prod for prod in all_products if prod[-1] is None]
+
+        return render_template('market.html', products_with_images=products_with_images, products_without_images=products_without_images, categories=category, subcategories=subcategory)
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
