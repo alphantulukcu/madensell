@@ -200,6 +200,25 @@ def profile():
                 ''', (customer_id,))
                 favorites = cursor.fetchall()
 
+                cursor.execute('''
+                    SELECT 
+                        p.*, b.*, s.*, c.*, MIN(i.image_url) AS single_image
+                    FROM 
+                        product p
+                        JOIN business b ON p.business_id = b.user_id
+                        JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                        JOIN category c ON s.category_id = c.category_id
+                        LEFT JOIN images i ON p.product_id = i.product_id
+                        JOIN orders o ON p.product_id = o.product_id
+                        JOIN shipping_info si ON o.info_id = si.info_id 
+                    WHERE 
+                        si.customer_id = %s
+                    GROUP BY 
+                        p.product_id, b.user_id, s.subcategory_id, c.category_id
+
+                ''', (customer_id,))
+                orders = cursor.fetchall()
+
                 # Separate products with and without images
                 products_with_images = [prod for prod in favorites if prod[-1] is not None]
                 products_without_images = [prod for prod in favorites if prod[-1] is None]
@@ -207,7 +226,7 @@ def profile():
                 if len(favorites) == 0:
                     favorites = 'Empty'
                 # Pass the account information to render the main page
-                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites)
+                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites, orders=orders)
 
             elif session['user_type'] == 2:
                 conn = mysql.connector.connect(**config)

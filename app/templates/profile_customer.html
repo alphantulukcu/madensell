@@ -32,8 +32,45 @@ Profile
 
     
     <div id="ordersTab" class="tab" style="display: none;">
-        <h2>Orders content will be shown here.</h2>
-        <!-- Orders content goes here, dynamically loaded or otherwise -->
+         {% for post in orders %}
+                            <div class="card">
+                                <div class="profile-for_card">
+                                    <img class="profile-for_card" src="{{ post[11] }}" >
+                                    <form action="" method="post">
+                                        <button type="submit">
+                                            <p>{{ post[9] }}</p>
+                                        </button>
+                                    </form>
+
+                                </div>
+                                <img class="card-img" src="/static/blankDark_image.jpg">
+                                <div class="card-content">
+                                <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                        <button type="submit">
+                                            <h2>{{ post[3] }}</h2>
+                                        </button>
+                                    </form>
+                                    <h1>{{ post[16] }} / {{ post[14] }}</h1>
+
+                                </div>
+                                <div class="card-price">
+                                    {% if post.price == 0 %}
+                                        <h3>Free</h3>
+                                    {% else %}
+                                            <h3>{{ post[2] }}₺</h3>
+                                    {% endif %}
+                                </div>
+                                <div class="card-bottom">
+                                    <h1>{{ post[7] }} ago</h1>
+                                    <!-- Favorite button -->
+                                    <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
+                                        <button type="submit" class="favorite-button">
+                                            <i class="fa fa-heart" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
     </div>
 
     <div id="favoritesTab" class="tab">
