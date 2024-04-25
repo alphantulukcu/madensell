@@ -8,6 +8,7 @@
     <link href="/static/default_dark.css" id="theme-stylesheet" rel="stylesheet" type="text/css" media="all">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs/build/css/themes/default.min.css" />
+
 </head>
 <body class="flex flex-col min-h-screen">
 
@@ -84,7 +85,6 @@
             alertify.success("{{ message }}", 4);
         }
         {% endif %}
-        checkInternetConnection();
     }
 </script>
 <script>

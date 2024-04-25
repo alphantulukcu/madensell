@@ -88,7 +88,7 @@ def login():
             return redirect(url_for('profile'))
         else:
             message = 'Please enter correct email / password !' + username + password
-    return render_template('login.html', message=message)
+    return render_template('login.html', message=message, message_type='error')
 
 
 @app.route("/customer-register", methods=["POST", "GET"])
@@ -111,7 +111,7 @@ def customer_register():
         user_exists = account is not None
         if user_exists:
             message = "Email already exists"
-            return render_template('register_customer.html', message=message)
+            return render_template('register_customer.html', message=message, message_type='error')
         else:
             cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 1, address, phone))
             conn.commit()
@@ -128,8 +128,9 @@ def customer_register():
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, password))
-            return redirect(url_for('login'))
-    return render_template('register_customer.html', message=message)
+            message = 'You have successfully registered!'
+            return render_template('login.html', message=message, message_type='success')
+    return render_template('register_customer.html', message=message, message_type='error')
 
 @app.route("/business-register", methods=["POST", "GET"])
 def business_register():
@@ -170,8 +171,9 @@ def business_register():
             cursor.execute(
                 'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, password))
-            return redirect(url_for('login'))
-    return render_template('register_business.html', message=message)
+            message = 'You have successfully registered!'
+            return render_template('login.html', message=message, message_type='success')
+    return render_template('register_business.html', message=message, message_type='error')
 
 
 @app.route("/profile", methods=["POST", "GET"])
@@ -243,7 +245,7 @@ def customer_edit_profile():
             user_exists = account is not None and user[0] != account[0]
             if user_exists:
                 message = "Email already exists"
-                return render_template('edit_profile_customer.html', message=message)
+                return render_template('edit_profile_customer.html', message=message, message_type='error',user=user)
             else:
                 #update customer with procedure here
                 cursor.callproc('UpdateCustomerProfile', [
@@ -258,8 +260,8 @@ def customer_edit_profile():
                 ])
                 conn.commit()  # Commit the transaction
                 message = "Profile updated successfully!"
-                return redirect(url_for('profile'))
-        return render_template('edit_profile_customer.html', user=user)
+                return render_template('edit_profile_customer.html', message=message, message_type='success', user=user)
+        return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
 
 
 
