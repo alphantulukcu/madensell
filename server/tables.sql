@@ -110,4 +110,28 @@ CREATE TABLE IF NOT EXISTS basket (
     foreign key (customer_id) references customer(user_id)
 	);
 
+CREATE TABLE IF NOT EXISTS shipping_info (
+    info_id             INT AUTO_INCREMENT NOT NULL,
+	customer_id		    INT (10) NOT NULL,
+    phone_number        VARCHAR(255) NOT NULL UNIQUE,
+    address_title       VARCHAR(255) NOT NULL,
+    address             VARCHAR(255) NOT NULL,
+    city                VARCHAR(255) NOT NULL,
+    town                VARCHAR(255) NOT NULL,
+    postal_code         INT (10) NOT NULL,
+    primary key (info_id),
+    foreign key (customer_id) references customer(user_id)
+    );
 
+CREATE TABLE IF NOT EXISTS orders (
+    order_id            INT AUTO_INCREMENT NOT NULL,
+	info_id	            INT (10) NOT NULL,
+    product_id          INT (10) NOT NULL,
+    num_of_products     INT (3) NOT NULL,
+    status              INT (3) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    primary key (order_id, info_id, product_id),
+    foreign key (product_id) references product(product_id),
+    foreign key (info_id) references shipping_info(info_id)
+    );

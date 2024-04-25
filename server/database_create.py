@@ -75,6 +75,41 @@ def create_tables():
             END
             """)  # Include the whole procedure creation statement here.
 
+    cursor.execute(
+        """CREATE PROCEDURE IF NOT EXISTS ProcessOrder(IN input_info_id INT)
+            BEGIN
+                DECLARE v_customer_id INT;
+                DECLARE total_cost INT DEFAULT 0;
+            
+                START TRANSACTION;
+            
+                    SELECT s.customer_id INTO v_customer_id FROM shipping_info s WHERE s.info_id = input_info_id;
+                
+                    SELECT SUM(p.price * b.num_of_products) INTO total_cost
+                    FROM basket b
+                    JOIN product p ON b.product_id = p.product_id
+                    WHERE b.customer_id = v_customer_id;
+          
+                    INSERT INTO orders (info_id, product_id, num_of_products, status)
+                    SELECT input_info_id, product_id, num_of_products, 1
+                    FROM basket
+                    WHERE customer_id = v_customer_id;
+                
+                    UPDATE product p
+                    JOIN basket b ON p.product_id = b.product_id
+                    SET p.stock_num = p.stock_num - b.num_of_products
+                    WHERE b.customer_id = v_customer_id;
+                
+                    UPDATE wallet SET balance = balance - total_cost WHERE customer_id = v_customer_id;
+                
+                    DELETE FROM basket WHERE customer_id = v_customer_id;
+            
+                COMMIT;
+            END
+
+    """
+    )
+
     print('Tables created')
     connection.commit()
     connection.close()

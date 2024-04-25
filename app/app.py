@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import firebase_admin
 from firebase_admin import credentials, storage
 
-cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+cred = credentials.Certificate("app/madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
 })
@@ -441,6 +441,69 @@ def basket(product_id):
         return render_template('basket.html', products=products, total_sum=total_sum)
 
 
+@app.route("/order/<int:type>", methods=["POST", "GET"])
+def order(type):
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        if request.method == 'POST':
+            if type == 0:
+                address_title = request.form['address_title']
+                city = request.form['city']
+                phone = request.form['phone']
+                address = request.form['address']
+                town = request.form['town']
+                postal_code = request.form['postal_code']
+                cursor.execute(
+                    """   
+                                    INSERT INTO shipping_info(customer_id, phone_number, address_title, address, city, town, postal_code) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                """,
+                    (session['userid'], phone, address_title, address, city, town, int(postal_code)))
+                conn.commit()
+            elif type == 1:
+                shipping_info = request.form['shipping_info_id']
+                cursor.callproc('ProcessOrder', [
+                    shipping_info,
+                ])
+                conn.commit()  # Commit the transaction
+
+                return redirect(url_for('profile'))
+
+
+
+        cursor.execute(
+            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        products = cursor.fetchall()
+
+        cursor.execute(
+            'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        total_sum = cursor.fetchone()[0]
+        if total_sum is None:
+            total_sum = 0
+
+        cursor.execute(
+            'SELECT * FROM wallet  WHERE customer_id = %s',
+            (session['userid'],))
+        wallet = cursor.fetchone()
+
+        cursor.execute(
+            'SELECT * FROM shipping_info  WHERE customer_id = %s',
+            (session['userid'],))
+        shipping_infos = cursor.fetchall()
+        if shipping_infos is None:
+            shipping_infos = 'Empty'
+
+        return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
+
+
 @app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
 def toggle_favorite(product_id):
     # Check if user is logged in
@@ -475,6 +538,32 @@ def toggle_favorite(product_id):
 
     # Redirect back to the market page
     return redirect(url_for('market'))
+
+
+@app.route("/wallet", methods=["POST", "GET"])
+def wallet():
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        if request.method == 'POST':
+            insert_amount = request.form['insert_amount']
+            if int(insert_amount) > 0:
+                cursor.execute(
+                    """   
+                     UPDATE wallet         
+                      SET balance = balance + %s         
+                      WHERE customer_id = %s;
+                    """,
+                    (insert_amount, session['userid'] ))
+                conn.commit()
+
+        cursor.execute(
+            'SELECT * FROM wallet  WHERE customer_id = %s',
+            (session['userid'],))
+        wallet = cursor.fetchone()
+
+        return render_template('wallet.html', wallet=wallet)
 
 
 if __name__ == "__main__":
