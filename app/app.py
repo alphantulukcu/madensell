@@ -30,6 +30,7 @@ app.secret_key = 'alphan'  # Replace with a unique and secret key
 def add_picture(pic):
 
     # set the storage bucket to add the image to
+
     bucket = storage.bucket()
 
     # sets the location and image name
@@ -213,10 +214,11 @@ def customer_edit_profile():
             last_name = request.form['last_name'].title()
             phone = request.form['phone']
             address = request.form['address']
-            profile_image = add_picture(request.files['profile_pic'])
-            # Validate birthdate
-
-            pp_path = os.path.join('static', 'default.png')
+            profile_image = request.files['profile_pic']
+            if profile_image:
+                profile_image = add_picture(profile_image)
+            else:
+                profile_image = user[11]
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
