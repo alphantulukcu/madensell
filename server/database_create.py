@@ -21,7 +21,7 @@ def create_tables():
     run_sql_file('/Users/alphantulukcu/Desktop/CS353/madensell/server/tables.sql', connection)
     cursor = connection.cursor()
     cursor.execute(
-        """ CREATE PROCEDURE UpdateCustomerProfile(
+        """ CREATE PROCEDURE IF NOT EXISTS UpdateCustomerProfile(
                 IN p_user_id INT,
                 IN p_email VARCHAR(50),
                 IN p_username VARCHAR(20),

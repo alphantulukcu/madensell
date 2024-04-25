@@ -37,6 +37,14 @@ CREATE TABLE IF NOT EXISTS customer (
     foreign key (user_id) references users(user_id)
 	);
 
+CREATE TABLE IF NOT EXISTS wallet (
+	customer_id		INT (10) NOT NULL,
+    wallet_id       INT AUTO_INCREMENT NOT NULL,
+    balance         INT(10) NOT NULL,
+    primary key (wallet_id),
+    foreign key (customer_id) references customer(user_id)
+	);
+
 CREATE TABLE IF NOT EXISTS category (
 	category_id			INT AUTO_INCREMENT NOT NULL,
     category_name		VARCHAR(20) NOT NULL,
@@ -62,6 +70,15 @@ CREATE TABLE IF NOT EXISTS product (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     primary key (product_id),
     foreign key (business_id) references business(user_id)
+	);
+
+CREATE TABLE IF NOT EXISTS images (
+    product_id   INT (10) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    image_url      VARCHAR(255) NOT NULL,
+
+    primary key (product_id, image_url),
+    foreign key (product_id) references product(product_id)
 	);
 
 CREATE TABLE IF NOT EXISTS favorites (

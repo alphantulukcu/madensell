@@ -110,6 +110,13 @@ def customer_register():
                 (user_id, first_name, last_name, pp_path))
             conn.commit()
             cursor.execute(
+                """   
+                                INSERT INTO wallet(customer_id,balance)
+                                VALUES (%s, %s);
+                            """,
+                (user_id, 0))
+            conn.commit()
+            cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, password))
             return redirect(url_for('login'))
@@ -400,6 +407,32 @@ def basket(product_id):
         total_sum = cursor.fetchone()[0]
 
         return render_template('basket.html', products=products, total_sum=total_sum)
+
+
+@app.route("/wallet", methods=["POST", "GET"])
+def wallet():
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        if request.method == 'POST':
+            insert_amount = request.form['numofproducts']
+            if int(insert_amount) > 0:
+                cursor.execute(
+                    """   
+                     UPDATE wallet         
+                      SET balance = %s         
+                      WHERE customer_id = %s;
+                    """,
+                    (insert_amount, session['userid'] ))
+                conn.commit()
+
+        cursor.execute(
+            'SELECT * FROM wallet  WHERE customer_id = %s',
+            (session['userid'],))
+        wallet = cursor.fetchall()
+
+        return render_template('wallet.html', wallet=wallet)
 
 
 if __name__ == "__main__":
