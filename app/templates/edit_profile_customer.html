@@ -5,11 +5,11 @@ Edit Your Profile
 
 {% block content %}
 
-        <div class="login-form-container">
+        <div class="login-form-container" style="align-self: center">
             <div class="">
             <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
 
-            <h3 class="text-center text-3xl font-bold mb-6">Register</h3>
+            <h3 class="text-center text-3xl font-bold mb-6">You can edit your profile {{user[9]}}</h3>
             <form action="{{ url_for( 'customer_edit_profile') }}" method="POST">
                 {% if message %}
                     <div class="bg-yellow-100 text-yellow-800 rounded-md p-4 mb-4">
@@ -41,9 +41,6 @@ Edit Your Profile
                     <input type="text" class="form-input" id="address" name="address" placeholder="Enter address"  value="{{ user[6] }}" required>
                   </div>
                 <button type="submit" class="btn">Update</button>
-            </form>
-            <form action="{{ url_for('login')}}">
-                <button type="submit" class="btn2">Back to Log in</button>
             </form>
 
             </div>
