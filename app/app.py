@@ -88,7 +88,7 @@ def login():
             return redirect(url_for('profile'))
         else:
             message = 'Please enter correct email / password !' + username + password
-    return render_template('login.html', message=message)
+    return render_template('login.html', message=message, message_type='error')
 
 
 @app.route("/customer-register", methods=["POST", "GET"])
@@ -111,7 +111,7 @@ def customer_register():
         user_exists = account is not None
         if user_exists:
             message = "Email already exists"
-            return render_template('register_customer.html', message=message)
+            return render_template('register_customer.html', message=message, message_type='error')
         else:
             cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 1, address, phone))
             conn.commit()
@@ -128,8 +128,9 @@ def customer_register():
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, password))
-            return redirect(url_for('login'))
-    return render_template('register_customer.html', message=message)
+            message = 'You have successfully registered!'
+            return render_template('login.html', message=message, message_type='success')
+    return render_template('register_customer.html', message=message, message_type='error')
 
 @app.route("/business-register", methods=["POST", "GET"])
 def business_register():
@@ -170,8 +171,9 @@ def business_register():
             cursor.execute(
                 'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, password))
-            return redirect(url_for('login'))
-    return render_template('register_business.html', message=message)
+            message = 'You have successfully registered!'
+            return render_template('login.html', message=message, message_type='success')
+    return render_template('register_business.html', message=message, message_type='error')
 
 
 @app.route("/profile", methods=["POST", "GET"])
@@ -184,14 +186,28 @@ def profile():
                     'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
                     (session['userid'],))
                 user = cursor.fetchone()
-                cursor.execute(
-                    'SELECT p.price, p.description FROM favorites f, customer c, product p WHERE f.cust_id = c.user_id AND f.product_id = p.product_id AND c.user_id = %s',
-                    (session['userid'],))
+                customer_id=session['userid']
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    LEFT JOIN images i ON p.product_id = i.product_id
+                    JOIN favorites f ON p.product_id = f.product_id
+                    WHERE f.cust_id = %s
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                ''', (customer_id,))
                 favorites = cursor.fetchall()
+
+                # Separate products with and without images
+                products_with_images = [prod for prod in favorites if prod[-1] is not None]
+                products_without_images = [prod for prod in favorites if prod[-1] is None]
+
                 if len(favorites) == 0:
                     favorites = 'Empty'
                 # Pass the account information to render the main page
-                return render_template('profile_customer.html', user=user, favorites=favorites)
+                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user)
 
             elif session['user_type'] == 2:
                 conn = mysql.connector.connect(**config)
@@ -243,7 +259,7 @@ def customer_edit_profile():
             user_exists = account is not None and user[0] != account[0]
             if user_exists:
                 message = "Email already exists"
-                return render_template('edit_profile_customer.html', message=message)
+                return render_template('edit_profile_customer.html', message=message, message_type='error',user=user)
             else:
                 #update customer with procedure here
                 cursor.callproc('UpdateCustomerProfile', [
@@ -258,8 +274,8 @@ def customer_edit_profile():
                 ])
                 conn.commit()  # Commit the transaction
                 message = "Profile updated successfully!"
-                return redirect(url_for('profile'))
-        return render_template('edit_profile_customer.html', user=user)
+                return render_template('edit_profile_customer.html', message=message, message_type='success', user=user)
+        return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
 
 
 
@@ -347,12 +363,23 @@ def market():
                 'SELECT subcategory_id, subcategory_name FROM subcategory',
                 ())
             subcategory = cursor.fetchall()
-            cursor.execute(
-                'SELECT * FROM product p, business b, subcategory s, category c WHERE p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id',
-                ())
-            products = cursor.fetchall()
+            
+        cursor.execute('''
+            SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+            FROM product p
+            JOIN business b ON p.business_id = b.user_id
+            JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+            JOIN category c ON s.category_id = c.category_id
+            LEFT JOIN images i ON p.product_id = i.product_id
+            GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+        ''')
+        all_products = cursor.fetchall()
 
-            return render_template('market.html', products=products, categories=category, subcategories=subcategory)
+        # Separate products with and without images
+        products_with_images = [prod for prod in all_products if prod[-1] is not None]
+        products_without_images = [prod for prod in all_products if prod[-1] is None]
+
+        return render_template('market.html', products_with_images=products_with_images, products_without_images=products_without_images, categories=category, subcategories=subcategory)
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
