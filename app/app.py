@@ -6,10 +6,12 @@ import mysql.connector
 from mysql.connector import errorcode
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, storage
 
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
-firebase_admin.initialize_app(cred)
+app1 = firebase_admin.initialize_app(cred, {
+    'storageBucket': 'madensell-dc0c4.appspot.com'
+})
 
 
 app = Flask(__name__)
@@ -213,7 +215,7 @@ def customer_edit_profile():
             last_name = request.form['last_name'].title()
             phone = request.form['phone']
             address = request.form['address']
-            profile_image = add_picture(request.files['profile_image'])
+            profile_image = add_picture(request.files['profile_pic'])
             # Validate birthdate
 
             pp_path = os.path.join('static', 'default.png')
