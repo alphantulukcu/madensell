@@ -27,7 +27,7 @@ config = {
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
-def add_picture(pic):
+def add_picture(pic, userid):
 
     # set the storage bucket to add the image to
 
@@ -35,8 +35,8 @@ def add_picture(pic):
 
     # sets the location and image name
     # if you need to store inside a folder use the following
-    # blob = bucket.blob("testfolder/" + pic.filename)
-    blob = bucket.blob(pic.filename)
+    blob = bucket.blob(str(userid) + "/" + pic.filename)
+    #blob = bucket.blob(pic.filename)
     
     # uploads the image
     blob.upload_from_string(pic.read(), content_type=pic.content_type)
@@ -216,7 +216,7 @@ def customer_edit_profile():
             address = request.form['address']
             profile_image = request.files['profile_pic']
             if profile_image:
-                profile_image = add_picture(profile_image)
+                profile_image = add_picture(profile_image, user[0])
             else:
                 profile_image = user[11]
             conn = mysql.connector.connect(**config)
