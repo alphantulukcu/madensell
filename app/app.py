@@ -27,6 +27,22 @@ config = {
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
+def delete_picture(pic_url):
+    bucket = storage.bucket()
+
+    # Assuming pic_url is the full URL to the object and needs parsing to get the exact path
+    parts = pic_url.split('madensell-dc0c4.appspot.com/')
+    desired_part = parts[-1] if len(parts) > 1 else parts[0]
+
+    blob = bucket.blob(desired_part)
+    try:
+        blob.delete()
+        return True
+    except Exception as e:
+        print(f"Failed to delete: {e}")
+        return False
+
+
 def add_picture(pic, userid):
 
     # set the storage bucket to add the image to
@@ -216,6 +232,7 @@ def customer_edit_profile():
             address = request.form['address']
             profile_image = request.files['profile_pic']
             if profile_image:
+                delete_picture(user[11])
                 profile_image = add_picture(profile_image, user[0])
             else:
                 profile_image = user[11]
@@ -258,11 +275,28 @@ def add_product():
             subcategory_id = int(request.form['subcategory'])
             stock_num = int(request.form['stock_num'])
             price = request.form['post_price']
+            images = request.files.getlist('product_images')  # Corrected here
 
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
+
+            if len(images) > 3:
+                flash('Cannot upload more than 3 images', 'error')
+                return redirect(url_for('add_product'))
+            
             cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
             conn.commit()
+            # Get the ID of the newly created product
+            product_id = cursor.lastrowid
+
+            for image in images:
+                if image:
+                    image_url = add_picture(image, session['userid'])
+                    cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
+                    conn.commit()
+                else:
+                    # Handle the case when no image is provided
+                    pass
             return redirect(url_for('profile'))
         else:
             conn = mysql.connector.connect(**config)
@@ -360,8 +394,13 @@ def post_detail(product_id):
             'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
             (product_id,))
         comments = cursor.fetchall()
+        
+        cursor.execute(
+            'SELECT * FROM product p, images s WHERE s.product_id = p.product_id AND p.product_id = %s', 
+            (product_id,))
+        images = cursor.fetchall()
 
-        return render_template('post_detail.html', product=product, comments=comments)
+        return render_template('post_detail.html', product=product, comments=comments, images=images)
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])
