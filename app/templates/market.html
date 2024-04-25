@@ -4,7 +4,7 @@ Market
 {% endblock %}
 
 {% block content %}
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha384-DyZuuL25pX2tYAWR5wwTf1PY/Vz9dQqel1QLMB5X1xXZqO2J4nZtv9pXp4pG7L7a" crossorigin="anonymous">
             <div class="card-container">
                <form class="filter-card" action="{{ url_for('market') }}" method="post">
                     <div class="form-group">
@@ -81,8 +81,13 @@ Market
                                 </div>
                                 <div class="card-bottom">
                                     <h1>{{ post[7] }} ago</h1>
+                                    <!-- Favorite button -->
+                                    <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
+                                        <button type="submit" class="favorite-button">
+                                            <i class="fa fa-heart" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
                                 </div>
-
                             </div>
                         {% endfor %}
                     {% endif %}

@@ -402,6 +402,42 @@ def basket(product_id):
         return render_template('basket.html', products=products, total_sum=total_sum)
 
 
+@app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
+def toggle_favorite(product_id):
+    # Check if user is logged in
+    if 'loggedin' not in session:
+        flash('You need to be logged in to favorite items!')
+        return redirect(url_for('login'))
+
+    # Get the customer's user ID from the session
+    cust_id = session['userid']
+
+    # Open a new database connection
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    # Check if the product is already in the customer's favorites
+    cursor.execute('SELECT * FROM favorites WHERE cust_id = %s AND product_id = %s', (cust_id, product_id))
+    favorite = cursor.fetchone()
+
+    if favorite:
+        # If the product is already in favorites, remove it
+        cursor.execute('DELETE FROM favorites WHERE cust_id = %s AND product_id = %s', (cust_id, product_id))
+        flash('Item removed from favorites.')
+    else:
+        # If the product is not in favorites, add it
+        cursor.execute('INSERT INTO favorites (cust_id, product_id) VALUES (%s, %s)', (cust_id, product_id))
+        flash('Item added to favorites.')
+
+    # Commit changes and close the connection
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    # Redirect back to the market page
+    return redirect(url_for('market'))
+
+
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
     app.run(debug=True, host='0.0.0.0', port=port)

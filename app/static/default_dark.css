@@ -1393,3 +1393,41 @@ img {vertical-align: middle;}
 .label {
     color: white;
 }
+
+.card-bottom {
+    display: flex;
+    justify-content: space-between; /* Add this to space out the items */
+    margin: 1rem;
+    margin-top: 0rem;
+    position: relative; /* Add this to position the like button absolutely */
+}
+
+.favorite-button {
+    position: absolute; /* Position the button absolutely within card-bottom */
+    right: 10px; /* Adjust the right position as needed */
+    bottom: 10px; /* Adjust the bottom position as needed */
+    border: none; /* Remove the border if you use a heart shape */
+    background-color: transparent; /* Keep the background transparent */
+    cursor: pointer;
+    outline: none;
+    padding: 8px;
+    font-size: 1.5rem; /* Adjust the size as you like */
+}
+
+/* Add the :before pseudo-element for the heart shape */
+.favorite-button:before {
+    content: '\2665'; /* Unicode for black heart suit */
+    color: red; /* Set your desired heart color */
+    font-size: 2.5rem; /* Adjust size as you wish */
+    line-height: 1; /* Adjust line height to fit the container */
+}
+
+/* Change the color on hover */
+.favorite-button:hover:before,
+.favorite-button:focus:before {
+    color: #ff0000; /* Red color on hover/focus */
+}
+
+
+
+
