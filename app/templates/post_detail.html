@@ -4,34 +4,31 @@ Post
 {% endblock %}
 
 {% block content %}
-                    <div class="detailed-post">
-                        <div class="slideshow-container">
-
-                            <div class="mySlides fade">
-                              <div class="numbertext"></div>
-                              <img src="/static/blankDark_image.jpg" style="width:100% " >
-                            </div>
-
-                            <div class="mySlides fade">
-                              <div class="numbertext" ></div>
-                              <img src="/static/blankDark_image.jpg" style="width:100% " >
-                            </div>
-
-                            <div class="mySlides fade">
-                              <div class="numbertext"></div>
-                                <img src="/static/blankDark_image.jpg" style="width:100% " >
-                            </div>
-                            <a class="prev" onclick="plusSlides(-1)">❮</a>
-                            <a class="next" onclick="plusSlides(1)">❯</a>
-
+            <div class="detailed-post">
+                <div class="slideshow-container">
+                    {% if images %}
+                        {% for image in images %}
+                        <div class="mySlides fade">
+                            <img src="{{image[10]}}" style="width:100%;">
                         </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="mySlides fade">
+                            <img src="/static/blankDark_image.jpg" style="width:100%;">
+                        </div>
+                    {% endif %}
+                    <a class="prev" onclick="plusSlides(-1)">❮</a>
+                    <a class="next" onclick="plusSlides(1)">❯</a>
+                </div>
 
-                            <div style="text-align:center">
-                              <span class="dot" onclick="currentSlide(1)"></span>
-                              <span class="dot" onclick="currentSlide(2)"></span>
-                              <span class="dot" onclick="currentSlide(3)"></span>
-                            </div>
-                    </div>
+                <div style="text-align:center">
+                    {% for _ in images %}
+                        <span class="dot" onclick="currentSlide({{ loop.index }})"></span>
+                    {% else %}
+                        <span class="dot" onclick="currentSlide(1)"></span>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="right-container">
             <div class="detailed-post">

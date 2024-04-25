@@ -4,74 +4,65 @@
 Add
 {% endblock %}
 
-
-
 {% block content %}
 <div class="profile-card">
-
-            <div class="profile-header">
-              <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
-              <div class="profile-details">
-
-                        <p>
-                            {{ user[9] }} {{ user[10] }}
-                        </p>
-                <h2>@{{ user[1] }}</h2>
-                <h2 class="profile-bio">{{user.bio}}</h2>
-                        <a href="" class="btn">Edit Profile</a>
-              </div>
-            </div>
-          </div>
-
+    <div class="profile-header">
+        <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
+        <div class="profile-details">
+            <p>{{ user[9] }} {{ user[10] }}</p>
+            <h2>@{{ user[1] }}</h2>
+            <h2 class="profile-bio">{{ user.bio }}</h2>
+            <a href="" class="btn">Edit Profile</a>
         </div>
+    </div>
 </div>
-    <div class="bottom-container">
-<div>
+
+<div class="bottom-container">
     <div class="flex">
-         <button class="toggle-title" >Post</button>
+        <button class="toggle-title">Post</button>
     </div>
     <div class="add-card mx-auto" id="postTab">
-        <form action="{{url_for('add_product')}}" method="POST">
+        <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
             <div class="mb-4">
-              <label for="post_title" class="label">Title:</label>
-              <input type="text" class="form-input" id="post_title" name="post_title" placeholder="Enter Title" required>
+                <label for="post_title" class="label">Title:</label>
+                <input type="text" class="form-input" id="post_title" name="post_title" placeholder="Enter Title" required>
             </div>
             <div class="mb-4">
-              <label for="post_description" class="label">Description:</label>
-              <input type="text" class="form-input" id="post_description" name="post_description" placeholder="Enter Description" required>
+                <label for="post_description" class="label">Description:</label>
+                <input type="text" class="form-input" id="post_description" name="post_description" placeholder="Enter Description" required>
             </div>
             <div class="form-group">
                 <label for="category" class="label">Category:</label>
-                <select id="category" name="category" class="form-input"  required>
+                <select id="category" name="category" class="form-input" required>
                     <option value="" selected>Select a category</option>
-                     {% for category in categories %}
-                        <option value="{{category[0]}}" >{{category[1]}}</option>
-                     {% endfor %}
+                    {% for category in categories %}
+                        <option value="{{ category[0] }}">{{ category[1] }}</option>
+                    {% endfor %}
                 </select>
             </div>
-
             <div class="form-group">
                 <label for="subcategory" class="label">Subcategory:</label>
                 <select id="subcategory" name="subcategory" class="form-input">
                     <option value="" selected>Select a subcategory</option>
-                     {% for subcategory in subcategories %}
-                        <option value="{{subcategory[0] }}" >{{ subcategory[1]}}</option>
+                    {% for subcategory in subcategories %}
+                        <option value="{{ subcategory[0] }}">{{ subcategory[1] }}</option>
                     {% endfor %}
                 </select>
             </div>
-
             <div class="mb-4">
-              <label for="post_price" class="label">Price:</label>
-              <input type="number" class="form-input" id="post_price" name="post_price" min="0" placeholder="Enter Price" value="0">
+                <label for="post_price" class="label">Price:</label>
+                <input type="number" class="form-input" id="post_price" name="post_price" min="0" placeholder="Enter Price" value="0">
             </div>
             <div class="mb-4">
-              <label for="stock_num" class="label">Stock:</label>
-              <input type="number" class="form-input" id="stock_num" name="stock_num" min="0" placeholder="Enter available stock" value="0">
+                <label for="stock_num" class="label">Stock:</label>
+                <input type="number" class="form-input" id="stock_num" name="stock_num" min="0" placeholder="Enter available stock" value="0">
             </div>
-
-            <button type="submit" class="settings-button" >Save Changes</button>
+            <div class="mb-4">
+                <label for="product_images" class="label">Product Images (up to 3):</label>
+                <input type="file" class="form-input" id="product_images" name="product_images" accept="image/*" multiple>
+            </div>
+            <button type="submit" class="settings-button">Save Changes</button>
         </form>
     </div>
 </div>
-
 {% endblock %}

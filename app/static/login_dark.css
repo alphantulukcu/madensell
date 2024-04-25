@@ -120,3 +120,17 @@
         .login-icon-color {
             color: rgba(255, 255, 255, 0.9);
         }
+
+
+.favorite-button {
+    position: relative; /* Adjust as needed, could be absolute if within a positioned parent */
+    display: inline-block; /* Ensures it takes up space and can be seen */
+    background-color: transparent; /* Adjust if you want a background */
+    border: none; /* Removes the border, adjust as needed */
+    cursor: pointer; /* Shows a pointer cursor on hover */
+    color: #ff0000; /* Adjust the color as needed */
+}
+
+.fa-heart {
+    font-size: 24px; /* Adjust the size of the heart icon */
+}

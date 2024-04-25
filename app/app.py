@@ -27,7 +27,23 @@ config = {
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
-def add_picture(pic):
+def delete_picture(pic_url):
+    bucket = storage.bucket()
+
+    # Assuming pic_url is the full URL to the object and needs parsing to get the exact path
+    parts = pic_url.split('madensell-dc0c4.appspot.com/')
+    desired_part = parts[-1] if len(parts) > 1 else parts[0]
+
+    blob = bucket.blob(desired_part)
+    try:
+        blob.delete()
+        return True
+    except Exception as e:
+        print(f"Failed to delete: {e}")
+        return False
+
+
+def add_picture(pic, userid):
 
     # set the storage bucket to add the image to
 
@@ -35,8 +51,8 @@ def add_picture(pic):
 
     # sets the location and image name
     # if you need to store inside a folder use the following
-    # blob = bucket.blob("testfolder/" + pic.filename)
-    blob = bucket.blob(pic.filename)
+    blob = bucket.blob(str(userid) + "/" + pic.filename)
+    #blob = bucket.blob(pic.filename)
     
     # uploads the image
     blob.upload_from_string(pic.read(), content_type=pic.content_type)
@@ -108,13 +124,6 @@ def customer_register():
                                 VALUES (%s, %s, %s, %s);
                             """,
                 (user_id, first_name, last_name, pp_path))
-            conn.commit()
-            cursor.execute(
-                """   
-                                INSERT INTO wallet(customer_id,balance)
-                                VALUES (%s, %s);
-                            """,
-                (user_id, 0))
             conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
@@ -223,7 +232,8 @@ def customer_edit_profile():
             address = request.form['address']
             profile_image = request.files['profile_pic']
             if profile_image:
-                profile_image = add_picture(profile_image)
+                delete_picture(user[11])
+                profile_image = add_picture(profile_image, user[0])
             else:
                 profile_image = user[11]
             conn = mysql.connector.connect(**config)
@@ -265,11 +275,28 @@ def add_product():
             subcategory_id = int(request.form['subcategory'])
             stock_num = int(request.form['stock_num'])
             price = request.form['post_price']
+            images = request.files.getlist('product_images')  # Corrected here
 
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
+
+            if len(images) > 3:
+                flash('Cannot upload more than 3 images', 'error')
+                return redirect(url_for('add_product'))
+            
             cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
             conn.commit()
+            # Get the ID of the newly created product
+            product_id = cursor.lastrowid
+
+            for image in images:
+                if image:
+                    image_url = add_picture(image, session['userid'])
+                    cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
+                    conn.commit()
+                else:
+                    # Handle the case when no image is provided
+                    pass
             return redirect(url_for('profile'))
         else:
             conn = mysql.connector.connect(**config)
@@ -367,8 +394,13 @@ def post_detail(product_id):
             'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
             (product_id,))
         comments = cursor.fetchall()
+        
+        cursor.execute(
+            'SELECT * FROM product p, images s WHERE s.product_id = p.product_id AND p.product_id = %s', 
+            (product_id,))
+        images = cursor.fetchall()
 
-        return render_template('post_detail.html', product=product, comments=comments)
+        return render_template('post_detail.html', product=product, comments=comments, images=images)
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])
@@ -409,30 +441,40 @@ def basket(product_id):
         return render_template('basket.html', products=products, total_sum=total_sum)
 
 
-@app.route("/wallet", methods=["POST", "GET"])
-def wallet():
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        if request.method == 'POST':
-            insert_amount = request.form['numofproducts']
-            if int(insert_amount) > 0:
-                cursor.execute(
-                    """   
-                     UPDATE wallet         
-                      SET balance = %s         
-                      WHERE customer_id = %s;
-                    """,
-                    (insert_amount, session['userid'] ))
-                conn.commit()
+@app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
+def toggle_favorite(product_id):
+    # Check if user is logged in
+    if 'loggedin' not in session:
+        flash('You need to be logged in to favorite items!')
+        return redirect(url_for('login'))
 
-        cursor.execute(
-            'SELECT * FROM wallet  WHERE customer_id = %s',
-            (session['userid'],))
-        wallet = cursor.fetchall()
+    # Get the customer's user ID from the session
+    cust_id = session['userid']
 
-        return render_template('wallet.html', wallet=wallet)
+    # Open a new database connection
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    # Check if the product is already in the customer's favorites
+    cursor.execute('SELECT * FROM favorites WHERE cust_id = %s AND product_id = %s', (cust_id, product_id))
+    favorite = cursor.fetchone()
+
+    if favorite:
+        # If the product is already in favorites, remove it
+        cursor.execute('DELETE FROM favorites WHERE cust_id = %s AND product_id = %s', (cust_id, product_id))
+        flash('Item removed from favorites.')
+    else:
+        # If the product is not in favorites, add it
+        cursor.execute('INSERT INTO favorites (cust_id, product_id) VALUES (%s, %s)', (cust_id, product_id))
+        flash('Item added to favorites.')
+
+    # Commit changes and close the connection
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    # Redirect back to the market page
+    return redirect(url_for('market'))
 
 
 if __name__ == "__main__":
