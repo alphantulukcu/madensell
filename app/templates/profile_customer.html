@@ -24,100 +24,125 @@ Profile
 
         </div>
 </div>
-<div class="bottom-container">
-    <div class="flex">
-        <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
-    </div>
-    <div class="card-container">
-
-              {% if posts == 'Empty' %}
-                    <div class="card">
-                            <div class="card-content">
-                                <h2>No one have not shared any post yet</h2>
-                                <h6> </h6>
-                            </div>
-                    </div>
-                {% else %}
-                    {% for post in products_without_images %}
-                         <div class="card">
-                            <div class="profile-for_card">
-                                <img class="profile-for_card" src="{{ post[11] }}" >
-                                <form action="" method="post">
-                                    <button type="submit">
-                                        <p>{{ post[9] }}</p>
-                                    </button>
-                                </form>
-
-                            </div>
-                            <img class="card-img" src="/static/blankDark_image.jpg">
-                            <div class="card-content">
-                            <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
-                                    <button type="submit">
-                                        <h2>{{ post[3] }}</h2>
-                                    </button>
-                                </form>
-                                <h1>{{ post[16] }} / {{ post[14] }}</h1>
-
-                            </div>
-                            <div class="card-price">
-                                 {% if post.price == 0 %}
-                                    <h3>Free</h3>
-                                {% else %}
-                                        <h3>{{ post[2] }}₺</h3>
-                                {% endif %}
-                            </div>
-                            <div class="card-bottom">
-                                <h1>{{ post[7] }} ago</h1>
-                                <!-- Favorite button -->
-                                <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
-                                    <button type="submit" class="favorite-button">
-                                        <i class="fa fa-heart" aria-hidden="true"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    {% endfor %}
-
-                    {% for post in products_with_images %}
-                    <div class="card">
-                       <div class="profile-for_card">
-                           <img class="profile-for_card" src="{{ post[11] }}" >
-                           <form action="" method="post">
-                               <button type="submit">
-                                   <p>{{ post[9] }}</p>
-                               </button>
-                           </form>
-
-                       </div>
-                       <img class="card-img" src="{{ post[17] }}">
-                       <div class="card-content">
-                       <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
-                               <button type="submit">
-                                   <h2>{{ post[3] }}</h2>
-                               </button>
-                           </form>
-                           <h1>{{ post[16] }} / {{ post[14] }}</h1>
-
-                       </div>
-                       <div class="card-price">
-                            {% if post.price == 0 %}
-                               <h3>Free</h3>
-                           {% else %}
-                                   <h3>{{ post[2] }}₺</h3>
-                           {% endif %}
-                       </div>
-                       <div class="card-bottom">
-                           <h1>{{ post[7] }} ago</h1>
-                           <!-- Favorite button -->
-                           <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
-                               <button type="submit" class="favorite-button">
-                                   <i class="fa fa-heart" aria-hidden="true"></i>
-                               </button>
-                           </form>
-                       </div>
-                   </div>
-                    {% endfor %}
-                {% endif %}
-    </div>
+<div class="flex">
+    <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+    <button class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
 </div>
+<div class="bottom-container">
+
+    
+    <div id="ordersTab" class="tab" style="display: none;">
+        <h2>Orders content will be shown here.</h2>
+        <!-- Orders content goes here, dynamically loaded or otherwise -->
+    </div>
+
+    <div id="favoritesTab" class="tab">
+        <div class="card-container">
+
+                {% if posts == 'Empty' %}
+                        <div class="card">
+                                <div class="card-content">
+                                    <h2>No one have not shared any post yet</h2>
+                                    <h6> </h6>
+                                </div>
+                        </div>
+                    {% else %}
+                        {% for post in products_without_images %}
+                            <div class="card">
+                                <div class="profile-for_card">
+                                    <img class="profile-for_card" src="{{ post[11] }}" >
+                                    <form action="" method="post">
+                                        <button type="submit">
+                                            <p>{{ post[9] }}</p>
+                                        </button>
+                                    </form>
+
+                                </div>
+                                <img class="card-img" src="/static/blankDark_image.jpg">
+                                <div class="card-content">
+                                <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                        <button type="submit">
+                                            <h2>{{ post[3] }}</h2>
+                                        </button>
+                                    </form>
+                                    <h1>{{ post[16] }} / {{ post[14] }}</h1>
+
+                                </div>
+                                <div class="card-price">
+                                    {% if post.price == 0 %}
+                                        <h3>Free</h3>
+                                    {% else %}
+                                            <h3>{{ post[2] }}₺</h3>
+                                    {% endif %}
+                                </div>
+                                <div class="card-bottom">
+                                    <h1>{{ post[7] }} ago</h1>
+                                    <!-- Favorite button -->
+                                    <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
+                                        <button type="submit" class="favorite-button">
+                                            <i class="fa fa-heart" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {% for post in products_with_images %}
+                        <div class="card">
+                        <div class="profile-for_card">
+                            <img class="profile-for_card" src="{{ post[11] }}" >
+                            <form action="" method="post">
+                                <button type="submit">
+                                    <p>{{ post[9] }}</p>
+                                </button>
+                            </form>
+
+                        </div>
+                        <img class="card-img" src="{{ post[17] }}">
+                        <div class="card-content">
+                        <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                <button type="submit">
+                                    <h2>{{ post[3] }}</h2>
+                                </button>
+                            </form>
+                            <h1>{{ post[16] }} / {{ post[14] }}</h1>
+
+                        </div>
+                        <div class="card-price">
+                                {% if post.price == 0 %}
+                                <h3>Free</h3>
+                            {% else %}
+                                    <h3>{{ post[2] }}₺</h3>
+                            {% endif %}
+                        </div>
+                        <div class="card-bottom">
+                            <h1>{{ post[7] }} ago</h1>
+                            <!-- Favorite button -->
+                            <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
+                                <button type="submit" class="favorite-button">
+                                    <i class="fa fa-heart" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                        {% endfor %}
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}
+<script>
+    function toggleTabs(tabName) {
+        var tabs = document.getElementsByClassName("tab");
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].style.display = "none";  // Hide all tabs
+        }
+        document.getElementById(tabName).style.display = "block";  // Show the selected tab
+    }
+
+    window.onload = function() {
+        toggleTabs('favoritesTab'); // Default to showing the Favorites tab when the page loads
+    };
+</script>

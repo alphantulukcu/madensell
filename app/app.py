@@ -207,7 +207,7 @@ def profile():
                 if len(favorites) == 0:
                     favorites = 'Empty'
                 # Pass the account information to render the main page
-                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user)
+                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites)
 
             elif session['user_type'] == 2:
                 conn = mysql.connector.connect(**config)
