@@ -40,8 +40,8 @@ def create_tables():
                 DECLARE v_address VARCHAR(255);
                 DECLARE v_profile_image VARCHAR(255);
             
-                SELECT u.email, u.username, c.first_name, c.last_name, u.phone_number, u.address,  
-                INTO v_email, v_username, v_first_name, v_last_name,  v_phone, v_address, 
+                SELECT u.email, u.username, c.first_name, c.last_name, u.phone_number, u.address, c.profile_image  
+                INTO v_email, v_username, v_first_name, v_last_name,  v_phone, v_address, v_profile_image
                 FROM users u NATURAL JOIN customer c
                 WHERE u.user_id = p_user_id;
             
@@ -70,7 +70,7 @@ def create_tables():
                 END IF;
 
                 IF p_profile_image != v_profile_image THEN
-                    UPDATE users SET profile_image = p_profile_image WHERE user_id = p_user_id;
+                    UPDATE customer SET profile_image = p_profile_image WHERE user_id = p_user_id;
                 END IF;
             END
             """)  # Include the whole procedure creation statement here.
