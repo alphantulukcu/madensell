@@ -360,47 +360,69 @@ def logout():
     session.pop('user_type', None)
     return redirect(url_for('login'))
 
+def get_products(cursor, category=None, subcategory=None, sort=None, price=None):
+    query = '''
+        SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+        FROM product p
+        JOIN business b ON p.business_id = b.user_id
+        JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+        JOIN category c ON s.category_id = c.category_id
+        LEFT JOIN images i ON p.product_id = i.product_id
+        WHERE p.status = 1
+    '''
 
+    params = []
+
+    if category:
+        query += ' AND c.category_id = %s'
+        params.append(category)
+
+    if subcategory:
+        query += ' AND s.subcategory_id = %s'
+        params.append(subcategory)
+
+    if price:
+        query += ' AND p.price <= %s'
+        params.append(price)
+
+    query += ' GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id'
+
+    if sort == 'oldest':
+        query += ' ORDER BY p.date_posted ASC'
+    elif sort == 'newest':
+        query += ' ORDER BY p.date_posted DESC'
+    elif sort == 'price_low':
+        query += ' ORDER BY p.price ASC'
+    elif sort == 'price_high':
+        query += ' ORDER BY p.price DESC'
+
+    cursor.execute(query, params)
+    return cursor.fetchall()
 
 @app.route("/market", methods=["POST", "GET"])
 def market():
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        if request.method == 'POST':
-            category_id = int(request.form['post_categories'])
-            subcategory_id = int(request.form['post_subcategories'])
-            sort = request.form['post_sort']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
 
+    if request.method == 'POST':
+        category_id = request.form.get('post_categories')
+        subcategory_id = request.form.get('post_subcategories')
+        sort = request.form.get('post_sort')
+        products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+    else:
+        products = get_products(cursor)
 
-        else:
-            conn = mysql.connector.connect(**config)
-            cursor = conn.cursor()
-            cursor.execute(
-                'SELECT category_id, category_name FROM category',
-                ())
-            category = cursor.fetchall()
-            cursor.execute(
-                'SELECT subcategory_id, subcategory_name FROM subcategory',
-                ())
-            subcategory = cursor.fetchall()
-            
-        cursor.execute('''
-            SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
-            FROM product p
-            JOIN business b ON p.business_id = b.user_id
-            JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-            JOIN category c ON s.category_id = c.category_id
-            LEFT JOIN images i ON p.product_id = i.product_id
-            WHERE p.status = 1
-            GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
-        ''')
-        all_products = cursor.fetchall()
+    cursor.execute('SELECT category_id, category_name FROM category')
+    categories = cursor.fetchall()
+    cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
+    subcategories = cursor.fetchall()
 
-        # Separate products with and without images
-        products_with_images = [prod for prod in all_products if prod[-1] is not None]
-        products_without_images = [prod for prod in all_products if prod[-1] is None]
+    # Separate products with and without images
+    products_with_images = [prod for prod in products if prod[-1] is not None]
+    products_without_images = [prod for prod in products if prod[-1] is None]
 
-        return render_template('market.html', products_with_images=products_with_images, products_without_images=products_without_images, categories=category, subcategories=subcategory)
+    return render_template('market.html', products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
+
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
