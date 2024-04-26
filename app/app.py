@@ -201,49 +201,49 @@ def profile():
                 favorites = cursor.fetchall()
 
                 cursor.execute('''
-          SELECT 
-            o.order_id,            -- Order ID
-            o.info_id,             -- Shipping Information ID
-            o.product_id,          -- Product ID
-            o.num_of_products,     -- Number of products ordered
-            o.status,              -- Order status
-            p.title,               -- Product title
-            p.description,         -- Product description
-            p.price,               -- Price of the product
-            s.subcategory_name, -- Subcategory name
-            c.category_name,    -- Category name
-            si.address_title,
-            si.address,
-            si.phone_number,
-            si.city,   -- Shipping address from the shipping info
-            si.town,   -- Shipping address from the shipping info
-            si.postal_code,   -- Shipping address from the shipping info
-            MIN(i.image_url) as single_image           -- Image URL for the product
-            
-        FROM orders o
-        JOIN product p ON o.product_id = p.product_id
-        JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-        JOIN category c ON s.category_id = c.category_id
-        LEFT JOIN images i ON p.product_id = i.product_id
-        JOIN shipping_info si ON o.info_id = si.info_id
-        WHERE si.customer_id = %s
-        GROUP BY o.order_id, 
-            o.info_id,       
-            o.product_id,         
-            o.num_of_products,   
-            o.status,          
-            p.title,             
-            p.description,      
-            p.price,               
-            s.subcategory_name, 
-            c.category_name,
-             si.address_title,
-            si.address,
-            si.phone_number,
-            si.city,   -- Shipping address from the shipping info
-            si.town,   -- Shipping address from the shipping info
-            si.postal_code
-        ORDER BY o.order_id DESC
+                  SELECT 
+                    o.order_id,            -- Order ID
+                    o.info_id,             -- Shipping Information ID
+                    o.product_id,          -- Product ID
+                    o.num_of_products,     -- Number of products ordered
+                    o.status,              -- Order status
+                    p.title,               -- Product title
+                    p.description,         -- Product description
+                    p.price,               -- Price of the product
+                    s.subcategory_name, -- Subcategory name
+                    c.category_name,    -- Category name
+                    si.address_title,
+                    si.address,
+                    si.phone_number,
+                    si.city,   -- Shipping address from the shipping info
+                    si.town,   -- Shipping address from the shipping info
+                    si.postal_code,   -- Shipping address from the shipping info
+                    MIN(i.image_url) as single_image           -- Image URL for the product
+                    
+                FROM orders o
+                JOIN product p ON o.product_id = p.product_id
+                JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                JOIN category c ON s.category_id = c.category_id
+                LEFT JOIN images i ON p.product_id = i.product_id
+                JOIN shipping_info si ON o.info_id = si.info_id
+                WHERE si.customer_id = %s
+                GROUP BY o.order_id, 
+                    o.info_id,       
+                    o.product_id,         
+                    o.num_of_products,   
+                    o.status,          
+                    p.title,             
+                    p.description,      
+                    p.price,               
+                    s.subcategory_name, 
+                    c.category_name,
+                     si.address_title,
+                    si.address,
+                    si.phone_number,
+                    si.city,   -- Shipping address from the shipping info
+                    si.town,   -- Shipping address from the shipping info
+                    si.postal_code
+                ORDER BY o.order_id DESC
 
                 ''', (customer_id,))
                 orders = cursor.fetchall()
@@ -265,13 +265,68 @@ def profile():
                     (session['userid'],))
                 user = cursor.fetchone()
                 cursor.execute(
-                    'SELECT * FROM product p, business b, subcategory s, category c WHERE p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id AND b.user_id = %s',
+                    'SELECT * FROM product p, business b, subcategory s, category c WHERE p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id AND b.user_id = %s AND p.status = 1',
                     (session['userid'],))
                 products = cursor.fetchall()
                 if len(products) == 0:
                     products = 'Empty'
+
+                cursor.execute('''
+                                  SELECT 
+                                    o.order_id,            -- Order ID
+                                    o.info_id,             -- Shipping Information ID
+                                    o.product_id,          -- Product ID
+                                    o.num_of_products,     -- Number of products ordered
+                                    o.status,              -- Order status
+                                    p.title,               -- Product title
+                                    p.description,         -- Product description
+                                    p.price,               -- Price of the product
+                                    s.subcategory_name, -- Subcategory name
+                                    c.category_name,    -- Category name
+                                    cu.first_name, 
+                                    cu.last_name, 
+                                    cu.profile_image,
+                                    si.address_title,
+                                    si.address,
+                                    si.phone_number,
+                                    si.city,   -- Shipping address from the shipping info
+                                    si.town,   -- Shipping address from the shipping info
+                                    si.postal_code,   -- Shipping address from the shipping info
+                                    MIN(i.image_url) as single_image           -- Image URL for the product
+
+                                FROM orders o
+                                JOIN product p ON o.product_id = p.product_id
+                                JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                                JOIN category c ON s.category_id = c.category_id
+                                LEFT JOIN images i ON p.product_id = i.product_id
+                                JOIN shipping_info si ON o.info_id = si.info_id
+                                JOIN customer cu ON cu.user_id = si.customer_id
+                                WHERE p.business_id = %s
+                                GROUP BY o.order_id, 
+                                    o.info_id,       
+                                    o.product_id,         
+                                    o.num_of_products,   
+                                    o.status,          
+                                    p.title,             
+                                    p.description,      
+                                    p.price,               
+                                    s.subcategory_name, 
+                                    c.category_name,
+                                    cu.first_name, 
+                                    cu.last_name, 
+                                    cu.profile_image,
+                                    si.address_title,
+                                    si.address,
+                                    si.phone_number,
+                                    si.city,   -- Shipping address from the shipping info
+                                    si.town,   -- Shipping address from the shipping info
+                                    si.postal_code
+                                ORDER BY o.order_id DESC
+
+                                ''', (session['userid'],))
+                orders = cursor.fetchall()
                 # Pass the account information to render the main page
-                return render_template('profile_business.html', user=user, products=products)
+                return render_template('profile_business.html', user=user, products=products, orders=orders)
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))

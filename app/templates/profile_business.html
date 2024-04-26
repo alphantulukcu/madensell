@@ -23,51 +23,146 @@ Profile
 
         </div>
 </div>
-  <div class="bottom-container">
-         <div class="flex">
-            <button class="toggle-title" onclick="toggleTabs('favoritesTab')">My Products</button>
+<div class="flex">
+    <button class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
+    <button class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+</div>
+  <div class="bottom-container" style="min-height: 500px;">
+
+         <div class="tab" id="postTab" style="overflow-x-auto whitespace-nowrap" style="display: none;">
+    {% if products == 'Empty' %}
+        <div class="horizontal-card">
+            <div class="horizontal-card-content">
+                <h2>You have not shared any post yet</h2>
+            </div>
         </div>
-         <div class="card-container" id="postTab">
-                    {% if products == 'Empty' %}
+    {% else %}
+        <div class="flex overflow-x-auto" style="padding: 2%;">
+            {% for post in products %}
+                <div class="card inline-block mr-4">
+                    <div class="profile-for_card">
+                        <img class="profile-for_card" src="/static/default.png" alt="Profile Picture">
+                        <form action="" method="post">
+                            <button type="submit">
+                                <p>{{ post[10] }}</p>
+                            </button>
+                        </form>
+                    </div>
+                    <img class="card-img" src="/static/blank_image.jpg" alt="Post Image">
+                    <div class="card-content">
+                        <form action="" method="post">
+                            <button type="submit">
+                                <h2>{{post[3]}}</h2>
+                            </button>
+                        </form>
+                        <h1>{{post[17]}} / {{post[15]}}</h1>
+                    </div>
+                    <div class="card-price">
+                        {% if post[2] == 0 %}
+                            <h3>Free</h3>
+                        {% else %}
+                            <h3>{{post[2]}}₺</h3>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+
+      <div id="ordersTab" class="tab" style="display: none;">
+         <div class="scroll-container" style="min-height: 500px;">
+                  {% if posts == 'Empty' %}
                         <div class="horizontal-card">
-                                <div class="horizontal-card-content">
-                                        <h2>You have not shared any post yet</h2>
+                                <div class="card-content">
+                                    <h2>Anyone have not shared any post yet</h2>
+                                    <h6> </h6>
                                 </div>
                         </div>
                     {% else %}
-                        {% for post in products %}
-                            <div class="card">
-                                <div class="profile-for_card">
-                                    <img class="profile-for_card" src="/static/default.png" >
+                        {% for post in orders %}
+                             <div class="horizontal-card">
+                                <div class="horizontal-card">
+
+                                    <img style="width: 10%" class="horizontal-card-img" src="{{post[19]}}">
+                                    <div class="card-content">
+                                        <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
+                                            <button type="submit">
+                                                <h2>{{ post[5] }}</h2>
+                                            </button>
+                                        </form>
+                                        <h1>{{ post[9] }} / {{ post[8] }}</h1>
+                                        <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
+                                        <div class="card-price">
+                                            <h3>{{ post[7] }}₺</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="detailed-post">
+                                    <div class="profile-for_card">
+                                    <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture" style="margin: 0.5rem;">
                                     <form action="" method="post">
                                         <button type="submit">
-                                            <p>{{ post[10] }}</p>
+                                            <p>{{ post[10] }} {{post[11]}}</p>
                                         </button>
-                                    </form>
-
+                                        </form>
+                                    </div>
+                                    <div class="detailed-post-content">
+                                        <h2>{{ post[13] }}
+                                        </h2>
+                                        <h1>Phone: {{ post[15] }}</h1>
+                                        <h1>Address: {{ post[14] }}, {{ post[17] }}/{{ post[16] }}, {{post[18] }}</h1>
+                                    </div>
                                 </div>
-                                <img class="card-img" src="/static/blank_image.jpg">
-                                <div class="card-content">
-                                    <form action="" method="post">
-                                        <button type="submit">
-                                            <h2>{{post[3]}}</h2>
-                                        </button>
+                                <div class="detailed-post">
+                                    <div class="detailed-post-content">
+                                        {% if post[4] == 0 %}
+                                                <h2>Status: CANCELLED</h2>
+                                        {% elif post[4] == 1 %}
+                                                <h2>Status: PROCESSING</h2>
+                                        {% elif post[4] == 2 %}
+                                                <h2>Status: SHIPPING</h2>
+                                        {% else %}
+                                               <h2>Status: DELIVERED</h2>
+                                        {% endif %}
+                                    </div>
+                                    <form class="filter-card" action="{{ url_for('market') }}" method="post">
+                                        <div class="form-group">
+                                            <select class="form-input" id="status" name="status">
+                                                <option value="">Change Status:</option>
+                                                <option value=0 {% if selected_sort == 0 %}selected{% endif %}>CANCELLED</option>
+                                                <option value=1 {% if selected_sort == 1 %}selected{% endif %}>PROCESSING</option>
+                                                <option value=2 {% if selected_sort == 2 %}selected{% endif %}>SHIPPING</option>
+                                                <option value=3 {% if selected_sort == 3 %}selected{% endif %}>DELIVERED</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="filter-button">Change <i class="fas fa-filter" style="color: #ffffff;"></i></button>
                                     </form>
-                                    <h1>{{post[17]}} / {{post[15]}}</h1>
-
-                                </div>
-                                <div class="card-price">
-                                     {% if post[2] == 0 %}
-                                        <h3>Free</h3>
-                                    {% else %}
-                                            <h3>{{post[2]}}₺</h3>
-                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}
                     {% endif %}
-        </div>
+            </div>
+    </div>
 
-</body>
-</html>
+<script>
+    function toggleTabs(tabName) {
+        posts = document.getElementById("postTab");
+        orders = document.getElementById("ordersTab");
+        if(tabName === "postTab") {
+             posts.style.display = "flex";  // Show the selected tab
+             orders.style.display = "none";  // Show the selected tab
+        }
+        else if(tabName === "ordersTab") {
+            posts.style.display = "none";  // Show the selected tab
+            orders.style.display = "flex";  // Show the selected tab
+        }
+
+    }
+
+    window.onload = function() {
+        toggleTabs("favoritesTab"); // Default to showing the Favorites tab when the page loads
+    };
+</script>
 {% endblock %}
