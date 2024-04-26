@@ -57,11 +57,12 @@ Post
                     {% else %}
                             <h3>{{product[2]}}₺</h3>
                     {% endif %}
+                    <h6>Available Stock: {{product[5]}} </h6>
                     <h1>{{product[7]}} ago</h1>
                     <br>
                     <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
                         <input type="hidden" class="form-input" id="comment" name="comment" value="" >
-                         <input type="number" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
+                         <input type="number" max="{{product[5]}}" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
                         <br>
                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Add to Basket</button>
                     </form>
