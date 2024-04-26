@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import firebase_admin
 from firebase_admin import credentials, storage
 
-cred = credentials.Certificate("app/madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
 })
@@ -483,6 +483,8 @@ def basket(product_id):
             'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
             (session['userid'],))
         total_sum = cursor.fetchone()[0]
+        if total_sum is None:
+            total_sum = 0
 
         return render_template('basket.html', products=products, total_sum=total_sum)
 
