@@ -77,39 +77,107 @@ def create_tables():
 
     cursor.execute(
         """CREATE PROCEDURE IF NOT EXISTS ProcessOrder(IN input_info_id INT)
-            BEGIN
-                DECLARE v_customer_id INT;
-                DECLARE total_cost INT DEFAULT 0;
-            
-                START TRANSACTION;
-            
-                    SELECT s.customer_id INTO v_customer_id FROM shipping_info s WHERE s.info_id = input_info_id;
+                BEGIN
+                    DECLARE v_customer_id INT;
+                    DECLARE v_business_id INT;
+                    DECLARE total_cost INT DEFAULT 0;
                 
-                    SELECT SUM(p.price * b.num_of_products) INTO total_cost
-                    FROM basket b
-                    JOIN product p ON b.product_id = p.product_id
-                    WHERE b.customer_id = v_customer_id;
-          
-                    INSERT INTO orders (info_id, product_id, num_of_products, status)
-                    SELECT input_info_id, product_id, num_of_products, 1
-                    FROM basket
-                    WHERE customer_id = v_customer_id;
+                    START TRANSACTION;
                 
-                    UPDATE product p
-                    JOIN basket b ON p.product_id = b.product_id
-                    SET p.stock_num = p.stock_num - b.num_of_products
-                    WHERE b.customer_id = v_customer_id;
+                        -- Retrieve customer ID from shipping_info using the input info_id
+                        SELECT s.customer_id INTO v_customer_id FROM shipping_info s WHERE s.info_id = input_info_id;
                 
-                    UPDATE wallet SET balance = balance - total_cost WHERE customer_id = v_customer_id;
+                        -- Calculate the total cost of all products in the customer's basket
+                        SELECT SUM(p.price * b.num_of_products) INTO total_cost
+                        FROM basket b
+                        JOIN product p ON b.product_id = p.product_id
+                        WHERE b.customer_id = v_customer_id;
                 
-                    DELETE FROM basket WHERE customer_id = v_customer_id;
-            
-                COMMIT;
-            END
+                        -- Insert order details into orders table from the basket
+                        INSERT INTO orders (info_id, product_id, num_of_products, status)
+                        SELECT input_info_id, product_id, num_of_products, 1
+                        FROM basket
+                        WHERE customer_id = v_customer_id;
+                
+                        -- Update the product stock based on the basket content
+                        UPDATE product p
+                        JOIN basket b ON p.product_id = b.product_id
+                        SET p.stock_num = p.stock_num - b.num_of_products
+                        WHERE b.customer_id = v_customer_id;
+                
+                        -- Deduct the total cost from the customer's wallet
+                        UPDATE wallet
+                        SET balance = balance - total_cost
+                        WHERE user_id = v_customer_id;
+                
+                        -- Update business wallet balances based on products sold
+                        UPDATE wallet w
+                        JOIN (
+                            SELECT p.business_id, SUM(p.price * b.num_of_products) AS revenue
+                            FROM basket b
+                            JOIN product p ON b.product_id = p.product_id
+                            WHERE b.customer_id = v_customer_id
+                            GROUP BY p.business_id
+                        ) AS business_revenue ON w.user_id = business_revenue.business_id
+                        SET w.balance = w.balance + business_revenue.revenue;
+                
+                        -- Clear the customer's basket after processing the order
+                        DELETE FROM basket WHERE customer_id = v_customer_id;
+                
+                    COMMIT;
+                END
 
     """
     )
 
+    cursor.execute(
+        """ CREATE PROCEDURE IF NOT EXISTS UpdateBusinessProfile(
+            IN p_user_id INT,
+            IN p_email VARCHAR(50),
+            IN p_username VARCHAR(20),
+            IN p_business_name VARCHAR(20),
+            IN p_phone VARCHAR(255),
+            IN p_address VARCHAR(255),
+            IN p_profile_image VARCHAR(255)
+        )
+        BEGIN
+            DECLARE v_email VARCHAR(50);
+            DECLARE v_username VARCHAR(20);
+            DECLARE v_business_name VARCHAR(20);
+            DECLARE v_phone VARCHAR(255);
+            DECLARE v_address VARCHAR(255);
+            DECLARE v_profile_image VARCHAR(255);
+
+            SELECT u.email, u.username, b.business_name, u.phone_number, u.address, b.profile_image  
+            INTO v_email, v_username, v_business_name,  v_phone, v_address, v_profile_image
+            FROM users u NATURAL JOIN business b
+            WHERE u.user_id = p_user_id;
+
+            IF p_email != v_email THEN
+                UPDATE users SET email = p_email WHERE user_id = p_user_id;
+            END IF;
+
+            IF p_username != v_username THEN
+                UPDATE users SET username = p_username WHERE user_id = p_user_id;
+            END IF;
+
+            IF p_business_name != v_business_name THEN
+                UPDATE business SET business_name = p_business_name WHERE user_id = p_user_id;
+            END IF;
+
+            IF p_phone != v_phone THEN
+                UPDATE users SET phone_number = p_phone WHERE user_id = p_user_id;
+            END IF;
+
+            IF p_address != v_address THEN
+                UPDATE users SET address = p_address WHERE user_id = p_user_id;
+            END IF;
+
+            IF p_profile_image != v_profile_image THEN
+                UPDATE business SET profile_image = p_profile_image WHERE user_id = p_user_id;
+            END IF;
+        END
+        """)  # Include the whole procedure creation statement here.
     print('Tables created')
     connection.commit()
     connection.close()

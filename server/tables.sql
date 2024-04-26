@@ -38,11 +38,11 @@ CREATE TABLE IF NOT EXISTS customer (
 	);
 
 CREATE TABLE IF NOT EXISTS wallet (
-	customer_id		INT (10) NOT NULL,
+	user_id		INT (10) NOT NULL,
     wallet_id       INT AUTO_INCREMENT NOT NULL,
     balance         INT(10) NOT NULL,
     primary key (wallet_id),
-    foreign key (customer_id) references customer(user_id)
+    foreign key (user_id) references users(user_id)
 	);
 
 CREATE TABLE IF NOT EXISTS category (

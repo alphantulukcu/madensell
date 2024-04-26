@@ -536,7 +536,7 @@ def order(type):
             total_sum = 0
 
         cursor.execute(
-            'SELECT * FROM wallet  WHERE customer_id = %s',
+            'SELECT * FROM wallet  WHERE user_id = %s',
             (session['userid'],))
         wallet = cursor.fetchone()
 
@@ -599,13 +599,13 @@ def wallet():
                     """   
                      UPDATE wallet         
                       SET balance = balance + %s         
-                      WHERE customer_id = %s;
+                      WHERE user_id = %s;
                     """,
                     (insert_amount, session['userid'] ))
                 conn.commit()
 
         cursor.execute(
-            'SELECT * FROM wallet  WHERE customer_id = %s',
+            'SELECT * FROM wallet  WHERE user_id = %s',
             (session['userid'],))
         wallet = cursor.fetchone()
 
