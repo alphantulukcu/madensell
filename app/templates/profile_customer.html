@@ -32,45 +32,64 @@ Profile
 
     
     <div id="ordersTab" class="tab" style="display: none;">
-         {% for post in orders %}
-                            <div class="detailed-post">
-                                <div class="profile-for_card">
-                                    <img class="profile-for_card" src="{{ post[11] }}" >
-                                    <form action="" method="post">
-                                        <button type="submit">
-                                            <p>{{ post[9] }}</p>
-                                        </button>
-                                    </form>
+         <div class="scroll-container">
+                  {% if posts == 'Empty' %}
+                        <div class="horizontal-card">
+                                <div class="card-content">
+                                    <h2>Anyone have not shared any post yet</h2>
+                                    <h6> </h6>
+                                </div>
+                        </div>
+                    {% else %}
+                        {% for post in orders %}
+                             <div class="horizontal-card">
 
-                                </div>
-                                <img class="card-img" src="/static/blankDark_image.jpg">
-                                <div class="detailed-post-content">
-                                <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
+                                <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
+                                <div class="card-content">
+                                    <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
                                         <button type="submit">
-                                            <h2>{{ post[3] }}</h2>
+                                            <h2>{{ post[5] }}</h2>
                                         </button>
                                     </form>
-                                    <h1>{{ post[16] }} / {{ post[14] }}</h1>
+                                    <h1>{{ post[9] }} / {{ post[8] }}</h1>
+                                    <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
+                                    <div class="card-price">
+                                        <h3>{{ post[7] }}₺</h3>
+                                    </div>
+                                </div>
+                                <div class="detailed-post">
+                                    <div class="detailed-post-content">
+                                        <h2>{{ post[10] }}
+                                        </h2>
+                                        <h1>Phone: {{ post[13] }}</h1>
+                                        <h1>Address: {{ post[12] }}, {{ post[14] }}/{{ post[13] }}, {{post[15] }}</h1>
+                                    </div>
+                                </div>
+                                <div class="detailed-post">
+                                    <div class="detailed-post-content">
+                                        <h2>Status</h2>
+                                        {% if post[4] == 0 %}
 
-                                </div>
-                                <div class="card-price">
-                                    {% if post.price == 0 %}
-                                        <h3>Free</h3>
-                                    {% else %}
-                                            <h3>{{ post[2] }}₺</h3>
-                                    {% endif %}
-                                </div>
-                                <div class="card-bottom">
-                                    <h1>{{ post[7] }} ago</h1>
-                                    <!-- Favorite button -->
-                                    <form action="{{ url_for('toggle_favorite', product_id=post[1]) }}" method="post">
-                                        <button type="submit" class="favorite-button">
-                                            <i class="fa fa-heart" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                               <h3>YOUR ORDER IS CANCELLED</h3>
+
+                                        {% elif post[4] == 1 %}
+
+                                               <h3>YOUR ORDER IS PROCESSING</h3>
+
+                                        {% elif post[4] == 2 %}
+
+                                               <h3>YOUR ORDER IS SHIPPED</h3>
+                                        {% else %}
+
+                                               <h3>YOUR ORDER IS DELIVERED</h3>
+
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         {% endfor %}
+                    {% endif %}
+            </div>
     </div>
 
     <div id="favoritesTab" class="tab" style="display: none">

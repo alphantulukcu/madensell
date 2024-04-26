@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import os
 from datetime import datetime, date
 from dotenv import load_dotenv
@@ -201,20 +201,49 @@ def profile():
                 favorites = cursor.fetchall()
 
                 cursor.execute('''
-                    SELECT 
-                        p.*, b.*, s.*, c.*, MIN(i.image_url) AS single_image
-                    FROM 
-                        product p
-                        JOIN business b ON p.business_id = b.user_id
-                        JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-                        JOIN category c ON s.category_id = c.category_id
-                        LEFT JOIN images i ON p.product_id = i.product_id
-                        JOIN orders o ON p.product_id = o.product_id
-                        JOIN shipping_info si ON o.info_id = si.info_id 
-                    WHERE 
-                        si.customer_id = %s
-                    GROUP BY 
-                        p.product_id, b.user_id, s.subcategory_id, c.category_id
+          SELECT 
+            o.order_id,            -- Order ID
+            o.info_id,             -- Shipping Information ID
+            o.product_id,          -- Product ID
+            o.num_of_products,     -- Number of products ordered
+            o.status,              -- Order status
+            p.title,               -- Product title
+            p.description,         -- Product description
+            p.price,               -- Price of the product
+            s.subcategory_name, -- Subcategory name
+            c.category_name,    -- Category name
+            si.address_title,
+            si.address,
+            si.phone_number,
+            si.city,   -- Shipping address from the shipping info
+            si.town,   -- Shipping address from the shipping info
+            si.postal_code,   -- Shipping address from the shipping info
+            MIN(i.image_url) as single_image           -- Image URL for the product
+            
+        FROM orders o
+        JOIN product p ON o.product_id = p.product_id
+        JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+        JOIN category c ON s.category_id = c.category_id
+        LEFT JOIN images i ON p.product_id = i.product_id
+        JOIN shipping_info si ON o.info_id = si.info_id
+        WHERE si.customer_id = %s
+        GROUP BY o.order_id, 
+            o.info_id,       
+            o.product_id,         
+            o.num_of_products,   
+            o.status,          
+            p.title,             
+            p.description,      
+            p.price,               
+            s.subcategory_name, 
+            c.category_name,
+             si.address_title,
+            si.address,
+            si.phone_number,
+            si.city,   -- Shipping address from the shipping info
+            si.town,   -- Shipping address from the shipping info
+            si.postal_code
+        ORDER BY o.order_id DESC
 
                 ''', (customer_id,))
                 orders = cursor.fetchall()
@@ -425,11 +454,27 @@ def post_detail(product_id):
                 numofproducts = int(numofproducts)
                 cursor.execute(
                     """   
-                                    INSERT INTO basket(product_id, customer_id, num_of_products) 
-                                    VALUES (%s,%s,%s)
+                                    SELECT basket_id FROM basket where product_id = %s AND customer_id = %s
                                 """,
-                    (product_id, session['userid'], numofproducts))
-                conn.commit()
+                    (product_id, session['userid'],))
+                basket = cursor.fetchone()
+                if basket:
+                    cursor.execute(
+                        """   
+                                    UPDATE basket         
+                                    SET num_of_products = num_of_products + %s         
+                                    WHERE basket_id = %s;
+                                    """,
+                        (numofproducts, basket[0]))
+                    conn.commit()
+                else:
+                    cursor.execute(
+                        """   
+                                        INSERT INTO basket(product_id, customer_id, num_of_products) 
+                                        VALUES (%s,%s,%s)
+                                    """,
+                        (product_id, session['userid'], numofproducts))
+                    conn.commit()
                 return redirect(url_for('basket', product_id=0))
 
 
@@ -592,28 +637,38 @@ def toggle_favorite(product_id):
 
 @app.route("/wallet", methods=["POST", "GET"])
 def wallet():
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        if request.method == 'POST':
-            insert_amount = request.form['insert_amount']
-            if int(insert_amount) > 0:
-                cursor.execute(
-                    """   
-                     UPDATE wallet         
-                      SET balance = balance + %s         
-                      WHERE user_id = %s;
-                    """,
-                    (insert_amount, session['userid'] ))
-                conn.commit()
+    if 'loggedin' not in session or 'user_type' not in session:
+        # Redirect to login or return an error
+        return jsonify({"error": "User not logged in"}), 403
 
-        cursor.execute(
-            'SELECT * FROM wallet  WHERE user_id = %s',
-            (session['userid'],))
-        wallet = cursor.fetchone()
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
 
-        return render_template('wallet.html', wallet=wallet)
+    if request.method == 'POST':
+        # Handle POST request for updating wallet balance
+        insert_amount = request.form.get('insert_amount', type=int)
+        if insert_amount and insert_amount > 0:
+            cursor.execute(
+                """   
+                 UPDATE wallet         
+                  SET balance = balance + %s         
+                  WHERE user_id = %s;
+                """,
+                (insert_amount, session['userid'])
+            )
+            conn.commit()
+            message = "Amount added successfully!"
+        else:
+            message = "Invalid amount."
+        return jsonify({'message': message})
+
+    # For GET requests, return wallet info in JSON
+    cursor.execute('SELECT balance FROM wallet WHERE user_id = %s', (session['userid'],))
+    wallet_balance = cursor.fetchone()
+    if wallet_balance:
+        return jsonify({"balance": wallet_balance[0]})
+    else:
+        return jsonify({"error": "Wallet not found"}), 404
 
 @app.route("/business-edit-profile", methods=["POST", "GET"])
 def business_edit_profile():

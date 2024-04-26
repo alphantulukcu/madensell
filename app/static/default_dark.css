@@ -1431,3 +1431,19 @@ img {vertical-align: middle;}
 
 
 
+/* Styles for the wallet card container */
+.wallet-card {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+    color: white;
+    padding: 0 2rem; /* Adjust padding as needed */
+    border-radius: 10px;
+}
+
+/* Expanded state style */
+.wallet-card.expanded {
+    max-height: 500px; /* Adjust based on the content size */
+    padding: 2rem; /* Provide padding when expanded */
+}
+
