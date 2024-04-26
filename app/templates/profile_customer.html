@@ -33,7 +33,7 @@ Profile
     
     <div id="ordersTab" class="tab" style="display: none;">
          {% for post in orders %}
-                            <div class="card">
+                            <div class="detailed-post">
                                 <div class="profile-for_card">
                                     <img class="profile-for_card" src="{{ post[11] }}" >
                                     <form action="" method="post">
@@ -44,7 +44,7 @@ Profile
 
                                 </div>
                                 <img class="card-img" src="/static/blankDark_image.jpg">
-                                <div class="card-content">
+                                <div class="detailed-post-content">
                                 <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
                                         <button type="submit">
                                             <h2>{{ post[3] }}</h2>
@@ -73,7 +73,7 @@ Profile
                         {% endfor %}
     </div>
 
-    <div id="favoritesTab" class="tab">
+    <div id="favoritesTab" class="tab" style="display: none">
         <div class="card-container">
 
                 {% if posts == 'Empty' %}
@@ -167,19 +167,25 @@ Profile
             </div>
         </div>
     </div>
-
-
-{% endblock %}
 <script>
     function toggleTabs(tabName) {
-        var tabs = document.getElementsByClassName("tab");
-        for (var i = 0; i < tabs.length; i++) {
-            tabs[i].style.display = "none";  // Hide all tabs
+        favorites = document.getElementById("favoritesTab");
+        orders = document.getElementById("ordersTab");
+        if(tabName === "favoritesTab") {
+             favorites.style.display = "block";  // Show the selected tab
+             orders.style.display = "none";  // Show the selected tab
         }
-        document.getElementById(tabName).style.display = "block";  // Show the selected tab
+        else if(tabName === "ordersTab") {
+            favorites.style.display = "none";  // Show the selected tab
+            orders.style.display = "block";  // Show the selected tab
+        }
+
     }
 
     window.onload = function() {
-        toggleTabs('favoritesTab'); // Default to showing the Favorites tab when the page loads
+        toggleTabs("favoritesTab"); // Default to showing the Favorites tab when the page loads
     };
 </script>
+
+{% endblock %}
+

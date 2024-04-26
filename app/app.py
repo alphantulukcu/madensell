@@ -371,6 +371,7 @@ def market():
             subcategory_id = int(request.form['post_subcategories'])
             sort = request.form['post_sort']
 
+
         else:
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
