@@ -316,6 +316,10 @@ def add_product():
             conn = mysql.connector.connect(**config)
             cursor = conn.cursor()
 
+            if not any(image.filename for image in images):
+                flash('Please upload at least one image', 'error')
+                return redirect(url_for('add_product'))
+
             if len(images) > 3:
                 flash('Cannot upload more than 3 images', 'error')
                 return redirect(url_for('add_product'))
