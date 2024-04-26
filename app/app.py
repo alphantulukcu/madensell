@@ -389,9 +389,9 @@ def get_products(cursor, category=None, subcategory=None, sort=None, price=None)
     query += ' GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id'
 
     if sort == 'oldest':
-        query += ' ORDER BY p.date_posted ASC'
+        query += ' ORDER BY p.created_at ASC'
     elif sort == 'newest':
-        query += ' ORDER BY p.date_posted DESC'
+        query += ' ORDER BY p.created_at DESC'
     elif sort == 'price_low':
         query += ' ORDER BY p.price ASC'
     elif sort == 'price_high':
@@ -411,7 +411,7 @@ def market():
         sort = request.form.get('post_sort')
         products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
     else:
-        products = get_products(cursor)
+        products = get_products(cursor,sort='newest')
 
     cursor.execute('SELECT category_id, category_name FROM category')
     categories = cursor.fetchall()
