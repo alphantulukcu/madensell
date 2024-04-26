@@ -16,7 +16,7 @@ Profile
 
                 <h2>@{{ user[1] }}</h2>
                 <h2 class="profile-bio">Overall point: {{ user[10] }}</h2>
-                        <a href="" class="btn">Edit Profile</a>
+                    <a href="{{url_for('business_edit_profile')}}" class="btn">Edit Profile</a>
               </div>
             </div>
           </div>
@@ -25,7 +25,7 @@ Profile
 </div>
   <div class="bottom-container">
          <div class="flex">
-            <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+            <button class="toggle-title" onclick="toggleTabs('favoritesTab')">My Products</button>
         </div>
          <div class="card-container" id="postTab">
                     {% if products == 'Empty' %}

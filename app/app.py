@@ -614,6 +614,54 @@ def wallet():
 
         return render_template('wallet.html', wallet=wallet)
 
+@app.route("/business-edit-profile", methods=["POST", "GET"])
+def business_edit_profile():
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        message = ''
+        if request.method == 'POST' and 'username' in request.form:
+            email = request.form['email']
+            username = request.form['username']
+            business_name = request.form['businessname'].title()
+            phone = request.form['phone']
+            address = request.form['address']
+            profile_image = request.files['profile_pic']
+            if profile_image:
+                delete_picture(user[11])
+                profile_image = add_picture(profile_image, user[0])
+            else:
+                profile_image = user[11]
+            conn = mysql.connector.connect(**config)
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+            account = cursor.fetchone()
+            user_exists = account is not None and user[0] != account[0]
+            if user_exists:
+                message = "Email already exists"
+                return render_template('edit_profile_customer.html', message=message, message_type='error',user=user)
+            else:
+                #update customer with procedure here
+                cursor.callproc('UpdateBusinessProfile', [
+                    session['userid'],
+                    email,
+                    username,
+                    business_name,
+                    phone,
+                    address, 
+                    profile_image
+                ])
+                conn.commit()  # Commit the transaction
+                message = "Profile updated successfully!"
+                return render_template('edit_profile_business.html', message=message, message_type='success', user=user)
+        return render_template('edit_profile_business.html', message=message, message_type='error', user=user)
+
+
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
