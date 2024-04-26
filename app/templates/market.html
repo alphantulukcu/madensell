@@ -94,22 +94,22 @@ Market
                         {% for post in products_with_images %}
                         <div class="card">
                            <div class="profile-for_card">
-                               <img class="profile-for_card" src="{{ post[11] }}" >
+                               <img class="profile-for_card" src="{{ post[12] }}" >
                                <form action="" method="post">
                                    <button type="submit">
-                                       <p>{{ post[9] }}</p>
+                                       <p>{{ post[10] }}</p>
                                    </button>
                                </form>
 
                            </div>
-                           <img class="card-img" src="{{ post[17] }}">
+                           <img class="card-img" src="{{ post[18] }}">
                            <div class="card-content">
                            <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
                                    <button type="submit">
                                        <h2>{{ post[3] }}</h2>
                                    </button>
                                </form>
-                               <h1>{{ post[16] }} / {{ post[14] }}</h1>
+                               <h1>{{ post[17] }} / {{ post[15] }}</h1>
 
                            </div>
                            <div class="card-price">
