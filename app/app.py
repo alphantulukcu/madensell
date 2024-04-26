@@ -102,8 +102,8 @@ def customer_register():
         password = request.form['password']
         phone = request.form['phone']
         address = request.form['address']
-
-        pp_path = os.path.join('static', 'default.png')
+        
+        pp_path = "https://storage.googleapis.com/madensell-dc0c4.appspot.com//default.png"
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
@@ -267,7 +267,8 @@ def customer_edit_profile():
             address = request.form['address']
             profile_image = request.files['profile_pic']
             if profile_image:
-                delete_picture(user[11])
+                if(user[11] != "https://storage.googleapis.com/madensell-dc0c4.appspot.com//default.png"):
+                    delete_picture(user[11])
                 profile_image = add_picture(profile_image, user[0])
             else:
                 profile_image = user[11]
