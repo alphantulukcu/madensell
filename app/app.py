@@ -483,6 +483,8 @@ def basket(product_id):
             'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
             (session['userid'],))
         total_sum = cursor.fetchone()[0]
+        if total_sum is None:
+            total_sum = 0
 
         return render_template('basket.html', products=products, total_sum=total_sum)
 
