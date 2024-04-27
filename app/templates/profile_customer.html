@@ -16,7 +16,9 @@ Profile
             </p>
             <h2>@{{ user[1] }}</h2>
             <h2 class="profile-bio">{{user.bio}}</h2>
-            <a href="{{url_for('customer_edit_profile')}}" class="btn">Edit Profile</a>
+            {% if viewing_own_profile %}
+                <a href="{{url_for('customer_edit_profile')}}" class="btn">Edit Profile</a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -25,105 +27,108 @@ Profile
 </div>
 <div class="flex">
      <button id="favoritesButton" class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
-    <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+     {% if viewing_own_profile %}
+        <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+     {% endif %}
+
 </div>
 <div class="bottom-container">
 
-    
-    <div id="ordersTab" class="tab" style="display: block;">
-         <div class="scroll-container">
-                  {% if posts == 'Empty' %}
-                        <div class="horizontal-card">
-                                <div class="card-content">
-                                    <h2>Anyone have not shared any post yet</h2>
-                                    <h6> </h6>
-                                </div>
-                        </div>
-                    {% else %}
-                        {% for post in orders %}
-                             <div class="horizontal-card">
-
-                                       <div class="horizontal-card">
-
-                                    <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
+    {% if viewing_own_profile %}
+        <div id="ordersTab" class="tab" style="display: block;">
+            <div class="scroll-container">
+                    {% if posts == 'Empty' %}
+                            <div class="horizontal-card">
                                     <div class="card-content">
-                                        <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
-                                            <button type="submit">
-                                                <h2>{{ post[5] }}</h2>
+                                        <h2>Anyone have not shared any post yet</h2>
+                                        <h6> </h6>
+                                    </div>
+                            </div>
+                        {% else %}
+                            {% for post in orders %}
+                                <div class="horizontal-card">
+
+                                        <div class="horizontal-card">
+
+                                        <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
+                                        <div class="card-content">
+                                            <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
+                                                <button type="submit">
+                                                    <h2>{{ post[5] }}</h2>
+                                                </button>
+                                            </form>
+                                            <h1>{{ post[9] }} / {{ post[8] }}</h1>
+                                            <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
+                                            <div class="card-price">
+                                                <h3>{{ post[7] }}₺</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="detailed-post">
+                                        <div class="profile-for_card">
+                                        <img class="profile-for_card" src="{{user[11]}}" alt="Profile Picture" style="margin: 0.5rem;">
+                                        <form action="" method="post">
+                                            <button type="submit" >
+                                                <p>{{ user[9] }} {{ user[10] }}</p>
                                             </button>
-                                        </form>
-                                        <h1>{{ post[9] }} / {{ post[8] }}</h1>
-                                        <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
-                                        <div class="card-price">
-                                            <h3>{{ post[7] }}₺</h3>
+                                            </form>
+                                        </div>
+                                        <div class="detailed-post-content">
+                                            <h2>{{ post[10] }}
+                                            </h2>
+                                            <h1>Phone: {{ post[13] }}</h1>
+                                            <h1>Address: {{ post[12] }}, {{ post[14] }}/{{ post[13] }}, {{post[15] }}</h1>
+                                        </div>
+                                    </div>
+                                    <div class="detailed-post">
+                                        <div class="detailed-post-content">
+                                            {% if post[4] == 0 %}
+                                                    <h2>Status: CANCELLED</h2>
+                                                    <br>
+                                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                        <input type="hidden" name="status" id="status" value=0>
+                                                        <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                    </form>
+                                            {% elif post[4] == 1 %}
+                                                    <h2>Status: PROCESSING</h2>
+                                                    <br>
+                                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                        <input type="hidden" name="status" id="status" value=0>
+                                                        <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                    </form>
+                                            {% elif post[4] == 2 %}
+                                                    <h2>Status: SHIPPING</h2>
+                                                    <br>
+                                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                        <input type="hidden" name="status" id="status" value=0>
+                                                        <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                    </form>
+                                            {% elif post[4] == 3 %}
+                                                    <h2>Status: DELIVERED</h2>
+                                                    <br>
+                                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                        <input type="hidden" name="status" id="status" value=4>
+                                                        <button type="submit" class="filter-button">Start Return Process <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                    </form>
+                                            {% elif post[4] == 4 %}
+                                                <h2>Status: RETURNING PROCESS</h2>
+                                                    <br>
+                                            {% else %}
+                                                <h2>Status: RETURNED</h2>
+                                                    <br>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="detailed-post">
-                                      <div class="profile-for_card">
-                                    <img class="profile-for_card" src="{{user[11]}}" alt="Profile Picture" style="margin: 0.5rem;">
-                                    <form action="" method="post">
-                                        <button type="submit" >
-                                            <p>{{ user[9] }} {{ user[10] }}</p>
-                                        </button>
-                                        </form>
-                                    </div>
-                                    <div class="detailed-post-content">
-                                        <h2>{{ post[10] }}
-                                        </h2>
-                                        <h1>Phone: {{ post[13] }}</h1>
-                                        <h1>Address: {{ post[12] }}, {{ post[14] }}/{{ post[13] }}, {{post[15] }}</h1>
-                                    </div>
-                                </div>
-                                <div class="detailed-post">
-                                    <div class="detailed-post-content">
-                                           {% if post[4] == 0 %}
-                                                <h2>Status: CANCELLED</h2>
-                                                <br>
-                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
-                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
-                                                    <input type="hidden" name="status" id="status" value=0>
-                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                </form>
-                                        {% elif post[4] == 1 %}
-                                                <h2>Status: PROCESSING</h2>
-                                                <br>
-                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
-                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
-                                                    <input type="hidden" name="status" id="status" value=0>
-                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                </form>
-                                        {% elif post[4] == 2 %}
-                                                <h2>Status: SHIPPING</h2>
-                                                <br>
-                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
-                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
-                                                    <input type="hidden" name="status" id="status" value=0>
-                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                </form>
-                                        {% elif post[4] == 3 %}
-                                                <h2>Status: DELIVERED</h2>
-                                                <br>
-                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
-                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
-                                                    <input type="hidden" name="status" id="status" value=4>
-                                                    <button type="submit" class="filter-button">Start Return Process <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                </form>
-                                        {% elif post[4] == 4 %}
-                                               <h2>Status: RETURNING PROCESS</h2>
-                                                <br>
-                                         {% else %}
-                                               <h2>Status: RETURNED</h2>
-                                                <br>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-            </div>
-    </div>
-
+                            {% endfor %}
+                        {% endif %}
+                </div>
+        </div>
+    {% endif %}
     <div id="favoritesTab" class="tab" style="display: none">
         <div class="card-container">
 
@@ -139,7 +144,7 @@ Profile
                             <div class="card">
                                 <div class="profile-for_card">
                                     <img class="profile-for_card" src="{{ post[12] }}" >
-                                    <form action="" method="post">
+                                    <form action="{{ url_for('profile', user_id=post[0]) }}" method="get">
                                         <button type="submit">
                                             <p>{{ post[10] }}</p>
                                         </button>
@@ -246,7 +251,7 @@ Profile
     }
 
     window.onload = function() {
-        toggleTabs("ordersTab"); // Default to showing the Favorites tab when the page loads
+        toggleTabs("favoritesTab"); // Default to showing the Favorites tab when the page loads
     };
 
 
