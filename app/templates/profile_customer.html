@@ -26,9 +26,12 @@ Profile
 </div>
 </div>
 <div class="flex">
-     <button id="favoritesButton" class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+
      {% if viewing_own_profile %}
-        <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+        <button id="favoritesButton" class="toggle-title " onclick="toggleTabs('favoritesTab')">Favorites</button>
+        <button id="ordersButton" class="toggle-title selected" onclick="toggleTabs('ordersTab')">Orders</button>
+     {% else %}
+            <button id="favoritesButton" class="toggle-title " onclick="toggleTabs('favoritesTab')">Favorites</button>
      {% endif %}
 
 </div>

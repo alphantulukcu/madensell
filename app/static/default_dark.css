@@ -155,8 +155,7 @@ body {
 }
 
 .bottom-container {
-    background-color: #2a2a2a;
-     /* Changed from 20px */
+
     width: 100%;
 }
 
@@ -1490,3 +1489,4 @@ canvas#statsChart {
     right: 0;
     border-radius: 0 3px 3px 0;
 }
+

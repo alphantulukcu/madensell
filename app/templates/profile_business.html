@@ -29,10 +29,10 @@ Profile
 </div>
 <div class="flex">
     {% if viewing_own_profile %}
-        <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
+        <button id="postButton" class="toggle-title selected" onclick="toggleTabs('postTab')">Your Products</button>
         <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
     {% else %}
-        <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Products</button>
+        <button id="postButton" class="toggle-title selected" onclick="toggleTabs('postTab')">Products</button>
     {% endif %}
     
 
@@ -48,6 +48,7 @@ Profile
         </div>
     {% else %}
         <div class="flex overflow-x-auto" style="padding: 2%;">
+
             {% for post in products %}
                 <div class="card inline-block mr-4">
                     <div class="profile-for_card">
