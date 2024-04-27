@@ -1,0 +1,111 @@
+{% extends "base_business.html" %}
+
+{% block title %}
+Business Statistics
+{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+
+    <div class="flex button-section">
+        <button class="toggle-title" id="dailyButton" onclick="selectChart('daily')">Daily Stats</button>
+        <button class="toggle-title" id="weeklyButton" onclick="selectChart('weekly')">Weekly Stats</button>
+        <button class="toggle-title" id="monthlyButton" onclick="selectChart('monthly')">Monthly Stats</button>
+    </div>
+    <div class="chart-container">
+        <canvas id="statsChart"></canvas>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let currentChart = null;
+
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("There was a problem with the fetch operation:", error);
+        }
+    }
+
+    function plotChart(data, label, chartTitle, xTitle, yTitle) {
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        if (currentChart) {
+            currentChart.destroy(); // Destroy the previous chart instance before creating a new one
+        }
+        currentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(item => item[label]),
+                datasets: [{
+                    label: 'Orders',
+                    data: data.map(item => item.OrderNum),
+                    borderColor: 'rgba(193, 31, 31, 0.9)', // Red
+                    backgroundColor: 'rgba(193, 31, 31, 0.5)', // Light red
+                }, {
+                    label: 'Favorites',
+                    data: data.map(item => item.FavoritesNum),
+                    borderColor: 'rgba(255, 255, 255, 0.9)', // White
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Light white (slightly transparent)
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: chartTitle,
+                        font: {
+                            size: 18
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: xTitle
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: yTitle
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function selectChart(type) {
+        let buttons = {
+            daily: document.getElementById('dailyButton'),
+            weekly: document.getElementById('weeklyButton'),
+            monthly: document.getElementById('monthlyButton')
+        };
+
+        // Clear all selections
+        Object.values(buttons).forEach(button => button.classList.remove('selected'));
+
+        // Set the selected button
+        buttons[type].classList.add('selected');
+
+        // Fetch data and update chart
+        fetchData(`/api/${type}-stats`).then(data => {
+            let chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Statistics`;
+            let xTitle = type === 'daily' ? 'Dates' : (type === 'weekly' ? 'Weeks' : 'Months');
+            let yTitle = 'Amount';
+            plotChart(data, type === 'daily' ? 'Date' : (type === 'weekly' ? 'Year-Week' : 'Month'), chartTitle, xTitle, yTitle);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        selectChart('daily'); // Default to showing daily stats when the page loads
+    });
+</script>
+{% endblock %}

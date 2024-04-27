@@ -519,6 +519,7 @@ def get_products(cursor, category=None, subcategory=None, sort=None, price=None)
     cursor.execute(query, params)
     return cursor.fetchall()
 
+
 @app.route("/market", methods=["POST", "GET"])
 def market():
     conn = mysql.connector.connect(**config)
