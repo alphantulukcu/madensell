@@ -513,8 +513,7 @@ body {
     transition: border-color 0.3s; /* Smooth transition for focus */
     background-color: transparent; /* Transparent background */
     margin: 1rem;
-    margin-right: 0.5rem;
-    min-width: 250px;
+    min-width: 400px;
     color: rgb(255, 255, 255);
 }
 
@@ -819,56 +818,6 @@ body {
     margin-bottom: 1rem;
 }
 
-.something{
-    height: 100px;
-    width: auto;
-    display: flex;
-    align-content: flex-start;
-    justify-content: flex-start;
-}
-
-.drop-area{
-    width: 80px;
-    height: 80px;
-    margin-top: 10px;
-    margin-left: 40px;
-    background: black;
-    border-radius: 10px;
-    text-align: center;
-    align-content: center;
-}
-
-.drop-area2 {
-    width: 80px;
-    height: 80px;
-    margin-top: 10px;
-    margin-left: 40px;
-    background: black;
-    border-radius: 10px;
-    text-align: center;
-    align-content: center;
-    pointer-events: none;
-    opacity: 0.1;
-    z-index: 2;
-}
-
-
-.img-view{
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    border-color: dimgrey;
-    border-width: 2px;
-    background-position: center;
-    background-size: cover;
-    background-image:url('ge.jpg');
-    overflow: hidden;
-}
-
-
-
-
-
 /* HORIZONTAL CARD FOR POSTS*/
 
 .horziontal-card-container {
@@ -1087,67 +1036,6 @@ body {
     color: #666;
 }
 
-.sold-pop-up {
-    display: none;
-    flex-direction: column;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 1rem;
-    margin-left: auto;
-    margin-right: auto;
-    min-width: 460px;
-    width: 100%;
-}
-
-.sold-pop-up h1 {
-    color: white;
-}
-.sold-pop-up-profile {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-
-}
-
-.sold-pop-up-profile-image {
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-}
-
-.sold-pop-up-profile-details {
-    margin-left: 20px;
-    text-align: left;
-    margin-right: 17rem;
-}
-
-.sold-pop-up-profile-details h2 {
-    color: #555555;
-    text-align: left;
-    font-size: 1rem;
-}
-
-.sold-pop-up-profile-details p {
-    font-size: 20px;
-    color: #ffffff;
-    text-align: left;
-}
-
-.sold-pop-up-profile-details .mb-4 {
-    margin-bottom: 1rem;
-}
-
- hr {
-      border: 1px solid #c0c0c0; /* Hex code for gray color */
-     margin-bottom: 1rem;
-     margin-top: 1rem;
-    }
-
-
- .report-box {
-     display: none;
- }
 /* FOOTER */
 
 .footer {
@@ -1391,20 +1279,6 @@ img {vertical-align: middle;}
     color: #666;
 }
 
-.sold {
-    position: relative;
-}
-
-.sold .sold-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom right, rgba(193, 31, 31, 0.5), rgba(249, 116, 0, 0.5));
-    border-radius: 10px;
-    z-index: 1; /* Place it above the card content */
-}
 
 .toggle-title {
     display: inline-block;
@@ -1460,14 +1334,12 @@ img {vertical-align: middle;}
     color: #ff0000; /* Red color on hover/focus */
 }
 
-
-
-
 /* Styles for the wallet card container */
 .wallet-card {
     max-height: 0;
+    max-width: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease-in-out;
+    transition: max-height 0.5s ease-in-out, max-width 1s ease-in-out;
     color: white;
     padding: 0 2rem; /* Adjust padding as needed */
     border-radius: 10px;
@@ -1476,6 +1348,27 @@ img {vertical-align: middle;}
 /* Expanded state style */
 .wallet-card.expanded {
     max-height: 500px; /* Adjust based on the content size */
+    max-width: 500px; /* Adjust based on the content size */
     padding: 2rem; /* Provide padding when expanded */
+    transition: max-height 0.5s ease-in-out, max-width 0.1s ease-in-out;
 }
+
+.custom-file-upload {
+    display: none;
+}
+.upload-btn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 30px;
+    border: 1px solid #ffffff;
+        background-color: rgb(0 0 0 / 48%);
+    transition: border-color 0.3s ease-in-out;
+    color: white;
+}
+
+.upload-btn:hover {
+    background-color: #e0e0e0;
+}
+
 

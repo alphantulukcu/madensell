@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import firebase_admin
 from firebase_admin import credentials, storage
 
-cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+cred = credentials.Certificate("app/madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
 })
@@ -847,6 +847,207 @@ def business_edit_profile():
         return render_template('edit_profile_business.html', message=message, message_type='error', user=user)
 
 
+@app.route('/api/monthly-stats')
+def get_monthly_stats():
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    # Query to count orders per month for a specific business
+    orders_query = """
+    SELECT 
+        DATE_FORMAT(o.created_at, '%Y-%m') AS month,
+        COUNT(*) AS OrderNum
+    FROM 
+        orders o
+    JOIN 
+        product p ON o.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        month
+    ORDER BY 
+        month DESC;
+    """
+
+    # Query to count favorites per month for a specific business
+    favorites_query = """
+    SELECT 
+        DATE_FORMAT(f.created_at, '%Y-%m') AS month,
+        COUNT(*) AS FavoritesNum
+    FROM 
+        favorites f
+    JOIN 
+        product p ON f.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        month
+    ORDER BY 
+        month DESC;
+    """
+
+    # Execute orders query
+    cursor.execute(orders_query, (session['userid'],))
+    orders_result = cursor.fetchall()
+
+    # Execute favorites query
+    cursor.execute(favorites_query, (session['userid'],))
+    favorites_result = cursor.fetchall()
+
+    # Combine results
+    stats = {}
+    for row in orders_result:
+        month, order_num = row
+        if month not in stats:
+            stats[month] = {'Month': datetime.strptime(month, '%Y-%m').strftime('%b %Y'), 'OrderNum': order_num,
+                            'FavoritesNum': 0}
+        else:
+            stats[month]['OrderNum'] = order_num
+
+    for row in favorites_result:
+        month, favorites_num = row
+        if month not in stats:
+            stats[month] = {'Month': datetime.strptime(month, '%Y-%m').strftime('%b %Y'), 'OrderNum': 0,
+                            'FavoritesNum': favorites_num}
+        else:
+            stats[month]['FavoritesNum'] = favorites_num
+
+    cursor.close()
+    conn.close()
+    return jsonify(list(stats.values()))
+
+
+@app.route('/api/daily-stats')
+def get_daily_stats():
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    # Execute orders query
+    orders_query = """
+    SELECT 
+        DATE(o.created_at) AS date,
+        COUNT(*) AS OrderNum
+    FROM 
+        orders o
+    JOIN 
+        product p ON o.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        date
+    ORDER BY 
+        date DESC;
+    """
+    cursor.execute(orders_query, (session['userid'],))
+    orders_result = cursor.fetchall()
+
+    # Execute favorites query
+    favorites_query = """
+    SELECT 
+        DATE(f.created_at) AS date,
+        COUNT(*) AS FavoritesNum
+    FROM 
+        favorites f
+    JOIN 
+        product p ON f.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        date
+    ORDER BY 
+        date DESC;
+    """
+    cursor.execute(favorites_query, (session['userid'],))
+    favorites_result = cursor.fetchall()
+
+    # Combine results
+    stats = {}
+    for date, order_num in orders_result:
+        if date not in stats:
+            stats[date] = {'Date': date, 'OrderNum': order_num, 'FavoritesNum': 0}
+        else:
+            stats[date]['OrderNum'] = order_num
+
+    for date, favorites_num in favorites_result:
+        if date not in stats:
+            stats[date] = {'Date': date, 'OrderNum': 0, 'FavoritesNum': favorites_num}
+        else:
+            stats[date]['FavoritesNum'] = favorites_num
+
+    cursor.close()
+    conn.close()
+    return jsonify(list(stats.values()))
+
+@app.route('/api/weekly-stats')
+def get_weekly_stats():
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    # Execute orders query
+    orders_query = """
+    SELECT 
+        YEAR(o.created_at) AS year,
+        WEEK(o.created_at, 1) AS week,
+        COUNT(*) AS OrderNum
+    FROM 
+        orders o
+    JOIN 
+        product p ON o.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        year, week
+    ORDER BY 
+        year DESC, week DESC;
+    """
+    cursor.execute(orders_query, (session['userid'],))
+    orders_result = cursor.fetchall()
+
+    # Execute favorites query
+    favorites_query = """
+    SELECT 
+        YEAR(f.created_at) AS year,
+        WEEK(f.created_at, 1) AS week,
+        COUNT(*) AS FavoritesNum
+    FROM 
+        favorites f
+    JOIN 
+        product p ON f.product_id = p.product_id
+    WHERE 
+        p.business_id = %s
+    GROUP BY 
+        year, week
+    ORDER BY 
+        year DESC, week DESC;
+    """
+    cursor.execute(favorites_query, (session['userid'],))
+    favorites_result = cursor.fetchall()
+
+    # Combine results
+    stats = {}
+    for year, week, order_num in orders_result:
+        key = f'{year}-W{week}'
+        if key not in stats:
+            stats[key] = {'Year-Week': key, 'OrderNum': order_num, 'FavoritesNum': 0}
+        else:
+            stats[key]['OrderNum'] = order_num
+
+    for year, week, favorites_num in favorites_result:
+        key = f'{year}-W{week}'
+        if key not in stats:
+            stats[key] = {'Year-Week': key, 'OrderNum': 0, 'FavoritesNum': favorites_num}
+        else:
+            stats[key]['FavoritesNum'] = favorites_num
+
+    cursor.close()
+    conn.close()
+    return jsonify(list(stats.values()))
+
+
+@app.route('/stats', methods=['GET'])
+def stats():
+    if 'loggedin' in session and 'user_type' in session:
+        return render_template('stats.html')
 
 
 if __name__ == "__main__":

@@ -5,24 +5,18 @@ Add
 {% endblock %}
 
 {% block content %}
-<div class="profile-card">
-    <div class="profile-header">
-        <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
-        <div class="profile-details">
-            <p>{{ user[9] }} {{ user[10] }}</p>
-            <h2>@{{ user[1] }}</h2>
-            <h2 class="profile-bio">{{ user.bio }}</h2>
-            <a href="" class="btn">Edit Profile</a>
-        </div>
-    </div>
-</div>
 
-<div class="bottom-container">
     <div class="flex">
-        <button class="toggle-title">Post</button>
+        <button class="toggle-title">New Post</button>
     </div>
     <div class="add-card mx-auto" id="postTab">
         <form action="{{ url_for('add_product') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <div id="imagePreview" style="display: flex; flex-wrap: wrap; margin-top: 10px; justify-content: center; margin-bottom: 1rem;"></div>
+                    <label for="product_images" class="label">Product Images (up to 3):</label>
+                    <input type="file" class="custom-file-upload" id="product_images" name="product_images" accept="image/*" multiple onchange="previewImages();">
+                    <label for="product_images" class="upload-btn">Choose File</label>
+                </div>
             <div class="mb-4">
                 <label for="post_title" class="label">Title:</label>
                 <input type="text" class="form-input" id="post_title" name="post_title" placeholder="Enter Title" required>
@@ -57,12 +51,37 @@ Add
                 <label for="stock_num" class="label">Stock:</label>
                 <input type="number" class="form-input" id="stock_num" name="stock_num" min="0" placeholder="Enter available stock" value="0">
             </div>
-            <div class="mb-4">
-                <label for="product_images" class="label">Product Images (up to 3):</label>
-                <input type="file" class="form-input" id="product_images" name="product_images" accept="image/*" multiple>
-            </div>
             <button type="submit" class="settings-button">Save Changes</button>
         </form>
     </div>
 </div>
+<script>
+function previewImages() {
+    var preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';  // Clear the preview
+    var files = document.getElementById('product_images').files;
+
+    if (files.length > 0) {
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            if (!file.type.startsWith('image/')){ continue }  // Skip non-image files
+
+            var img = document.createElement('img');
+            img.classList.add('img-preview');
+            img.file = file;
+            img.style.width = '200px'; // Set the width of the preview image
+            img.style.height = '200px'; // Set the height of the preview image
+            img.style.marginRight = '10px'; // Margin between images
+            img.style.borderRadius = '5px'; // Optional: if you want round corners
+
+            preview.appendChild(img);
+
+            var reader = new FileReader();
+            reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
+            reader.readAsDataURL(file);
+        }
+    }
+}
+</script>
+
 {% endblock %}

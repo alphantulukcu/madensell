@@ -6,23 +6,22 @@ Profile
 
 {%  block content %}
 
- <div class="profile-card">
+<div class="profile-card">
 
-            <div class="profile-header">
-              <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
-              <div class="profile-details">
-
-                        <p>
-                            {{ user[9] }} {{ user[10] }}
-                        </p>
-                <h2>@{{ user[1] }}</h2>
-                <h2 class="profile-bio">{{user.bio}}</h2>
-                        <a href="{{url_for('customer_edit_profile')}}" class="btn">Edit Profile</a>
-              </div>
-            </div>
-          </div>
-
+    <div class="profile-header">
+        <img src="{{user[11]}}" class="profile-image" alt="Profile Image">
+        <div class="profile-details">
+            <p>
+                {{ user[9] }} {{ user[10] }}
+            </p>
+            <h2>@{{ user[1] }}</h2>
+            <h2 class="profile-bio">{{user.bio}}</h2>
+            <a href="{{url_for('customer_edit_profile')}}" class="btn">Edit Profile</a>
         </div>
+    </div>
+</div>
+
+</div>
 </div>
 <div class="flex">
     <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
@@ -31,7 +30,7 @@ Profile
 <div class="bottom-container">
 
     
-    <div id="ordersTab" class="tab" style="display: none;">
+    <div id="ordersTab" class="tab" style="display: block;">
          <div class="scroll-container">
                   {% if posts == 'Empty' %}
                         <div class="horizontal-card">
