@@ -24,8 +24,8 @@ Profile
 </div>
 </div>
 <div class="flex">
-    <button class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
-    <button class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+     <button id="favoritesButton" class="toggle-title" onclick="toggleTabs('favoritesTab')">Favorites</button>
+    <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
 </div>
 <div class="bottom-container">
 
@@ -79,20 +79,44 @@ Profile
                                     <div class="detailed-post-content">
                                            {% if post[4] == 0 %}
                                                 <h2>Status: CANCELLED</h2>
+                                                <br>
+                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                    <input type="hidden" name="status" id="status" value=0>
+                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                </form>
                                         {% elif post[4] == 1 %}
                                                 <h2>Status: PROCESSING</h2>
+                                                <br>
+                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                    <input type="hidden" name="status" id="status" value=0>
+                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                </form>
                                         {% elif post[4] == 2 %}
                                                 <h2>Status: SHIPPING</h2>
-                                        {% else %}
-                                               <h2>Status: DELIVERED</h2>
+                                                <br>
+                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                    <input type="hidden" name="status" id="status" value=0>
+                                                    <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                </form>
+                                        {% elif post[4] == 3 %}
+                                                <h2>Status: DELIVERED</h2>
+                                                <br>
+                                                <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                                    <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                                    <input type="hidden" name="status" id="status" value=4>
+                                                    <button type="submit" class="filter-button">Start Return Process <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                                </form>
+                                        {% elif post[4] == 4 %}
+                                               <h2>Status: RETURNING PROCESS</h2>
+                                                <br>
+                                         {% else %}
+                                               <h2>Status: RETURNED</h2>
+                                                <br>
                                         {% endif %}
                                     </div>
-                                    <br>
-                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
-                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
-                                        <input type="hidden" name="status" id="status" value=0>
-                                        <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                    </form>
                                 </div>
                             </div>
                         {% endfor %}
@@ -201,18 +225,33 @@ Profile
         if(tabName === "favoritesTab") {
              favorites.style.display = "block";  // Show the selected tab
              orders.style.display = "none";  // Show the selected tab
+
         }
         else if(tabName === "ordersTab") {
             favorites.style.display = "none";  // Show the selected tab
             orders.style.display = "block";  // Show the selected tab
         }
 
+         let buttons = {
+            ordersTab: document.getElementById('ordersButton'),
+            favoritesTab: document.getElementById('favoritesButton'),
+        };
+
+        // Clear all selections
+        Object.values(buttons).forEach(button => button.classList.remove('selected'));
+
+        // Set the selected button
+        buttons[tabName].classList.add('selected');
+
     }
 
     window.onload = function() {
-        toggleTabs("favoritesTab"); // Default to showing the Favorites tab when the page loads
+        toggleTabs("ordersTab"); // Default to showing the Favorites tab when the page loads
     };
+
+
 </script>
+
 
 {% endblock %}
 

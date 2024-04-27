@@ -1371,4 +1371,38 @@ img {vertical-align: middle;}
     background-color: #e0e0e0;
 }
 
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.title-section, .button-section, .chart-container {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;  /* Adds space between sections */
+}
+
+.chart-container {
+    align-self: center;  /* Centers the chart in the available space */
+}
+
+canvas#statsChart {
+    width: 100% !important;  /* Ensures the canvas takes the full width of its container */
+    max-width: 800px;  /* Adjust this to fit your design */
+}
+
+.toggle-title {
+    margin: 5px;  /* Gives space around buttons */
+    padding: 10px 20px;  /* Adjust padding inside buttons */
+}
+/* Add to your existing CSS or inside a <style> block in the HTML head */
+.selected {
+    background-color: rgba(193, 31, 31, 0.5); /* Red */
+    color: white; /* White text */
+    border-radius: 50px;
+}
 

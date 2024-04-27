@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import firebase_admin
 from firebase_admin import credentials, storage
 
-cred = credentials.Certificate("app/madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
+cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
 })
@@ -847,74 +847,55 @@ def business_edit_profile():
         return render_template('edit_profile_business.html', message=message, message_type='error', user=user)
 
 
+from datetime import datetime, date, timedelta
+
 @app.route('/api/monthly-stats')
 def get_monthly_stats():
     conn = mysql.connector.connect(**config)
     cursor = conn.cursor()
 
-    # Query to count orders per month for a specific business
-    orders_query = """
-    SELECT 
-        DATE_FORMAT(o.created_at, '%Y-%m') AS month,
-        COUNT(*) AS OrderNum
-    FROM 
-        orders o
-    JOIN 
-        product p ON o.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        month
-    ORDER BY 
-        month DESC;
-    """
-
-    # Query to count favorites per month for a specific business
-    favorites_query = """
-    SELECT 
-        DATE_FORMAT(f.created_at, '%Y-%m') AS month,
-        COUNT(*) AS FavoritesNum
-    FROM 
-        favorites f
-    JOIN 
-        product p ON f.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        month
-    ORDER BY 
-        month DESC;
-    """
-
-    # Execute orders query
-    cursor.execute(orders_query, (session['userid'],))
-    orders_result = cursor.fetchall()
-
-    # Execute favorites query
-    cursor.execute(favorites_query, (session['userid'],))
-    favorites_result = cursor.fetchall()
-
-    # Combine results
+    # Prepare the stats dictionary with all possible months from the beginning of 2024 to the current month
     stats = {}
-    for row in orders_result:
-        month, order_num = row
-        if month not in stats:
-            stats[month] = {'Month': datetime.strptime(month, '%Y-%m').strftime('%b %Y'), 'OrderNum': order_num,
-                            'FavoritesNum': 0}
-        else:
-            stats[month]['OrderNum'] = order_num
+    start_date = date(2024, 1, 1)
+    today = date.today()
+    current_month = today.replace(day=1)  # Start of the current month
 
-    for row in favorites_result:
-        month, favorites_num = row
-        if month not in stats:
-            stats[month] = {'Month': datetime.strptime(month, '%Y-%m').strftime('%b %Y'), 'OrderNum': 0,
-                            'FavoritesNum': favorites_num}
-        else:
-            stats[month]['FavoritesNum'] = favorites_num
+    while start_date <= current_month:
+        formatted_month = start_date.strftime('%Y-%m')
+        stats[formatted_month] = {'Month': formatted_month, 'OrderNum': 0, 'FavoritesNum': 0}
+        start_date = (start_date.replace(day=28) + timedelta(days=4)).replace(day=1)  # Next month
+
+    # SQL queries to fetch data
+    orders_query = """
+    SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS month, COUNT(*) AS OrderNum
+    FROM orders o
+    JOIN product p ON o.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY month
+    ORDER BY month DESC;
+    """
+    cursor.execute(orders_query, (session['userid'],))
+    for month_result, order_num in cursor.fetchall():
+        if month_result in stats:
+            stats[month_result]['OrderNum'] = order_num
+
+    favorites_query = """
+    SELECT DATE_FORMAT(f.created_at, '%Y-%m') AS month, COUNT(*) AS FavoritesNum
+    FROM favorites f
+    JOIN product p ON f.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY month
+    ORDER BY month DESC;
+    """
+    cursor.execute(favorites_query, (session['userid'],))
+    for month_result, favorites_num in cursor.fetchall():
+        if month_result in stats:
+            stats[month_result]['FavoritesNum'] = favorites_num
 
     cursor.close()
     conn.close()
     return jsonify(list(stats.values()))
+
 
 
 @app.route('/api/daily-stats')
@@ -922,121 +903,101 @@ def get_daily_stats():
     conn = mysql.connector.connect(**config)
     cursor = conn.cursor()
 
-    # Execute orders query
+    # Prepare the stats dictionary with all possible dates from the beginning of 2024 to today
+    stats = {}
+
+    today = date.today()
+    start_date = today - timedelta(days=30)
+    delta = timedelta(days=1)
+
+    while start_date <= today:
+        formatted_date = start_date.strftime('%Y-%m-%d')
+        stats[formatted_date] = {'Date': formatted_date, 'OrderNum': 0, 'FavoritesNum': 0}
+        start_date += delta
+
+    # SQL queries to fetch data
     orders_query = """
-    SELECT 
-        DATE(o.created_at) AS date,
-        COUNT(*) AS OrderNum
-    FROM 
-        orders o
-    JOIN 
-        product p ON o.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        date
-    ORDER BY 
-        date DESC;
+    SELECT DATE(o.created_at) AS date, COUNT(*) AS OrderNum
+    FROM orders o
+    JOIN product p ON o.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY date
+    ORDER BY date DESC;
     """
     cursor.execute(orders_query, (session['userid'],))
-    orders_result = cursor.fetchall()
+    for date_result, order_num in cursor.fetchall():
+        formatted_date = date_result.strftime('%Y-%m-%d')
+        if formatted_date in stats:
+            stats[formatted_date]['OrderNum'] = order_num
 
-    # Execute favorites query
     favorites_query = """
-    SELECT 
-        DATE(f.created_at) AS date,
-        COUNT(*) AS FavoritesNum
-    FROM 
-        favorites f
-    JOIN 
-        product p ON f.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        date
-    ORDER BY 
-        date DESC;
+    SELECT DATE(f.created_at) AS date, COUNT(*) AS FavoritesNum
+    FROM favorites f
+    JOIN product p ON f.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY date
+    ORDER BY date DESC;
     """
     cursor.execute(favorites_query, (session['userid'],))
-    favorites_result = cursor.fetchall()
-
-    # Combine results
-    stats = {}
-    for date, order_num in orders_result:
-        if date not in stats:
-            stats[date] = {'Date': date, 'OrderNum': order_num, 'FavoritesNum': 0}
-        else:
-            stats[date]['OrderNum'] = order_num
-
-    for date, favorites_num in favorites_result:
-        if date not in stats:
-            stats[date] = {'Date': date, 'OrderNum': 0, 'FavoritesNum': favorites_num}
-        else:
-            stats[date]['FavoritesNum'] = favorites_num
+    for date_result, favorites_num in cursor.fetchall():
+        formatted_date = date_result.strftime('%Y-%m-%d')
+        if formatted_date in stats:
+            stats[formatted_date]['FavoritesNum'] = favorites_num
 
     cursor.close()
     conn.close()
     return jsonify(list(stats.values()))
+
+
+from datetime import datetime, date, timedelta
+
+
+from datetime import datetime, date, timedelta
 
 @app.route('/api/weekly-stats')
 def get_weekly_stats():
     conn = mysql.connector.connect(**config)
     cursor = conn.cursor()
 
-    # Execute orders query
+    # Prepare the stats dictionary with all possible weeks from the beginning of 2024 to the current week
+    stats = {}
+    start_date = date(2024, 1, 1)
+    today = date.today()
+    one_week = timedelta(weeks=1)
+
+    while start_date <= today:
+        year, week, _ = start_date.isocalendar()
+        week_key = f'{year}-W{week}'
+        stats[week_key] = {'Year-Week': week_key, 'OrderNum': 0, 'FavoritesNum': 0}
+        start_date += one_week
+
+    # SQL queries to fetch data
     orders_query = """
-    SELECT 
-        YEAR(o.created_at) AS year,
-        WEEK(o.created_at, 1) AS week,
-        COUNT(*) AS OrderNum
-    FROM 
-        orders o
-    JOIN 
-        product p ON o.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        year, week
-    ORDER BY 
-        year DESC, week DESC;
+    SELECT YEAR(o.created_at) AS year, WEEK(o.created_at, 1) AS week, COUNT(*) AS OrderNum
+    FROM orders o
+    JOIN product p ON o.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY year, week
+    ORDER BY year DESC, week DESC;
     """
     cursor.execute(orders_query, (session['userid'],))
-    orders_result = cursor.fetchall()
-
-    # Execute favorites query
-    favorites_query = """
-    SELECT 
-        YEAR(f.created_at) AS year,
-        WEEK(f.created_at, 1) AS week,
-        COUNT(*) AS FavoritesNum
-    FROM 
-        favorites f
-    JOIN 
-        product p ON f.product_id = p.product_id
-    WHERE 
-        p.business_id = %s
-    GROUP BY 
-        year, week
-    ORDER BY 
-        year DESC, week DESC;
-    """
-    cursor.execute(favorites_query, (session['userid'],))
-    favorites_result = cursor.fetchall()
-
-    # Combine results
-    stats = {}
-    for year, week, order_num in orders_result:
-        key = f'{year}-W{week}'
-        if key not in stats:
-            stats[key] = {'Year-Week': key, 'OrderNum': order_num, 'FavoritesNum': 0}
-        else:
+    for year_result, week_result, order_num in cursor.fetchall():
+        key = f'{year_result}-W{week_result}'
+        if key in stats:
             stats[key]['OrderNum'] = order_num
 
-    for year, week, favorites_num in favorites_result:
-        key = f'{year}-W{week}'
-        if key not in stats:
-            stats[key] = {'Year-Week': key, 'OrderNum': 0, 'FavoritesNum': favorites_num}
-        else:
+    favorites_query = """
+    SELECT YEAR(f.created_at) AS year, WEEK(f.created_at, 1) AS week, COUNT(*) AS FavoritesNum
+    FROM favorites f
+    JOIN product p ON f.product_id = p.product_id
+    WHERE p.business_id = %s
+    GROUP BY year, week
+    ORDER BY year DESC, week DESC;
+    """
+    cursor.execute(favorites_query, (session['userid'],))
+    for year_result, week_result, favorites_num in cursor.fetchall():
+        key = f'{year_result}-W{week_result}'
+        if key in stats:
             stats[key]['FavoritesNum'] = favorites_num
 
     cursor.close()

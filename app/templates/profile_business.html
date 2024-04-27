@@ -25,8 +25,8 @@ Profile
         </div>
 </div>
 <div class="flex">
-    <button class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
-    <button class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+    <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
+    <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
 </div>
   <div class="bottom-container" style="min-height: 500px;">
 
@@ -124,8 +124,12 @@ Profile
                                                 <h2>Status: PROCESSING</h2>
                                         {% elif post[4] == 2 %}
                                                 <h2>Status: SHIPPING</h2>
-                                        {% else %}
+                                        {% elif post[4] == 3 %}
                                                <h2>Status: DELIVERED</h2>
+                                        {% elif post[4] == 4 %}
+                                               <h2>Status: RETURNING PROCESS</h2>
+                                        {% else %}
+                                               <h2>Status: RETURNED</h2>
                                         {% endif %}
                                     </div>
                                     <form class="filter-card" action="{{ url_for('profile') }}" method="post">
@@ -136,6 +140,7 @@ Profile
                                                 <option value=1 {% if selected_status == 1 %} selected{% endif %}>PROCESSING</option>
                                                 <option value=2 {% if selected_status == 2 %} selected{% endif %}>SHIPPING</option>
                                                 <option value=3 {% if selected_status == 3 %} selected{% endif %}>DELIVERED</option>
+                                                <option value=5 {% if selected_status == 3 %} selected{% endif %}>RETURNED</option>
                                             </select>
                                         </div>
                                         <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
@@ -153,18 +158,31 @@ Profile
         posts = document.getElementById("postTab");
         orders = document.getElementById("ordersTab");
         if(tabName === "postTab") {
-             posts.style.display = "flex";  // Show the selected tab
+             posts.style.display = "block";  // Show the selected tab
              orders.style.display = "none";  // Show the selected tab
         }
         else if(tabName === "ordersTab") {
             posts.style.display = "none";  // Show the selected tab
-            orders.style.display = "flex";  // Show the selected tab
+            orders.style.display = "block";  // Show the selected tab
         }
+
+         let buttons = {
+            ordersTab: document.getElementById('ordersButton'),
+            postTab: document.getElementById('postButton'),
+        };
+
+        // Clear all selections
+        Object.values(buttons).forEach(button => button.classList.remove('selected'));
+
+        // Set the selected button
+        buttons[tabName].classList.add('selected');
 
     }
 
     window.onload = function() {
-        toggleTabs("favoritesTab"); // Default to showing the Favorites tab when the page loads
+        toggleTabs("postTab"); // Default to showing the Favorites tab when the page loads
     };
+
+
 </script>
 {% endblock %}
