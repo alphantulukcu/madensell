@@ -264,9 +264,17 @@ def profile():
                     'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
                     (session['userid'],))
                 user = cursor.fetchone()
-                cursor.execute(
-                    'SELECT * FROM product p, business b, subcategory s, category c WHERE p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id AND b.user_id = %s AND p.status = 1',
-                    (session['userid'],))
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    JOIN images i ON p.product_id = i.product_id
+                    WHERE b.user_id = %s
+                    AND p.status = 1
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                    ''', (session['userid'],))  # Notice the comma to make it a tuple
                 products = cursor.fetchall()
                 if len(products) == 0:
                     products = 'Empty'

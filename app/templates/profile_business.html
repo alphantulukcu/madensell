@@ -41,14 +41,14 @@ Profile
             {% for post in products %}
                 <div class="card inline-block mr-4">
                     <div class="profile-for_card">
-                        <img class="profile-for_card" src="/static/default.png" alt="Profile Picture">
+                        <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture">
                         <form action="" method="post">
                             <button type="submit">
                                 <p>{{ post[10] }}</p>
                             </button>
                         </form>
                     </div>
-                    <img class="card-img" src="/static/blank_image.jpg" alt="Post Image">
+                    <img class="card-img" src="{{post[18]}}" alt="Post Image">
                     <div class="card-content">
                         <form action="" method="post">
                             <button type="submit">
