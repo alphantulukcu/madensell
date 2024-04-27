@@ -98,8 +98,8 @@ Market
                         <div class="card">
                            <div class="profile-for_card">
                                <img class="profile-for_card" src="{{ post[12] }}" >
-                               <form action="" method="post">
-                                   <button type="submit">
+                               <form action="{{ url_for('profile', user_id=post[0]) }}" method="get">
+                                <button type="submit">
                                        <p>{{ post[10] }}</p>
                                    </button>
                                </form>

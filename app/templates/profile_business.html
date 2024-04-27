@@ -17,7 +17,10 @@ Profile
 
                 <h2>@{{ user[1] }}</h2>
                 <h2 class="profile-bio">Overall point: {{ user[10] }}</h2>
+                {% if viewing_own_profile %}
+
                     <a href="{{url_for('business_edit_profile')}}" class="btn">Edit Profile</a>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -25,8 +28,14 @@ Profile
         </div>
 </div>
 <div class="flex">
-    <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
-    <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+    {% if viewing_own_profile %}
+        <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Your Products</button>
+        <button id="ordersButton" class="toggle-title" onclick="toggleTabs('ordersTab')">Orders</button>
+    {% else %}
+        <button id="postButton" class="toggle-title" onclick="toggleTabs('postTab')">Products</button>
+    {% endif %}
+    
+
 </div>
   <div class="bottom-container" style="min-height: 500px;">
 
@@ -43,7 +52,7 @@ Profile
                 <div class="card inline-block mr-4">
                     <div class="profile-for_card">
                         <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture">
-                        <form action="" method="post">
+                        <form action="{{ url_for('profile', user_id=post[0]) }}" method="get">
                             <button type="submit">
                                 <p>{{ post[10] }}</p>
                             </button>
@@ -71,6 +80,7 @@ Profile
     {% endif %}
 </div>
 
+{% if viewing_own_profile %}
 
       <div id="ordersTab" class="tab" style="display: none;">
          <div class="scroll-container" style="min-height: 500px;">
@@ -152,7 +162,7 @@ Profile
                     {% endif %}
             </div>
     </div>
-
+    {% endif %}
 <script>
     function toggleTabs(tabName) {
         posts = document.getElementById("postTab");

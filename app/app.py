@@ -176,186 +176,247 @@ def business_register():
     return render_template('register_business.html', message=message, message_type='error')
 
 
-@app.route("/profile", methods=["POST", "GET"])
-def profile():
+@app.route("/profile/<int:user_id>", methods=["GET"])
+@app.route("/profile", defaults={'user_id': None}, methods=["GET", "POST"])
+def profile(user_id):
     if 'loggedin' in session and 'user_type' in session:
+
+        viewing_own_profile = user_id is None or user_id == session['userid']
+
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
-        if session['user_type'] == 1:
-            if request.method == 'POST':
-                status = request.form['status']
-                order_id = request.form['order_id']
+
+        if viewing_own_profile:
+            if session['user_type'] == 1:
+                if request.method == 'POST':
+                    status = request.form['status']
+                    order_id = request.form['order_id']
+                    cursor.execute(
+                        """   
+                                    UPDATE orders         
+                                    SET status = %s       
+                                    WHERE order_id = %s;
+                                    """,
+                        (status, order_id))
+                    conn.commit()
                 cursor.execute(
-                    """   
-                                UPDATE orders         
-                                SET status = %s       
-                                WHERE order_id = %s;
-                                """,
-                    (status, order_id))
-                conn.commit()
-            cursor.execute(
-                'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
-                (session['userid'],))
-            user = cursor.fetchone()
-            customer_id=session['userid']
-            cursor.execute('''
-                SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
-                FROM product p
-                JOIN business b ON p.business_id = b.user_id
+                    'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+                    (session['userid'],))
+                user = cursor.fetchone()
+                customer_id=session['userid']
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    LEFT JOIN images i ON p.product_id = i.product_id
+                    JOIN favorites f ON p.product_id = f.product_id
+                    WHERE f.cust_id = %s
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                ''', (customer_id,))
+                favorites = cursor.fetchall()
+
+                cursor.execute('''
+                SELECT 
+                    o.order_id,            -- Order ID
+                    o.info_id,             -- Shipping Information ID
+                    o.product_id,          -- Product ID
+                    o.num_of_products,     -- Number of products ordered
+                    o.status,              -- Order status
+                    p.title,               -- Product title
+                    p.description,         -- Product description
+                    p.price,               -- Price of the product
+                    s.subcategory_name, -- Subcategory name
+                    c.category_name,    -- Category name
+                    si.address_title,
+                    si.address,
+                    si.phone_number,
+                    si.city,   -- Shipping address from the shipping info
+                    si.town,   -- Shipping address from the shipping info
+                    si.postal_code,   -- Shipping address from the shipping info
+                    MIN(i.image_url) as single_image           -- Image URL for the product
+                    
+                FROM orders o
+                JOIN product p ON o.product_id = p.product_id
                 JOIN subcategory s ON p.subcategory_id = s.subcategory_id
                 JOIN category c ON s.category_id = c.category_id
                 LEFT JOIN images i ON p.product_id = i.product_id
-                JOIN favorites f ON p.product_id = f.product_id
-                WHERE f.cust_id = %s
-                GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
-            ''', (customer_id,))
-            favorites = cursor.fetchall()
+                JOIN shipping_info si ON o.info_id = si.info_id
+                WHERE si.customer_id = %s
+                GROUP BY o.order_id, 
+                    o.info_id,       
+                    o.product_id,         
+                    o.num_of_products,   
+                    o.status,          
+                    p.title,             
+                    p.description,      
+                    p.price,               
+                    s.subcategory_name, 
+                    c.category_name,
+                    si.address_title,
+                    si.address,
+                    si.phone_number,
+                    si.city,   -- Shipping address from the shipping info
+                    si.town,   -- Shipping address from the shipping info
+                    si.postal_code
+                ORDER BY o.order_id DESC
 
-            cursor.execute('''
-              SELECT 
-                o.order_id,            -- Order ID
-                o.info_id,             -- Shipping Information ID
-                o.product_id,          -- Product ID
-                o.num_of_products,     -- Number of products ordered
-                o.status,              -- Order status
-                p.title,               -- Product title
-                p.description,         -- Product description
-                p.price,               -- Price of the product
-                s.subcategory_name, -- Subcategory name
-                c.category_name,    -- Category name
-                si.address_title,
-                si.address,
-                si.phone_number,
-                si.city,   -- Shipping address from the shipping info
-                si.town,   -- Shipping address from the shipping info
-                si.postal_code,   -- Shipping address from the shipping info
-                MIN(i.image_url) as single_image           -- Image URL for the product
-                
-            FROM orders o
-            JOIN product p ON o.product_id = p.product_id
-            JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-            JOIN category c ON s.category_id = c.category_id
-            LEFT JOIN images i ON p.product_id = i.product_id
-            JOIN shipping_info si ON o.info_id = si.info_id
-            WHERE si.customer_id = %s
-            GROUP BY o.order_id, 
-                o.info_id,       
-                o.product_id,         
-                o.num_of_products,   
-                o.status,          
-                p.title,             
-                p.description,      
-                p.price,               
-                s.subcategory_name, 
-                c.category_name,
-                 si.address_title,
-                si.address,
-                si.phone_number,
-                si.city,   -- Shipping address from the shipping info
-                si.town,   -- Shipping address from the shipping info
-                si.postal_code
-            ORDER BY o.order_id DESC
+                ''', (customer_id,))
+                orders = cursor.fetchall()
 
-            ''', (customer_id,))
-            orders = cursor.fetchall()
+                # Separate products with and without images
+                products_with_images = [prod for prod in favorites if prod[-1] is not None]
+                products_without_images = [prod for prod in favorites if prod[-1] is None]
 
-            # Separate products with and without images
-            products_with_images = [prod for prod in favorites if prod[-1] is not None]
-            products_without_images = [prod for prod in favorites if prod[-1] is None]
+                if len(favorites) == 0:
+                    favorites = 'Empty'
+                # Pass the account information to render the main page
+                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites, orders=orders, viewing_own_profile=viewing_own_profile)
 
-            if len(favorites) == 0:
-                favorites = 'Empty'
-            # Pass the account information to render the main page
-            return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites, orders=orders)
+            elif session['user_type'] == 2:
+                if request.method == 'POST':
+                    status = request.form['status']
+                    order_id = request.form['order_id']
+                    cursor.execute(
+                        """   
+                                    UPDATE orders         
+                                    SET status = %s       
+                                    WHERE order_id = %s;
+                                    """,
+                        (status, order_id))
+                    conn.commit()
 
-        elif session['user_type'] == 2:
-            if request.method == 'POST':
-                status = request.form['status']
-                order_id = request.form['order_id']
                 cursor.execute(
-                    """   
-                                UPDATE orders         
-                                SET status = %s       
-                                WHERE order_id = %s;
-                                """,
-                    (status, order_id))
-                conn.commit()
+                    'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
+                    (session['userid'],))
+                user = cursor.fetchone()
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    JOIN images i ON p.product_id = i.product_id
+                    WHERE b.user_id = %s
+                    AND p.status = 1
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                    ''', (session['userid'],))  # Notice the comma to make it a tuple
+                products = cursor.fetchall()
+                if len(products) == 0:
+                    products = 'Empty'
 
+                cursor.execute('''
+                                SELECT 
+                                    o.order_id,            -- Order ID
+                                    o.info_id,             -- Shipping Information ID
+                                    o.product_id,          -- Product ID
+                                    o.num_of_products,     -- Number of products ordered
+                                    o.status,              -- Order status
+                                    p.title,               -- Product title
+                                    p.description,         -- Product description
+                                    p.price,               -- Price of the product
+                                    s.subcategory_name, -- Subcategory name
+                                    c.category_name,    -- Category name
+                                    cu.first_name, 
+                                    cu.last_name, 
+                                    cu.profile_image,
+                                    si.address_title,
+                                    si.address,
+                                    si.phone_number,
+                                    si.city,   -- Shipping address from the shipping info
+                                    si.town,   -- Shipping address from the shipping info
+                                    si.postal_code,   -- Shipping address from the shipping info
+                                    MIN(i.image_url) as single_image           -- Image URL for the product
+
+                                FROM orders o
+                                JOIN product p ON o.product_id = p.product_id
+                                JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                                JOIN category c ON s.category_id = c.category_id
+                                LEFT JOIN images i ON p.product_id = i.product_id
+                                JOIN shipping_info si ON o.info_id = si.info_id
+                                JOIN customer cu ON cu.user_id = si.customer_id
+                                WHERE p.business_id = %s
+                                GROUP BY o.order_id, 
+                                    o.info_id,       
+                                    o.product_id,         
+                                    o.num_of_products,   
+                                    o.status,          
+                                    p.title,             
+                                    p.description,      
+                                    p.price,               
+                                    s.subcategory_name, 
+                                    c.category_name,
+                                    cu.first_name, 
+                                    cu.last_name, 
+                                    cu.profile_image,
+                                    si.address_title,
+                                    si.address,
+                                    si.phone_number,
+                                    si.city,   -- Shipping address from the shipping info
+                                    si.town,   -- Shipping address from the shipping info
+                                    si.postal_code
+                                ORDER BY o.order_id DESC
+
+                                ''', (session['userid'],))
+                orders = cursor.fetchall()
+                # Pass the account information to render the main page
+                return render_template('profile_business.html', user=user, products=products, orders=orders,viewing_own_profile=viewing_own_profile)    
+        else:
             cursor.execute(
-                'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
-                (session['userid'],))
+                'SELECT * FROM users u WHERE u.user_id = %s',
+                (user_id,))
             user = cursor.fetchone()
-            cursor.execute('''
-                SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
-                FROM product p
-                JOIN business b ON p.business_id = b.user_id
-                JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-                JOIN category c ON s.category_id = c.category_id
-                JOIN images i ON p.product_id = i.product_id
-                WHERE b.user_id = %s
-                AND p.status = 1
-                GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
-                ''', (session['userid'],))  # Notice the comma to make it a tuple
-            products = cursor.fetchall()
-            if len(products) == 0:
-                products = 'Empty'
+            if user[5] == 1:
+                # Code for user type 1
+                cursor.execute(
+                    'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+                    (user_id,))
+                user_data = cursor.fetchone()
+                customer_id = user_id
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    LEFT JOIN images i ON p.product_id = i.product_id
+                    JOIN favorites f ON p.product_id = f.product_id
+                    WHERE f.cust_id = %s
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                ''', (customer_id,))
+                favorites = cursor.fetchall()
+                # Separate products with and without images
+                products_with_images = [prod for prod in favorites if prod[-1] is not None]
+                products_without_images = [prod for prod in favorites if prod[-1] is None]
 
-            cursor.execute('''
-                              SELECT 
-                                o.order_id,            -- Order ID
-                                o.info_id,             -- Shipping Information ID
-                                o.product_id,          -- Product ID
-                                o.num_of_products,     -- Number of products ordered
-                                o.status,              -- Order status
-                                p.title,               -- Product title
-                                p.description,         -- Product description
-                                p.price,               -- Price of the product
-                                s.subcategory_name, -- Subcategory name
-                                c.category_name,    -- Category name
-                                cu.first_name, 
-                                cu.last_name, 
-                                cu.profile_image,
-                                si.address_title,
-                                si.address,
-                                si.phone_number,
-                                si.city,   -- Shipping address from the shipping info
-                                si.town,   -- Shipping address from the shipping info
-                                si.postal_code,   -- Shipping address from the shipping info
-                                MIN(i.image_url) as single_image           -- Image URL for the product
+                if len(favorites) == 0:
+                    favorites = 'Empty'
+                # Pass the account information to render the main page
+                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user_data, favorites=favorites, viewing_own_profile=viewing_own_profile)
 
-                            FROM orders o
-                            JOIN product p ON o.product_id = p.product_id
-                            JOIN subcategory s ON p.subcategory_id = s.subcategory_id
-                            JOIN category c ON s.category_id = c.category_id
-                            LEFT JOIN images i ON p.product_id = i.product_id
-                            JOIN shipping_info si ON o.info_id = si.info_id
-                            JOIN customer cu ON cu.user_id = si.customer_id
-                            WHERE p.business_id = %s
-                            GROUP BY o.order_id, 
-                                o.info_id,       
-                                o.product_id,         
-                                o.num_of_products,   
-                                o.status,          
-                                p.title,             
-                                p.description,      
-                                p.price,               
-                                s.subcategory_name, 
-                                c.category_name,
-                                cu.first_name, 
-                                cu.last_name, 
-                                cu.profile_image,
-                                si.address_title,
-                                si.address,
-                                si.phone_number,
-                                si.city,   -- Shipping address from the shipping info
-                                si.town,   -- Shipping address from the shipping info
-                                si.postal_code
-                            ORDER BY o.order_id DESC
+            else:
+                cursor.execute(
+                    'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
+                    (user_id,))
+                user_data = cursor.fetchone()
+                cursor.execute('''
+                    SELECT p.*, b.*, s.*, c.*, MIN(i.image_url) as single_image
+                    FROM product p
+                    JOIN business b ON p.business_id = b.user_id
+                    JOIN subcategory s ON p.subcategory_id = s.subcategory_id
+                    JOIN category c ON s.category_id = c.category_id
+                    JOIN images i ON p.product_id = i.product_id
+                    WHERE b.user_id = %s
+                    AND p.status = 1
+                    GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
+                    ''', (user_id,))  # Notice the comma to make it a tuple
+                products = cursor.fetchall()
+                if len(products) == 0:
+                    products = 'Empty'
+                return render_template('profile_business.html', user=user_data, products=products, viewing_own_profile=viewing_own_profile)    
 
-                            ''', (session['userid'],))
-            orders = cursor.fetchall()
-            # Pass the account information to render the main page
-            return render_template('profile_business.html', user=user, products=products, orders=orders)
+                
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))
