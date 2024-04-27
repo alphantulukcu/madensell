@@ -182,6 +182,17 @@ def profile():
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
         if session['user_type'] == 1:
+            if request.method == 'POST':
+                status = request.form['status']
+                order_id = request.form['order_id']
+                cursor.execute(
+                    """   
+                                UPDATE orders         
+                                SET status = %s       
+                                WHERE order_id = %s;
+                                """,
+                    (status, order_id))
+                conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
                 (session['userid'],))
@@ -782,7 +793,8 @@ def wallet():
         result = cursor.fetchone()
         if result:
             balance, first_name, last_name, profile_image = result
-            return jsonify({"balance": balance, "name": first_name + ' ' + last_name, "profile_image": profile_image})
+            name = first_name + ' ' + last_name
+            return jsonify({"balance": balance, "name": name, "profile_image": profile_image})
         else:
             return jsonify({"error": "Wallet not found"}), 404
 

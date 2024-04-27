@@ -44,20 +44,31 @@ Profile
                         {% for post in orders %}
                              <div class="horizontal-card">
 
-                                <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
-                                <div class="card-content">
-                                    <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
-                                        <button type="submit">
-                                            <h2>{{ post[5] }}</h2>
-                                        </button>
-                                    </form>
-                                    <h1>{{ post[9] }} / {{ post[8] }}</h1>
-                                    <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
-                                    <div class="card-price">
-                                        <h3>{{ post[7] }}₺</h3>
+                                       <div class="horizontal-card">
+
+                                    <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
+                                    <div class="card-content">
+                                        <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
+                                            <button type="submit">
+                                                <h2>{{ post[5] }}</h2>
+                                            </button>
+                                        </form>
+                                        <h1>{{ post[9] }} / {{ post[8] }}</h1>
+                                        <h1 style="color: #FFFFFF">Ordered Amount: {{post[3]}}</h1>
+                                        <div class="card-price">
+                                            <h3>{{ post[7] }}₺</h3>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="detailed-post">
+                                      <div class="profile-for_card">
+                                    <img class="profile-for_card" src="{{user[11]}}" alt="Profile Picture" style="margin: 0.5rem;">
+                                    <form action="" method="post">
+                                        <button type="submit" >
+                                            <p>{{ user[9] }} {{ user[10] }}</p>
+                                        </button>
+                                        </form>
+                                    </div>
                                     <div class="detailed-post-content">
                                         <h2>{{ post[10] }}
                                         </h2>
@@ -67,24 +78,22 @@ Profile
                                 </div>
                                 <div class="detailed-post">
                                     <div class="detailed-post-content">
-                                        <h2>Status</h2>
-                                        {% if post[4] == 0 %}
-
-                                               <h3>YOUR ORDER IS CANCELLED</h3>
-
+                                           {% if post[4] == 0 %}
+                                                <h2>Status: CANCELLED</h2>
                                         {% elif post[4] == 1 %}
-
-                                               <h3>YOUR ORDER IS PROCESSING</h3>
-
+                                                <h2>Status: PROCESSING</h2>
                                         {% elif post[4] == 2 %}
-
-                                               <h3>YOUR ORDER IS SHIPPED</h3>
+                                                <h2>Status: SHIPPING</h2>
                                         {% else %}
-
-                                               <h3>YOUR ORDER IS DELIVERED</h3>
-
+                                               <h2>Status: DELIVERED</h2>
                                         {% endif %}
                                     </div>
+                                    <br>
+                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
+                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
+                                        <input type="hidden" name="status" id="status" value=0>
+                                        <button type="submit" class="filter-button">Cancel Order <i class="fas fa-filter" style="color: #ffffff;"></i></button>
+                                    </form>
                                 </div>
                             </div>
                         {% endfor %}

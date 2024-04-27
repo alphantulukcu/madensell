@@ -212,6 +212,13 @@ body {
         display: flex;
         align-items: center;
     }
+.navbar-menu {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Distributes space between items */
+}
+
 
     .navbar-menu a {
         color: #FFF;
@@ -225,6 +232,14 @@ body {
         border: none;
         cursor: pointer;
         font-size: 0.8rem;
+    }
+
+    .navbar-menu img {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin: 1rem;
     }
 
     #fixed-title {
