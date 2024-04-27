@@ -163,6 +163,9 @@ async function updateWalletAmount(event) {
         if (response.ok) {
             alert('Amount added: ' + formData.get('insert_amount'));
             fetchWalletInfo(); // Update wallet info on page
+             if (window.location.pathname.includes('order')) {
+                window.location.reload(); // Refresh the page
+            }
         } else {
             alert('Error: ' + data.message);
         }

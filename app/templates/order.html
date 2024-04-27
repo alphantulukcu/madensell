@@ -1,44 +1,42 @@
 {% extends "base_customer.html" %}
+
 {% block title %}
 Order
 {% endblock %}
 
 {% block content %}
-    <div class="detailed-post">
-        <div class="detailed-post-content">
-            <h2>Order Summary:</h2>
-            <h1 style="color: #FFFFFF">Total Price:</h1>
-            <h3>{{total_sum}}₺</h3>
-            {% for post in products %}
-                <h1 style="color: #FFFFFF">{{post[3] }} x {{ post[6] }}</h1>
-            {% endfor %}
-            <br>
-        </div>
-        <div class="detailed-post-content">
-            {% if wallet[2] > total_sum %}
-                <h2>You have enough money:</h2>
-                <h1 style="color: #FFFFFF">Total Balance:</h1>
-                <h3>{{wallet[2]}}₺</h3>
-                <br>
-        </div>
-
-        <form action="{{ url_for('order', type=1) }}" method="post" id="orderForm" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-            <input type="hidden" name="shipping_info_id" id="shipping_info_id">
-            <button class="settings-button" type="submit" style="margin-left: 0.5rem">Order Now!</button>
-        </form>
-    </div>
-    {% else %}
-        <h2>You do not have enough money!</h2>
-        <h1 style="color: #FFFFFF">Total Balance:</h1>
-        <h3>{{wallet[2]}}₺</h3>
+<div class="detailed-post">
+    <div class="detailed-post-content">
+        <h2>Order Summary:</h2>
+        <h1 style="color: #FFFFFF">Total Price:</h1>
+        <h3>{{total_sum}}₺</h3>
+        {% for post in products %}
+            <h1 style="color: #FFFFFF">{{post[3] }} x {{ post[6] }}</h1>
+        {% endfor %}
         <br>
-        </div>
-        <script>
-            toggleWalletVisibility(event);
-        </script>
-
     </div>
-    {% endif%}
+    <div class="detailed-post-content">
+        {% if wallet[2] > total_sum %}
+            <h2>You have enough money:</h2>
+            <h1 style="color: #FFFFFF">Total Balance:</h1>
+            <h3>{{wallet[2]}}₺</h3>
+            <br>
+    </div>
+
+    <form action="{{ url_for('order', type=1) }}" method="post" id="orderForm" style="width: 100%; display: flex; flex-direction: row; height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+        <input type="hidden" name="shipping_info_id" id="shipping_info_id">
+        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Order Now!</button>
+    </form>
+</div>
+{% else %}
+    <h2>You do not have enough money!</h2>
+    <h1 style="color: #FFFFFF">Total Balance:</h1>
+    <h3>{{wallet[2]}}₺</h3>
+    <br>
+    </div>
+    <button class="settings-button" onclick="toggleWalletVisibility(event);"> Open Wallet</button>
+</div>
+{% endif %}
 </div>
 <div class="right-container">
     <div class="scroll-container">
@@ -52,73 +50,77 @@ Order
         {% else %}
             <div>
                 {% for info in shipping_infos %}
-                    <div class="detailed-post">
-                        <label>
-                            <div class="detailed-post-content">
-                                <h2>{{ info[3] }}
-                                    <input type="radio" id="shipping_info" name="shipping_info" class="shipping-info" value="{{ info[0] }}">
-                                </h2>
-                                <h1>Phone: {{ info[2] }}</h1>
-                                <h1>Address: {{ info[4] }}, {{ info[6] }}/{{ info[5] }}, {{info[7] }}</h1>
-                            </div>
-                        </label>
+                <div class="detailed-post" id="card_{{ info[0] }}" onclick="selectShippingInfo('{{ info[0] }}', this)">
+                    <div class="detailed-post-content">
+                        <h2>{{ info[3] }}</h2>
+                        <h1>Phone: {{ info[2] }}</h1>
+                        <h1>Address: {{ info[4] }}, {{ info[6] }}/{{ info[5] }}, {{info[7] }}</h1>
                     </div>
+                </div>
                 {% endfor %}
+                <input type="hidden" id="shipping_info_id" name="shipping_info_id">
             </div>
         {% endif %}
-        <div class="detailed-post"  style="flex-direction: column">
-            <button class="toggle-title" onclick="showTab()"> Add New Shipping Info </button>
-            <form  action="{{ url_for('order', type=0) }}" id="addAddress" method="POST" style="width: 100%;display: none;flex-direction: column;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                <div class="mb-4">
-                    <label for="address_title" class="label">Address Title</label>
-                    <input type="text" class="form-input" id="address_title" name="address_title"  required>
-                </div>
-                <div class="mb-4">
-                    <label for="address" class="label">Address:</label>
-                    <input type="text" class="form-input" id="address" name="address"  required>
-                </div>
-                <div class="mb-4">
-                    <label for="city" class="label">City:</label>
-                    <input type="text" class="form-input" id="city" name="city"  required>
-                </div>
-                <div class="mb-4">
-                    <label for="town" class="label">Town:</label>
-                    <input type="text" class="form-input" id="town" name="town"  required>
-                </div>
-                <div class="mb-4">
-                    <label for="phone" class="label">Phone Number:</label>
-                    <input type="tel" class="form-input" id="phone" name="phone"  required>
-                </div>
-                <div class="mb-4">
-                    <label for="postal_code" class="label">Postal Code:</label>
-                    <input type="tel" class="form-input" id="postal_code" name="postal_code"  required>
-                </div>
-                <button class="settings-button" type="submit" style="margin-left: 0.5rem">Save</button>
-            </form>
-        </div>
+        <button class="toggle-title" onclick="showTab()">Add New Shipping Info</button>
     </div>
 </div>
-</div>
-<script>
-    document.getElementById('orderForm').addEventListener('submit', function(event) {
-        var selectedShippingInfo = document.querySelector('input[name="shipping_info"]:checked');
-        if (selectedShippingInfo) {
-            document.getElementById('shipping_info_id').value = selectedShippingInfo.value;
-        } else {
-            event.preventDefault();
-            alert('Please select a shipping info.');
-        }
-    });
 
-    function showTab() {
-        addAddress = document.getElementById('addAddress');
-        if(addAddress.style.display === 'flex') {
-            addAddress.style.display = 'none';
-        }
-        else {
-            addAddress.style.display = 'flex';
-            addAddress.style.flexDirection = 'column';
-        }
+<!-- Overlay for Adding New Shipping Info -->
+<div class="overlay" id="overlay">
+    <div class="form-container">
+        <button onclick="toggleForm()" class="close-btn">Close</button>
+        <form action="{{ url_for('order', type=0) }}" id="addAddress" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">
+            <div class="mb-4">
+                <label for="address_title" class="label">Address Title</label>
+                <input type="text" class="form-input" id="address_title" name="address_title" required>
+            </div>
+            <div class="mb-4">
+                <label for="address" class="label">Address:</label>
+                <input type="text" class="form-input" id="address" name="address" required>
+            </div>
+            <div class="mb-4">
+                <label for="city" class="label">City:</label>
+                <input type="text" class="form-input" id="city" name="city" required>
+            </div>
+            <div class="mb-4">
+                <label for="town" class="label">Town:</label>
+                <input type="text" class="form-input" id="town" name="town" required>
+            </div>
+            <div class="mb-4">
+                <label for="phone" class="label">Phone Number:</label>
+                <input type="tel" class="form-input" id="phone" name="phone" required>
+            </div>
+            <div class="mb-4">
+                <label for="postal_code" class="label">Postal Code:</label>
+                <input type="tel" class="form-input" id="postal_code" name="postal_code" required>
+            </div>
+            <button class="settings-button" type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function selectShippingInfo(infoId, element) {
+    if (element.classList.contains('selected2')) {
+        element.classList.remove('selected2');
+        document.getElementById('shipping_info_id').value = '';
+    } else {
+        document.querySelectorAll('.detailed-post').forEach(card => {
+            card.classList.remove('selected2');
+        });
+        element.classList.add('selected2');
+        document.getElementById('shipping_info_id').value = infoId;
     }
+}
+
+function showTab() {
+    var overlay = document.getElementById('overlay');
+    overlay.style.display = 'flex';
+}
+
+function toggleForm() {
+    var overlay = document.getElementById('overlay');
+    overlay.style.display = 'none';
+}
 </script>
 {% endblock %}
