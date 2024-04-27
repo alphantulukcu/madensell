@@ -1,3 +1,4 @@
+
 {% extends "base_business.html" %}
 
 {% block title %}
@@ -50,7 +51,7 @@ Profile
                     </div>
                     <img class="card-img" src="{{post[18]}}" alt="Post Image">
                     <div class="card-content">
-                        <form action="" method="post">
+                        <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
                             <button type="submit">
                                 <h2>{{post[3]}}</h2>
                             </button>
@@ -127,16 +128,17 @@ Profile
                                                <h2>Status: DELIVERED</h2>
                                         {% endif %}
                                     </div>
-                                    <form class="filter-card" action="{{ url_for('market') }}" method="post">
+                                    <form class="filter-card" action="{{ url_for('profile') }}" method="post">
                                         <div class="form-group">
                                             <select class="form-input" id="status" name="status">
-                                                <option value="">Change Status:</option>
-                                                <option value=0 {% if selected_sort == 0 %}selected{% endif %}>CANCELLED</option>
-                                                <option value=1 {% if selected_sort == 1 %}selected{% endif %}>PROCESSING</option>
-                                                <option value=2 {% if selected_sort == 2 %}selected{% endif %}>SHIPPING</option>
-                                                <option value=3 {% if selected_sort == 3 %}selected{% endif %}>DELIVERED</option>
+                                                <option value="">Change Status</option>
+                                                <option value=0 {% if selected_status == 0 %} selected{% endif %}>CANCELLED</option>
+                                                <option value=1 {% if selected_status == 1 %} selected{% endif %}>PROCESSING</option>
+                                                <option value=2 {% if selected_status == 2 %} selected{% endif %}>SHIPPING</option>
+                                                <option value=3 {% if selected_status == 3 %} selected{% endif %}>DELIVERED</option>
                                             </select>
                                         </div>
+                                        <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
                                         <button type="submit" class="filter-button">Change <i class="fas fa-filter" style="color: #ffffff;"></i></button>
                                     </form>
                                 </div>

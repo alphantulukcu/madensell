@@ -27,10 +27,22 @@
             <!-- Add navigation links here -->
             <a href="{{url_for('add_product')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i> Add</a>
             <a href="{{url_for('market')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i> Market</a>
-            <a href="" class="btn"><i class="icon-color fa-solid fa-user"></i> Profile</a>
-            <a href="#" class="btn" onclick="toggleWalletVisibility(event);"><i class="icon-color fa-solid fa-user"></i> Wallet</a>
-            <a href="{{url_for('logout')}}" class="btn"><i class="icon-color fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="#" class="btn" onclick="toggleWalletVisibility(event);"><i class="icon-color fa-solid fa-user"></i> Profile</a>
             <div class="wallet-card" id="walletCard">
+                <div class="detailed-post">
+                     <div class="profile-for_card">
+                            <img id="profileImage" class="profile-for_card" src="" >
+                            <form action="" method="post">
+                                <button type="submit">
+                                      <p id="businessName">Business Name</p>
+                                </button>
+                            </form>
+                         <div >
+                                <a href="{{url_for('profile')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i>See Your Profile</a>
+                                <a href="{{url_for('logout')}}" class="btn"><i class="icon-color fa-solid fa-right-from-bracket"></i> Logout</a>
+                        </div>
+                     </div>
+                </div>
                 <div class="detailed-post">
                     <div class="detailed-post-content">
                         <h2>Your Wallet:</h2>
@@ -143,15 +155,16 @@ async function fetchWalletInfo() {
         const data = await response.json();
         if (response.ok) {
             document.getElementById('walletBalance').textContent = `${data.balance}₺`;
+            document.getElementById('businessName').textContent = data.name;
+            document.getElementById('profileImage').src = data.profile_image;
         } else {
             console.error('Failed to fetch wallet info:', data.error);
-            document.getElementById('walletBalance').textContent = 'Failed to fetch balance';
         }
     } catch (error) {
         console.error('Error fetching wallet info:', error);
-        document.getElementById('walletBalance').textContent = 'Error fetching balance';
     }
 }
+
 
 
 async function updateWalletAmount(event) {

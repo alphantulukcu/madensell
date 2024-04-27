@@ -215,7 +215,7 @@ body {
 
     .navbar-menu a {
         color: #FFF;
-        margin: 0 1rem;
+        margin: 2rem;
         text-decoration: none;
         font-size: 0.8rem;
     }
@@ -1263,7 +1263,7 @@ img {vertical-align: middle;}
     box-sizing: border-box;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    background-color: #000000;
+    background-color: rgba(58, 58, 58, 0.6);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 1rem;
     border-radius: 10px;
@@ -1292,7 +1292,7 @@ img {vertical-align: middle;}
 }
 
 .comment-card {
-    background-color: #5d5d5d;
+    background-color: rgba(58, 58, 58, 0.6);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 20px;

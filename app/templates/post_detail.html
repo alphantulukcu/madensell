@@ -1,4 +1,8 @@
-{% extends "base_customer.html" %}
+{% if user_type == 1 %}
+    {% extends "base_customer.html" %}
+{% elif user_type == 2 %}
+    {% extends "base_business.html" %}
+{% endif %}
 {% block title %}
 Post
 {% endblock %}
@@ -43,7 +47,7 @@ Post
                                     </button>
                                 </form>
 
-                        <h2>@{{ product[14] }}</h2>
+                        <h2 class="profile-bio">@{{ product[14] }}</h2>
                         <h2 class="profile-bio">point: {{product[11]}}</h2>
                     </div>
                 </div>
@@ -70,7 +74,7 @@ Post
 
             </div>
             <div class="comment-container" >
-                <h2>Comments</h2>
+                <button class="toggle-title" >Comments</button>
                 <div class="scroll-container">
                  {% for comment in comments %}
                     <div class="comment-card">
@@ -79,10 +83,10 @@ Post
                             <div class="comment-details">
                                  <form action="" method="post">
                                             <button type="submit">
-                                                <p>{{comment[5]}} {{comment[6]}}</p>
+                                                <p style="color: #FFFFFF">{{comment[5]}} {{comment[6]}}</p>
                                             </button>
                                         </form>
-                                <h2>{{comment[3]}}</h2>
+                                <h2 style="color: #666666">{{comment[3]}}</h2>
                             </div>
                         </div>
                     </div>
