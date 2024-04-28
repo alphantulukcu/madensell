@@ -27,7 +27,6 @@ config = {
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
-
 def delete_picture(pic_url):
     bucket = storage.bucket()
 
@@ -65,7 +64,6 @@ def add_picture(pic, userid):
     # returns url
     url = blob.public_url
     return url
-
 
 @app.route('/')
 
@@ -473,10 +471,6 @@ def customer_edit_profile():
                 return render_template('edit_profile_customer.html', message=message, message_type='success', user=user)
         return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
 
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
-
 
 
 
@@ -484,62 +478,57 @@ def customer_edit_profile():
 def add_product():
     message = ''
     if 'loggedin' in session and 'user_type' in session:
-        if session['user_type'] == 2:
-            if request.method == 'POST':
-                title = request.form['post_title']
-                description = request.form['post_description']
-                category_id = int(request.form['category'])
-                subcategory_id = int(request.form['subcategory'])
-                stock_num = int(request.form['stock_num'])
-                price = request.form['post_price']
-                images = request.files.getlist('product_images')  # Corrected here
+        if request.method == 'POST':
+            title = request.form['post_title']
+            description = request.form['post_description']
+            category_id = int(request.form['category'])
+            subcategory_id = int(request.form['subcategory'])
+            stock_num = int(request.form['stock_num'])
+            price = request.form['post_price']
+            images = request.files.getlist('product_images')  # Corrected here
 
-                conn = mysql.connector.connect(**config)
-                cursor = conn.cursor()
+            conn = mysql.connector.connect(**config)
+            cursor = conn.cursor()
 
-                if not any(image.filename for image in images):
-                    flash('Please upload at least one image', 'error')
-                    return redirect(url_for('add_product'))
+            if not any(image.filename for image in images):
+                flash('Please upload at least one image', 'error')
+                return redirect(url_for('add_product'))
 
-                if len(images) > 3:
-                    flash('Cannot upload more than 3 images', 'error')
-                    return redirect(url_for('add_product'))
+            if len(images) > 3:
+                flash('Cannot upload more than 3 images', 'error')
+                return redirect(url_for('add_product'))
+            
+            cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
+            conn.commit()
+            # Get the ID of the newly created product
+            product_id = cursor.lastrowid
 
-                cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
-                conn.commit()
-                # Get the ID of the newly created product
-                product_id = cursor.lastrowid
-
-                for image in images:
-                    if image:
-                        image_url = add_picture(image, session['userid'])
-                        cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
-                        conn.commit()
-                    else:
-                        # Handle the case when no image is provided
-                        pass
-                return redirect(url_for('profile'))
-            else:
-                conn = mysql.connector.connect(**config)
-                cursor = conn.cursor()
-                cursor.execute(
-                    'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
-                    (session['userid'],))
-                user = cursor.fetchone()
-
-                cursor.execute(
-                    'SELECT category_id, category_name FROM category',
-                    ())
-                category = cursor.fetchall()
-                cursor.execute(
-                    'SELECT subcategory_id, subcategory_name FROM subcategory',
-                    ())
-                subcategory = cursor.fetchall()
-                return render_template('add_product.html', user=user, categories=category, subcategories=subcategory)
-        else:
+            for image in images:
+                if image:
+                    image_url = add_picture(image, session['userid'])
+                    cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
+                    conn.commit()
+                else:
+                    # Handle the case when no image is provided
+                    pass
             return redirect(url_for('profile'))
-    else:
-        return redirect(url_for('login'))
+        else:
+            conn = mysql.connector.connect(**config)
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
+                (session['userid'],))
+            user = cursor.fetchone()
+
+            cursor.execute(
+                'SELECT category_id, category_name FROM category',
+                ())
+            category = cursor.fetchall()
+            cursor.execute(
+                'SELECT subcategory_id, subcategory_name FROM subcategory',
+                ())
+            subcategory = cursor.fetchall()
+            return render_template('add_product.html', user=user, categories=category, subcategories=subcategory)
 
 
 @app.route('/logout')
@@ -594,35 +583,28 @@ def get_products(cursor, category=None, subcategory=None, sort=None, price=None)
 
 @app.route("/market", methods=["POST", "GET"])
 def market():
-    if 'loggedin' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        category_id = request.args.get('category_id')
-        if request.method == 'POST':
-            category_id = request.form.get('post_categories')
-            subcategory_id = request.form.get('post_subcategories')
-            sort = request.form.get('post_sort')
-            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
-        elif category_id:
-            subcategory_id = ''
-            sort = ''
-            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
-        else:
-            products = get_products(cursor,sort='newest')
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
 
-        cursor.execute('SELECT category_id, category_name FROM category')
-        categories = cursor.fetchall()
-        cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
-        subcategories = cursor.fetchall()
-
-        # Separate products with and without images
-        products_with_images = [prod for prod in products if prod[-1] is not None]
-        products_without_images = [prod for prod in products if prod[-1] is None]
-
-        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
+    if request.method == 'POST':
+        category_id = request.form.get('post_categories')
+        subcategory_id = request.form.get('post_subcategories')
+        sort = request.form.get('post_sort')
+        products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
     else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
+        products = get_products(cursor,sort='newest')
+
+    cursor.execute('SELECT category_id, category_name FROM category')
+    categories = cursor.fetchall()
+    cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
+    subcategories = cursor.fetchall()
+
+    # Separate products with and without images
+    products_with_images = [prod for prod in products if prod[-1] is not None]
+    products_without_images = [prod for prod in products if prod[-1] is None]
+
+    return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
+
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
@@ -687,9 +669,6 @@ def post_detail(product_id):
         images = cursor.fetchall()
 
         return render_template('post_detail.html',user_type=session['user_type'], product=product, comments=comments, images=images)
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])
@@ -730,75 +709,6 @@ def basket(product_id):
             total_sum = 0
 
         return render_template('basket.html', products=products, total_sum=total_sum)
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
-
-
-@app.route("/order/<int:type>", methods=["POST", "GET"])
-def order(type):
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        cursor.execute(
-            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
-            (session['userid'],))
-        user = cursor.fetchone()
-        if request.method == 'POST':
-            if type == 0:
-                address_title = request.form['address_title']
-                city = request.form['city']
-                phone = request.form['phone']
-                address = request.form['address']
-                town = request.form['town']
-                postal_code = request.form['postal_code']
-                cursor.execute(
-                    """   
-                                    INSERT INTO shipping_info(customer_id, phone_number, address_title, address, city, town, postal_code) 
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                """,
-                    (session['userid'], phone, address_title, address, city, town, int(postal_code)))
-                conn.commit()
-            elif type == 1:
-                shipping_info = request.form['shipping_info_id']
-                cursor.callproc('ProcessOrder', [
-                    shipping_info,
-                ])
-                conn.commit()  # Commit the transaction
-
-                return redirect(url_for('profile'))
-
-
-
-        cursor.execute(
-            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
-            (session['userid'],))
-        products = cursor.fetchall()
-
-        cursor.execute(
-            'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
-            (session['userid'],))
-        total_sum = cursor.fetchone()[0]
-        if total_sum is None:
-            total_sum = 0
-
-        cursor.execute(
-            'SELECT * FROM wallet  WHERE user_id = %s',
-            (session['userid'],))
-        wallet = cursor.fetchone()
-
-        cursor.execute(
-            'SELECT * FROM shipping_info  WHERE customer_id = %s',
-            (session['userid'],))
-        shipping_infos = cursor.fetchall()
-        if shipping_infos is None:
-            shipping_infos = 'Empty'
-
-        return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
 
 
 @app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
@@ -934,9 +844,6 @@ def business_edit_profile():
                 message = "Profile updated successfully!"
                 return render_template('edit_profile_business.html', message=message, message_type='success', user=user)
         return render_template('edit_profile_business.html', message=message, message_type='error', user=user)
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
 
 
 from datetime import datetime, date, timedelta
@@ -1100,49 +1007,107 @@ def get_weekly_stats():
 @app.route('/stats', methods=['GET'])
 def stats():
     if 'loggedin' in session and 'user_type' in session:
-        if session['user_type'] == 2:
-            return render_template('stats.html')
-        else:
-            return redirect(url_for('profile'))
-    else:
-        # User is not logged in, redirect to login page
-        return redirect(url_for('login'))
+        return render_template('stats.html')
+
+@app.route("/order/<int:type>", methods=["POST", "GET"])
+def order(type):
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        if request.method == 'POST':
+            if type == 0:
+                address_title = request.form['address_title']
+                city = request.form['city']
+                phone = request.form['phone']
+                address = request.form['address']
+                town = request.form['town']
+                postal_code = request.form['postal_code']
+                cursor.execute(
+                    """   
+                                    INSERT INTO shipping_info(customer_id, phone_number, address_title, address, city, town, postal_code) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                """,
+                    (session['userid'], phone, address_title, address, city, town, int(postal_code)))
+                conn.commit()
+            elif type == 1:
+                shipping_info = request.form['shipping_info_id']
+                cursor.callproc('ProcessOrder', [
+                    shipping_info,
+                ])
+                conn.commit()  # Commit the transaction
+
+                return redirect(url_for('profile'))
+
+        cursor.execute(
+            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        products = cursor.fetchall()
+
+        cursor.execute(
+            'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        total_sum = cursor.fetchone()[0]
+        if total_sum is None:
+            total_sum = 0
+
+        cursor.execute(
+            'SELECT * FROM wallet  WHERE user_id = %s',
+            (session['userid'],))
+        wallet = cursor.fetchone()
+
+        cursor.execute(
+            'SELECT * FROM shipping_info  WHERE customer_id = %s',
+            (session['userid'],))
+        shipping_infos = cursor.fetchall()
+        if shipping_infos is None:
+            shipping_infos = 'Empty'
+
+        return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
+
+@app.route("/review/<int:type>", methods=["POST", "GET"])
+def review(type):
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        if request.method == 'POST':
+                comment = request.form['comment']
+                customer_id = session['userid']
+                product_id = request.form.get('product_id')
+
+                try:
+                    speed_point = int(request.form['speed_point'])
+                    quality_point = int(request.form['quality_point'])
+                    interest_point = int(request.form['interest_point'])
+                except ValueError:
+                    # Handle case where the input is not an integer
+                    flash('Please enter valid integer values for points.')
+                    return redirect(url_for('review', type=type))
+
+                    # Validate points are within the range 1-10
+                if not all(1 <= point <= 10 for point in [speed_point, quality_point, interest_point]):
+                    flash('All points must be between 1 and 10.')
+                    return redirect(url_for('review', type=type))
 
 
-@app.route('/search', methods=['GET'])
-def search():
-    query = request.args.get('query', '')
-    if query:
-        results = fetch_recommendations(query)
-        return jsonify(results)
-    return jsonify([])
-
-
-def fetch_recommendations(query):
-    conn = mysql.connector.connect(**config)
-    results = []
-    try:
-        with conn.cursor() as cursor:
-            # Your SQL statement should also select the user_id or product_id based on the type
-            sql = """
-            SELECT product_id AS id, title AS name, 'Product' AS type FROM product WHERE title LIKE %s AND status = 1
-            UNION
-            SELECT user_id AS id, business_name AS name, 'Business' AS type FROM business WHERE business_name LIKE %s
-            UNION
-            SELECT category_id AS id, category_name AS name, 'Category' AS type FROM category WHERE category_name LIKE %s
-            LIMIT 10;
-            """
-            like_query = f'%{query}%'
-            cursor.execute(sql, (like_query, like_query, like_query))
-            # Fetch rows as tuples
-            rows = cursor.fetchall()
-            # Construct a dictionary for each suggestion
-            for row in rows:
-                result = {'id': row[0], 'name': row[1], 'type': row[2]}  # Adjust indices accordingly
-                results.append(result)
-    finally:
-        conn.close()
-    return results
+                average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
+                cursor.execute(
+                    """   
+                                    INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                """,
+                    (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point))
+                conn.commit()
+                return redirect(url_for('profile'))
 
 
 if __name__ == "__main__":
