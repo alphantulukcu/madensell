@@ -1523,4 +1523,5 @@ canvas#statsChart {
 
 .suggestion-item:hover {
     background-color: rgba(193, 31, 31, 0.9); /* Change as needed */
+    border-radius: 10px;
 }
