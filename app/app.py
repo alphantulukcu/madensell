@@ -678,6 +678,7 @@ def post_detail(product_id):
         )
         reviews = cursor.fetchall()
 
+
         cursor.execute(
             'SELECT * FROM product p, images s WHERE s.product_id = p.product_id AND p.product_id = %s', 
             (product_id,))
@@ -1113,7 +1114,6 @@ def review(type):
                 if not all(1 <= point <= 10 for point in [speed_point, quality_point, interest_point]):
                     flash('All points must be between 1 and 10.')
                     return redirect(url_for('review', type=type))
-
 
                 average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
                 cursor.execute(
