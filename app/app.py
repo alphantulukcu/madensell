@@ -85,6 +85,8 @@ def login():
             session['userid'] = user[0]
             session['username'] = user[1]
             session['user_type'] = user[5]
+            if session['user_type'] == 0:
+                return redirect(url_for('admin'))
             return redirect(url_for('profile'))
         else:
             message = 'Please enter correct email / password !' + username + password
@@ -1152,6 +1154,13 @@ def fetch_recommendations(query):
     finally:
         conn.close()
     return results
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if 'loggedin' in session and 'user_type' in session:
+        if session['user_type'] == 0:
+            return render_template('admin.html')
 
 
 if __name__ == "__main__":

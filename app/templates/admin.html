@@ -1,0 +1,23 @@
+{% extends "base_login.html" %}
+{% block title %}
+Admin Page
+{% endblock %}
+
+{% block content %}
+
+        <div class="login-form-container">
+            <div class="">
+                 <h3 class="text-center text-3xl font-bold mb-6">Admin sayfası burası olacak, sitede seni welcome to admin page yazısı ve bir select inputu karşılayacak ve her database table'ının ismi olacak, kişi onlardan birini seçince
+                    dinamik bir şekilde o tablo gelecek. User o tablodaki herhangi bir objeyi vs silebilecek ve yeni obje ekleyebilecek.</h3>
+                     <div class="form-group">
+                        <label for="table" class="label">Table Name:</label>
+                        <select id="table" name="table" class="form-input">
+                            <option value="" selected>Select a Table</option>
+                            <option value="">Table ismi örnek</option>
+                        </select>
+                    </div>
+                    <a href="{{url_for('logout')}}" class="settings-button">Log Out</a>
+            </div>
+            </div>
+
+   {% endblock %}
