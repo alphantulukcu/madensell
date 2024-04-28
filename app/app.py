@@ -671,13 +671,19 @@ def post_detail(product_id):
             'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
             (product_id,))
         comments = cursor.fetchall()
-        
+
+        cursor.execute(
+            'SELECT * FROM review WHERE product_id = %s',
+            (product_id,)
+        )
+        reviews = cursor.fetchall()
+
         cursor.execute(
             'SELECT * FROM product p, images s WHERE s.product_id = p.product_id AND p.product_id = %s', 
             (product_id,))
         images = cursor.fetchall()
 
-        return render_template('post_detail.html',user_type=session['user_type'], product=product, comments=comments, images=images)
+        return render_template('post_detail.html',user_type=session['user_type'], product=product, comments=comments, images=images, reviews=reviews)
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])

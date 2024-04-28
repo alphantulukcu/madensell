@@ -1525,3 +1525,51 @@ canvas#statsChart {
     background-color: rgba(193, 31, 31, 0.9); /* Change as needed */
     border-radius: 10px;
 }
+
+.review-section {
+    background-color: #333; /* Dark background for the entire section */
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    color: white;
+}
+
+.reviews-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ff0000; /* Gold color for titles */
+}
+
+.review-card {
+    background-color: #444; /* Slightly lighter background for cards */
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.review-details {
+    border-left: 3px solid #ff0000; /* Gold line for a bit of flair */
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.review-label {
+    font-weight: bold;
+}
+
+.review-ratings {
+    display: flex;
+    justify-content: space-between; /* Space out the speed, quality, and interest */
+}
+
+.review-average-point, .review-comment, .review-ratings p {
+    background-color: #555; /* Even lighter background for review content */
+    padding: 5px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.no-content-message {
+    text-align: center;
+    padding: 20px;
+}

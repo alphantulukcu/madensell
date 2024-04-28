@@ -78,7 +78,6 @@ Post
                  {% for comment in comments %}
                     <div class="comment-card">
                         <div class="comment-header">
-                            <img src="{{comment[7]}}" class="profile-image" alt="Profile Image">
                             <div class="comment-details">
                                  <form action="" method="post">
                                             <button type="submit">
@@ -101,6 +100,32 @@ Post
                     </form>
                 </div>
             </div>
+
+             <!-- Reviews Section -->
+            <div class="review-section">
+                <h2 class="reviews-title">Reviews</h2>
+                <div class="scroll-container">
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-details">
+                            <p class="review-average-point"><span class="review-label">Average Point:</span> {{ review[7] }}</p>
+                            <p class="review-comment"><span class="review-label">Comment:</span> {{ review[3] }}</p>
+                            <div class="review-ratings">
+                                <p class="review-speed"><span class="review-label">Speed:</span> {{ review[4] }}</p>
+                                <p class="review-quality"><span class="review-label">Quality:</span> {{ review[5] }}</p>
+                                <p class="review-interest"><span class="review-label">Interest:</span> {{ review[6] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="no-content-message">
+                        <h2>No reviews yet.</h2>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        <!-- End of Review Section -->
+
         </div>
     <!-- The Modal -->
 <div id="myModal" class="modal">
