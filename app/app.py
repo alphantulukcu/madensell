@@ -711,6 +711,69 @@ def basket(product_id):
         return render_template('basket.html', products=products, total_sum=total_sum)
 
 
+@app.route("/order/<int:type>", methods=["POST", "GET"])
+def order(type):
+    message = ''
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        if request.method == 'POST':
+            if type == 0:
+                address_title = request.form['address_title']
+                city = request.form['city']
+                phone = request.form['phone']
+                address = request.form['address']
+                town = request.form['town']
+                postal_code = request.form['postal_code']
+                cursor.execute(
+                    """   
+                                    INSERT INTO shipping_info(customer_id, phone_number, address_title, address, city, town, postal_code) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                """,
+                    (session['userid'], phone, address_title, address, city, town, int(postal_code)))
+                conn.commit()
+            elif type == 1:
+                shipping_info = request.form['shipping_info_id']
+                cursor.callproc('ProcessOrder', [
+                    shipping_info,
+                ])
+                conn.commit()  # Commit the transaction
+
+                return redirect(url_for('profile'))
+
+
+
+        cursor.execute(
+            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        products = cursor.fetchall()
+
+        cursor.execute(
+            'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            (session['userid'],))
+        total_sum = cursor.fetchone()[0]
+        if total_sum is None:
+            total_sum = 0
+
+        cursor.execute(
+            'SELECT * FROM wallet  WHERE user_id = %s',
+            (session['userid'],))
+        wallet = cursor.fetchone()
+
+        cursor.execute(
+            'SELECT * FROM shipping_info  WHERE customer_id = %s',
+            (session['userid'],))
+        shipping_infos = cursor.fetchall()
+        if shipping_infos is None:
+            shipping_infos = 'Empty'
+
+        return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
+
+
 @app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
 def toggle_favorite(product_id):
     # Check if user is logged in
@@ -1008,106 +1071,6 @@ def get_weekly_stats():
 def stats():
     if 'loggedin' in session and 'user_type' in session:
         return render_template('stats.html')
-
-@app.route("/order/<int:type>", methods=["POST", "GET"])
-def order(type):
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        cursor.execute(
-            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
-            (session['userid'],))
-        user = cursor.fetchone()
-        if request.method == 'POST':
-            if type == 0:
-                address_title = request.form['address_title']
-                city = request.form['city']
-                phone = request.form['phone']
-                address = request.form['address']
-                town = request.form['town']
-                postal_code = request.form['postal_code']
-                cursor.execute(
-                    """   
-                                    INSERT INTO shipping_info(customer_id, phone_number, address_title, address, city, town, postal_code) 
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                """,
-                    (session['userid'], phone, address_title, address, city, town, int(postal_code)))
-                conn.commit()
-            elif type == 1:
-                shipping_info = request.form['shipping_info_id']
-                cursor.callproc('ProcessOrder', [
-                    shipping_info,
-                ])
-                conn.commit()  # Commit the transaction
-
-                return redirect(url_for('profile'))
-
-        cursor.execute(
-            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
-            (session['userid'],))
-        products = cursor.fetchall()
-
-        cursor.execute(
-            'SELECT SUM(p.price * b.num_of_products) FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
-            (session['userid'],))
-        total_sum = cursor.fetchone()[0]
-        if total_sum is None:
-            total_sum = 0
-
-        cursor.execute(
-            'SELECT * FROM wallet  WHERE user_id = %s',
-            (session['userid'],))
-        wallet = cursor.fetchone()
-
-        cursor.execute(
-            'SELECT * FROM shipping_info  WHERE customer_id = %s',
-            (session['userid'],))
-        shipping_infos = cursor.fetchall()
-        if shipping_infos is None:
-            shipping_infos = 'Empty'
-
-        return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
-
-@app.route("/review/<int:type>", methods=["POST", "GET"])
-def review(type):
-    message = ''
-    if 'loggedin' in session and 'user_type' in session:
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-        cursor.execute(
-            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
-            (session['userid'],))
-        user = cursor.fetchone()
-        if request.method == 'POST':
-                comment = request.form['comment']
-                customer_id = session['userid']
-                product_id = request.form.get('product_id')
-
-                try:
-                    speed_point = int(request.form['speed_point'])
-                    quality_point = int(request.form['quality_point'])
-                    interest_point = int(request.form['interest_point'])
-                except ValueError:
-                    # Handle case where the input is not an integer
-                    flash('Please enter valid integer values for points.')
-                    return redirect(url_for('review', type=type))
-
-                    # Validate points are within the range 1-10
-                if not all(1 <= point <= 10 for point in [speed_point, quality_point, interest_point]):
-                    flash('All points must be between 1 and 10.')
-                    return redirect(url_for('review', type=type))
-
-
-                average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
-                cursor.execute(
-                    """   
-                                    INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point) 
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                """,
-                    (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point))
-                conn.commit()
-                return redirect(url_for('profile'))
 
 
 if __name__ == "__main__":
