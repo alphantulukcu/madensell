@@ -1,5 +1,9 @@
 
-{% extends "base_business.html" %}
+{% if user_type == 1 %}
+    {% extends "base_customer.html" %}
+{% elif user_type == 2 %}
+    {% extends "base_business.html" %}
+{% endif %}
 
 {% block title %}
 Profile

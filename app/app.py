@@ -272,7 +272,7 @@ def profile(user_id):
                 if len(favorites) == 0:
                     favorites = 'Empty'
                 # Pass the account information to render the main page
-                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites, orders=orders, viewing_own_profile=viewing_own_profile)
+                return render_template('profile_customer.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, user=user, favorites=favorites, orders=orders, viewing_own_profile=viewing_own_profile)
 
             elif session['user_type'] == 2:
                 if request.method == 'POST':
@@ -361,7 +361,7 @@ def profile(user_id):
                                 ''', (session['userid'],))
                 orders = cursor.fetchall()
                 # Pass the account information to render the main page
-                return render_template('profile_business.html', user=user, products=products, orders=orders,viewing_own_profile=viewing_own_profile)    
+                return render_template('profile_business.html', user_type=session['user_type'], user=user, products=products, orders=orders,viewing_own_profile=viewing_own_profile)
         else:
             cursor.execute(
                 'SELECT * FROM users u WHERE u.user_id = %s',
@@ -393,7 +393,7 @@ def profile(user_id):
                 if len(favorites) == 0:
                     favorites = 'Empty'
                 # Pass the account information to render the main page
-                return render_template('profile_customer.html', products_with_images=products_with_images, products_without_images=products_without_images, user=user_data, favorites=favorites, viewing_own_profile=viewing_own_profile)
+                return render_template('profile_customer.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, user=user_data, favorites=favorites, viewing_own_profile=viewing_own_profile)
 
             else:
                 cursor.execute(
@@ -414,7 +414,7 @@ def profile(user_id):
                 products = cursor.fetchall()
                 if len(products) == 0:
                     products = 'Empty'
-                return render_template('profile_business.html', user=user_data, products=products, viewing_own_profile=viewing_own_profile)    
+                return render_template('profile_business.html', user_type=session['user_type'], user=user_data, products=products, viewing_own_profile=viewing_own_profile)
 
                 
     else:
