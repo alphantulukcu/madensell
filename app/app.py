@@ -66,6 +66,7 @@ def add_picture(pic, userid):
     url = blob.public_url
     return url
 
+
 @app.route('/')
 
 
@@ -596,11 +597,15 @@ def market():
     if 'loggedin' in session:
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
-
+        category_id = request.args.get('category_id')
         if request.method == 'POST':
             category_id = request.form.get('post_categories')
             subcategory_id = request.form.get('post_subcategories')
             sort = request.form.get('post_sort')
+            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        elif category_id:
+            subcategory_id = ''
+            sort = ''
             products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
         else:
             products = get_products(cursor,sort='newest')
@@ -1102,6 +1107,42 @@ def stats():
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))
+
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '')
+    if query:
+        results = fetch_recommendations(query)
+        return jsonify(results)
+    return jsonify([])
+
+
+def fetch_recommendations(query):
+    conn = mysql.connector.connect(**config)
+    results = []
+    try:
+        with conn.cursor() as cursor:
+            # Your SQL statement should also select the user_id or product_id based on the type
+            sql = """
+            SELECT product_id AS id, title AS name, 'Product' AS type FROM product WHERE title LIKE %s AND status = 1
+            UNION
+            SELECT user_id AS id, business_name AS name, 'Business' AS type FROM business WHERE business_name LIKE %s
+            UNION
+            SELECT category_id AS id, category_name AS name, 'Category' AS type FROM category WHERE category_name LIKE %s
+            LIMIT 10;
+            """
+            like_query = f'%{query}%'
+            cursor.execute(sql, (like_query, like_query, like_query))
+            # Fetch rows as tuples
+            rows = cursor.fetchall()
+            # Construct a dictionary for each suggestion
+            for row in rows:
+                result = {'id': row[0], 'name': row[1], 'type': row[2]}  # Adjust indices accordingly
+                results.append(result)
+    finally:
+        conn.close()
+    return results
 
 
 if __name__ == "__main__":

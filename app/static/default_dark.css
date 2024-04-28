@@ -1490,3 +1490,36 @@ canvas#statsChart {
     border-radius: 0 3px 3px 0;
 }
 
+.search-suggestions {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    background: white;
+    color: black;
+}
+
+.search-suggestions div {
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd; /* Add a light border to each suggestion */
+}
+
+.search-suggestions div:last-child {
+    border-bottom: none; /* Remove border for the last suggestion */
+}
+
+.search-suggestions div:hover {
+       background-color: rgba(58, 58, 58, 0.6);
+ /* Change background on hover */
+}
+
+.suggestion-item {
+    display: block;
+    padding: 8px;
+    color: white;
+    text-decoration: none;
+}
+
+.suggestion-item:hover {
+    background-color: #424242; /* Change as needed */
+}
