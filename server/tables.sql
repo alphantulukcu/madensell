@@ -135,3 +135,14 @@ CREATE TABLE IF NOT EXISTS orders (
     foreign key (product_id) references product(product_id),
     foreign key (info_id) references shipping_info(info_id)
     );
+
+CREATE TABLE IF NOT EXISTS review (
+  customer_id INT NOT NULL,
+  product_id INT NOT NULL,
+  review_id INT AUTO_INCREMENT NOT NULL,
+  comment VARCHAR(250) NULL,
+  speed INT NOT NULL,
+  quality INT NOT NULL,
+  interest INT NOT NULL,
+  avg_point INT NOT NULL,
+  PRIMARY KEY (review_id));
