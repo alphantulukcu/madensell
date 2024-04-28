@@ -27,6 +27,7 @@ config = {
 }
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
+
 def delete_picture(pic_url):
     bucket = storage.bucket()
 
@@ -471,6 +472,10 @@ def customer_edit_profile():
                 return render_template('edit_profile_customer.html', message=message, message_type='success', user=user)
         return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
 
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
+
 
 
 
@@ -478,57 +483,62 @@ def customer_edit_profile():
 def add_product():
     message = ''
     if 'loggedin' in session and 'user_type' in session:
-        if request.method == 'POST':
-            title = request.form['post_title']
-            description = request.form['post_description']
-            category_id = int(request.form['category'])
-            subcategory_id = int(request.form['subcategory'])
-            stock_num = int(request.form['stock_num'])
-            price = request.form['post_price']
-            images = request.files.getlist('product_images')  # Corrected here
+        if session['user_type'] == 2:
+            if request.method == 'POST':
+                title = request.form['post_title']
+                description = request.form['post_description']
+                category_id = int(request.form['category'])
+                subcategory_id = int(request.form['subcategory'])
+                stock_num = int(request.form['stock_num'])
+                price = request.form['post_price']
+                images = request.files.getlist('product_images')  # Corrected here
 
-            conn = mysql.connector.connect(**config)
-            cursor = conn.cursor()
+                conn = mysql.connector.connect(**config)
+                cursor = conn.cursor()
 
-            if not any(image.filename for image in images):
-                flash('Please upload at least one image', 'error')
-                return redirect(url_for('add_product'))
+                if not any(image.filename for image in images):
+                    flash('Please upload at least one image', 'error')
+                    return redirect(url_for('add_product'))
 
-            if len(images) > 3:
-                flash('Cannot upload more than 3 images', 'error')
-                return redirect(url_for('add_product'))
-            
-            cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
-            conn.commit()
-            # Get the ID of the newly created product
-            product_id = cursor.lastrowid
+                if len(images) > 3:
+                    flash('Cannot upload more than 3 images', 'error')
+                    return redirect(url_for('add_product'))
 
-            for image in images:
-                if image:
-                    image_url = add_picture(image, session['userid'])
-                    cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
-                    conn.commit()
-                else:
-                    # Handle the case when no image is provided
-                    pass
-            return redirect(url_for('profile'))
+                cursor.execute('INSERT INTO product(business_id, price, title, description, stock_num, subcategory_id ) VALUES (%s, %s, %s, %s, %s, %s)',(session['userid'], price, title, description, stock_num, subcategory_id))
+                conn.commit()
+                # Get the ID of the newly created product
+                product_id = cursor.lastrowid
+
+                for image in images:
+                    if image:
+                        image_url = add_picture(image, session['userid'])
+                        cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
+                        conn.commit()
+                    else:
+                        # Handle the case when no image is provided
+                        pass
+                return redirect(url_for('profile'))
+            else:
+                conn = mysql.connector.connect(**config)
+                cursor = conn.cursor()
+                cursor.execute(
+                    'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
+                    (session['userid'],))
+                user = cursor.fetchone()
+
+                cursor.execute(
+                    'SELECT category_id, category_name FROM category',
+                    ())
+                category = cursor.fetchall()
+                cursor.execute(
+                    'SELECT subcategory_id, subcategory_name FROM subcategory',
+                    ())
+                subcategory = cursor.fetchall()
+                return render_template('add_product.html', user=user, categories=category, subcategories=subcategory)
         else:
-            conn = mysql.connector.connect(**config)
-            cursor = conn.cursor()
-            cursor.execute(
-                'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.user_id = %s',
-                (session['userid'],))
-            user = cursor.fetchone()
-
-            cursor.execute(
-                'SELECT category_id, category_name FROM category',
-                ())
-            category = cursor.fetchall()
-            cursor.execute(
-                'SELECT subcategory_id, subcategory_name FROM subcategory',
-                ())
-            subcategory = cursor.fetchall()
-            return render_template('add_product.html', user=user, categories=category, subcategories=subcategory)
+            return redirect(url_for('profile'))
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/logout')
@@ -583,28 +593,31 @@ def get_products(cursor, category=None, subcategory=None, sort=None, price=None)
 
 @app.route("/market", methods=["POST", "GET"])
 def market():
-    conn = mysql.connector.connect(**config)
-    cursor = conn.cursor()
+    if 'loggedin' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-    if request.method == 'POST':
-        category_id = request.form.get('post_categories')
-        subcategory_id = request.form.get('post_subcategories')
-        sort = request.form.get('post_sort')
-        products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        if request.method == 'POST':
+            category_id = request.form.get('post_categories')
+            subcategory_id = request.form.get('post_subcategories')
+            sort = request.form.get('post_sort')
+            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        else:
+            products = get_products(cursor,sort='newest')
+
+        cursor.execute('SELECT category_id, category_name FROM category')
+        categories = cursor.fetchall()
+        cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
+        subcategories = cursor.fetchall()
+
+        # Separate products with and without images
+        products_with_images = [prod for prod in products if prod[-1] is not None]
+        products_without_images = [prod for prod in products if prod[-1] is None]
+
+        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
     else:
-        products = get_products(cursor,sort='newest')
-
-    cursor.execute('SELECT category_id, category_name FROM category')
-    categories = cursor.fetchall()
-    cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
-    subcategories = cursor.fetchall()
-
-    # Separate products with and without images
-    products_with_images = [prod for prod in products if prod[-1] is not None]
-    products_without_images = [prod for prod in products if prod[-1] is None]
-
-    return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
-
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
@@ -669,6 +682,9 @@ def post_detail(product_id):
         images = cursor.fetchall()
 
         return render_template('post_detail.html',user_type=session['user_type'], product=product, comments=comments, images=images)
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])
@@ -709,6 +725,9 @@ def basket(product_id):
             total_sum = 0
 
         return render_template('basket.html', products=products, total_sum=total_sum)
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 @app.route("/order/<int:type>", methods=["POST", "GET"])
@@ -772,6 +791,9 @@ def order(type):
             shipping_infos = 'Empty'
 
         return render_template('order.html', shipping_infos=shipping_infos, wallet=wallet, user=user, products=products, total_sum=total_sum)
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 @app.route('/toggle_favorite/<int:product_id>', methods=['POST'])
@@ -907,6 +929,9 @@ def business_edit_profile():
                 message = "Profile updated successfully!"
                 return render_template('edit_profile_business.html', message=message, message_type='success', user=user)
         return render_template('edit_profile_business.html', message=message, message_type='error', user=user)
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 from datetime import datetime, date, timedelta
@@ -1070,7 +1095,13 @@ def get_weekly_stats():
 @app.route('/stats', methods=['GET'])
 def stats():
     if 'loggedin' in session and 'user_type' in session:
-        return render_template('stats.html')
+        if session['user_type'] == 2:
+            return render_template('stats.html')
+        else:
+            return redirect(url_for('profile'))
+    else:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 if __name__ == "__main__":
