@@ -1510,17 +1510,17 @@ canvas#statsChart {
 }
 
 .search-suggestions div:hover {
-       background-color: rgba(58, 58, 58, 0.6);
+       background-color: rgba(255, 255, 255, 0.6);
  /* Change background on hover */
 }
 
 .suggestion-item {
     display: block;
     padding: 8px;
-    color: white;
+    color: rgb(255, 255, 255);
     text-decoration: none;
 }
 
 .suggestion-item:hover {
-    background-color: #424242; /* Change as needed */
+    background-color: rgba(193, 31, 31, 0.9); /* Change as needed */
 }
