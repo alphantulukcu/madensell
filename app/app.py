@@ -583,28 +583,35 @@ def get_products(cursor, category=None, subcategory=None, sort=None, price=None)
 
 @app.route("/market", methods=["POST", "GET"])
 def market():
-    conn = mysql.connector.connect(**config)
-    cursor = conn.cursor()
+    if 'loggedin' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        category_id = request.args.get('category_id')
+        if request.method == 'POST':
+            category_id = request.form.get('post_categories')
+            subcategory_id = request.form.get('post_subcategories')
+            sort = request.form.get('post_sort')
+            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        elif category_id:
+            subcategory_id = ''
+            sort = ''
+            products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        else:
+            products = get_products(cursor,sort='newest')
 
-    if request.method == 'POST':
-        category_id = request.form.get('post_categories')
-        subcategory_id = request.form.get('post_subcategories')
-        sort = request.form.get('post_sort')
-        products = get_products(cursor, category=category_id, subcategory=subcategory_id, sort=sort)
+        cursor.execute('SELECT category_id, category_name FROM category')
+        categories = cursor.fetchall()
+        cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
+        subcategories = cursor.fetchall()
+
+        # Separate products with and without images
+        products_with_images = [prod for prod in products if prod[-1] is not None]
+        products_without_images = [prod for prod in products if prod[-1] is None]
+
+        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
     else:
-        products = get_products(cursor,sort='newest')
-
-    cursor.execute('SELECT category_id, category_name FROM category')
-    categories = cursor.fetchall()
-    cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
-    subcategories = cursor.fetchall()
-
-    # Separate products with and without images
-    products_with_images = [prod for prod in products if prod[-1] is not None]
-    products_without_images = [prod for prod in products if prod[-1] is None]
-
-    return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
-
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
 
 
 @app.route("/detail/<int:product_id>/", methods=["POST", "GET"])
