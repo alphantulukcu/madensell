@@ -7,76 +7,7 @@ Profile
 {%  block content %}
 
 <style>
-.review {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.8); /* Black background with a bit of opacity */
-    align-items: center; /* Center content vertically */
-    justify-content: center; /* Center content horizontally */
-    display: flex; /* Enable flexbox */
-}
 
-.form-container {
-    background-color: #242020; /* White background for the form */
-    border: none;
-    border-radius: 8px; /* Rounded corners for the form */
-    padding: 20px;
-    width: 90%; /* Width can be a percentage of the screen */
-    max-width: 500px; /* Maximum width */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Box-shadow for a subtle depth effect */
-}
-
-/* The Close Button */
-.close-btn {
-    color: #d9534f; /* Red color for the close button */
-    float: right;
-    font-size: 1.25rem; /* Size of the close button */
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    padding: 0 0 0 0.5rem;
-    margin: -0.5rem -0.5rem 0 0; /* Positioning adjustments */
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: #fff; /* Color when hovered or focused */
-}
-
-/* Style the input fields to improve contrast */
-.form-container input[type='text'],
-.form-container input[type='number'] {
-    background-color: #ffffff; /* Light background for input fields */
-    color: #000; /* Black color for the text */
-    border: 1px solid #ccc; /* Border color */
-    padding: 10px;
-    margin-bottom: 15px; /* Margin at the bottom of the fields */
-    border-radius: 4px; /* Rounded corners for the input fields */
-}
-
-/* Style the 'Save' button to make it stand out */
-.form-container .settings-button {
-    background-color: #d9534f; /* Red color for the button */
-    color: #ffffff; /* White color for the text */
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 4px; /* Rounded corners for the button */
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-top: 15px; /* Space above the button */
-}
-
-/* Ensure that the button is fully opaque and stands out */
-.form-container .settings-button {
-    opacity: 1;
-}
 </style>
 
 <div class="profile-card">
@@ -302,7 +233,7 @@ Profile
     </div>
 
  <!-- Overlay for Making Review -->
-<div class="review" id="review">
+<div class="overlay" id="review" style="display: none">
     <div class="form-container">
         <button onclick="toggleForm()" class="close-btn">Close</button>
         <form action="{{ url_for('review', type=0) }}" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">
