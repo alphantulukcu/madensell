@@ -713,7 +713,7 @@ def basket(product_id):
                     (session['userid'], product_id,))
                 conn.commit()
         cursor.execute(
-            'SELECT * FROM basket b NATURAL JOIN product p WHERE b.customer_id = %s',
+            'SELECT b.*, p.*,  MIN(i.image_url) as single_image FROM basket b NATURAL JOIN product p LEFT JOIN images i ON p.product_id = i.product_id WHERE b.customer_id = %s GROUP BY b.basket_id, p.product_id',
             (session['userid'],))
         products = cursor.fetchall()
 

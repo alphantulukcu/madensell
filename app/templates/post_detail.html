@@ -21,13 +21,14 @@ Post
                             <img src="/static/blankDark_image.jpg" style="width:100%;  aspect-ratio: 1 / 1; /* Ensures the image remains square */">
                         </div>
                     {% endif %}
-                    <div style="text-align:center">
-                    {% for _ in images %}
-                        <span class="dot" onclick="currentSlide({{ loop.index }})"></span>
-                    {% else %}
-                        <span class="dot" onclick="currentSlide(1)"></span>
-                    {% endfor %}
+                    <div style="text-align:center" class="dot-container">
+                        {% for _ in images %}
+                            <span class="dot" onclick="currentSlide({{ loop.index }})"></span>
+                        {% else %}
+                            <span class="dot" onclick="currentSlide(1)"></span>
+                        {% endfor %}
                     </div>
+                    
                 </div>
             </div>
 <div class="comment-container">

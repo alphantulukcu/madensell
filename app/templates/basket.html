@@ -16,24 +16,24 @@ Basket
                         {% for post in products %}
                              <div class="horizontal-card">
 
-                                <img class="horizontal-card-img" src="/static/blankDark_image.jpg">
+                                <img class="horizontal-card-img" src="{{post[13]}}">
                                 <div class="card-content">
                                 <form action="{{ url_for('post_detail', product_id=post[1]) }}" method="get">
                                         <button type="submit">
-                                            <h2>{{ post[6] }}</h2>
+                                            <h2>{{ post[7] }}</h2>
                                         </button>
                                     </form>
 
                                 <div class="card-price">
-                                     {% if post[5] == 0 %}
+                                     {% if post[6] == 0 %}
                                         <h3>Free</h3>
                                     {% else %}
-                                            <h3>{{ post[5] }}₺</h3>
+                                            <h3>{{ post[6] }}₺</h3>
                                     {% endif %}
                                 </div>
-                                    <h1 style="color: #FFFFFF">Number of Products: (Available Stock: {{post[8]}})</h1>
-                                    <form action="{{ url_for('basket', product_id=post[0]) }}" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                                        <input type="number" class="form-input" max="{{post[8]}}" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="{{ post[3] }}" >
+                                    <h1 style="color: #FFFFFF">Number of Products: (Available Stock: {{post[9]}})</h1>
+                                    <form action="{{ url_for('basket', product_id=post[1]) }}" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                                        <input type="number" class="form-input" max="{{post[9]}}" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="{{ post[3] }}" >
                                         <br>
                                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Update</button>
                                     </form>
