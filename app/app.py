@@ -844,7 +844,7 @@ def business_edit_profile():
             user_exists = account is not None and user[0] != account[0]
             if user_exists:
                 message = "Email already exists"
-                return render_template('edit_profile_customer.html', message=message, message_type='error',user=user)
+                return render_template('edit_profile_business.html', message=message, message_type='error',user=user)
             else:
                 #update customer with procedure here
                 cursor.callproc('UpdateBusinessProfile', [
@@ -1160,6 +1160,96 @@ def fetch_recommendations(query):
     finally:
         conn.close()
     return results
+
+
+
+@app.route('/edit_product/<int:product_id>', methods=["POST", "GET"])
+def edit_product(product_id):
+    if 'loggedin' not in session or 'user_type' not in session:
+        return redirect(url_for('login'))
+
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'GET':
+        cursor.execute(
+            """
+            SELECT p.*, i.image_url
+            FROM product p
+            LEFT JOIN images i ON i.product_id = p.product_id
+            WHERE p.product_id = %s
+            """,
+            (product_id,))
+        products = cursor.fetchall()
+
+        cursor.execute(
+            """
+            SELECT *
+            FROM product p
+            WHERE p.product_id = %s
+            """,
+            (product_id,))
+        single_product = cursor.fetchone()
+
+        return render_template('edit_product.html', products=products, single_product=single_product)
+
+    elif request.method == 'POST':
+        product_name = request.form['product_name']
+        product_details = request.form['product_details']
+        price = float(request.form['price'])
+        stock_num = int(request.form['stock_num'])
+        delete_image_urls = request.form.getlist('delete_images')  # Assume this comes from checkboxes with image URLs
+        new_images = request.files.getlist('new_images')
+
+        if price < 0:
+            flash('Price cannot be negative.', 'error')
+            return redirect(url_for('edit_product', product_id=product_id))
+
+        if len(new_images) - len(delete_image_urls) > 3:
+            flash('Cannot upload more than 3 images.', 'error')
+            return redirect(url_for('edit_product', product_id=product_id))
+
+        # Check all current images
+        cursor.execute("SELECT image_url FROM images WHERE product_id = %s", (product_id,))
+        current_images = [row['image_url'] for row in cursor.fetchall()]
+
+        # Calculate if all current images are being deleted and no new ones are provided
+        remaining_images = [img for img in current_images if img not in delete_image_urls]
+
+        if not remaining_images and not any(img.filename for img in new_images):
+            flash('Please upload at least one image', 'error')
+            return redirect(url_for('edit_product', product_id=product_id))
+
+        # Delete selected images if they are not used elsewhere
+        for image_url in delete_image_urls:
+            cursor.execute("SELECT COUNT(*) AS count FROM images WHERE image_url = %s AND product_id != %s", (image_url, product_id))
+            result = cursor.fetchone()
+            if result['count'] == 0:  # No other product uses this image
+                if delete_picture(image_url):  # Delete from storage
+                    cursor.execute("DELETE FROM images WHERE image_url = %s", (image_url,))
+                    conn.commit()
+
+
+        # Add new images
+        for image in new_images:
+            if image:
+                new_image_url = add_picture(image, session['userid'])
+                cursor.execute("INSERT INTO images (product_id, image_url) VALUES (%s, %s)", (product_id, new_image_url))
+                conn.commit()
+
+        # Update product details
+        cursor.execute(
+            """
+            UPDATE product SET title = %s, description = %s, price = %s, stock_num = %s
+            WHERE product_id = %s
+            """,
+            (product_name, product_details, price, stock_num, product_id)
+        )
+        conn.commit()
+        flash('Product updated successfully!', 'success')
+        return redirect(url_for('edit_product', product_id=product_id))
+
+    return render_template('edit_product.html', products=products)
 
 
 @app.route('/admin', methods=['GET', 'POST'])

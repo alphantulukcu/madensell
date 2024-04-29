@@ -1629,6 +1629,29 @@ canvas#statsChart {
     object-fit: contain; /* Contain within the view without crop */
 }
 
+.edit-button {
+    display: block;
+    width: auto; /* Adjust width as needed */
+    padding: 0.5rem 1rem; /* Adjust padding for better fit */
+    border-radius: 15px; /* Less rounded corners */
+    background-color: rgba(193, 31, 31, 0.9); /* Consistent red background */
+    color: #FFF; /* White text for visibility */
+    font-weight: 500; /* Slightly bold, less than before */
+    font-size: 0.9rem; /* Smaller font size */
+    text-align: center; /* Center text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease-in-out; /* Smooth transition for hover effect */
+    border: none; /* No border */
+    margin: 0; /* Remove any default margin */
+}
+
+.edit-button:hover {
+    background-color: #363636; /* Darker shade on hover for feedback */
+}
+
+
+
+
 @media screen and (max-width: 768px) {
     /* Adjustments for smaller screens */
     .slideshow-container {

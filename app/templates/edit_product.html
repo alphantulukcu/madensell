@@ -1,0 +1,55 @@
+{% extends "base_customer.html" %}
+{% block title %}
+Edit Product
+{% endblock %}
+
+{% block content %}
+<div class="login-form-container" style="align-self: center">
+    <div class="">
+        <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
+        <h3 class="text-center text-3xl font-bold mb-6">Edit Product</h3>
+        <form action="{{ url_for('edit_product', product_id=single_product['product_id']) }}" method="POST" enctype="multipart/form-data">
+
+            {% if products %}
+            <div class="mb-4">
+                <label for="product_name" class="label">Product name:</label>
+                <input type="text" class="form-input" id="product_name" name="product_name" placeholder="Enter product name" value="{{ single_product['title'] }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="product_details" class="label">Product description:</label>
+                <input type="text" class="form-input" id="product_details" name="product_details" placeholder="Enter product description" value="{{ single_product['description'] }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="price" class="label">Price:</label>
+                <input type="number" class="form-input" id="price" name="price" placeholder="Enter price" value="{{ products[0]['price'] }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="stock_num" class="label">Stock number:</label>
+                <input type="number" class="form-input" id="stock_num" name="stock_num" placeholder="Enter stock number" value="{{ products[0]['stock_num'] }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="product_images" class="label">Current Product Images:</label>
+                <div class="images-container">
+                    {% for product in products %}
+                        {% if product['image_url'] %}
+                            <div class="image-preview">
+                                <img src="{{ product['image_url'] }}" alt="Product Image" style="width: 100px; height: 100px;">
+                                <input type="checkbox" name="delete_images" value="{{ product['image_url'] }}">
+                                Delete
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="new_images" class="label">Add New Images:</label>
+                <input type="file" class="form-input" id="new_images" name="new_images[]" accept="image/*" multiple>
+            </div>
+            <button type="submit" class="btn">Update Product</button>
+            {% else %}
+                <p>No product details available.</p>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

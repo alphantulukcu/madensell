@@ -54,7 +54,7 @@ Profile
         <div class="flex overflow-x-auto" style="padding: 2%;">
 
             {% for post in products %}
-                <div class="card inline-block mr-4">
+                <div class="card inline-block mr-4" style="position: relative;">
                     <div class="profile-for_card">
                         <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture">
                         <form action="{{ url_for('profile', user_id=post[0]) }}" method="get">
@@ -79,6 +79,11 @@ Profile
                             <h3>{{post[2]}}₺</h3>
                         {% endif %}
                     </div>
+
+                    <form action="{{ url_for('edit_product', product_id=post[1]) }}" method="get" style="position: absolute; right: 10px; bottom: 10px;">
+                        <button type="submit" class="edit-button">Edit</button>
+                    </form>
+
                 </div>
             {% endfor %}
         </div>
