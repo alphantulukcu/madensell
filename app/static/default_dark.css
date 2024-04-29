@@ -1584,6 +1584,98 @@ canvas#statsChart {
 .gray-star {
     color: #ccc; /* Gray color for empty stars */
 }
+.comment-container {
+    background-color: #1c1c1c; /* Dark grey background similar to the product detail part */
+    border: 1px solid #333; /* Slightly lighter grey for subtle border */
+    padding: 20px;
+    border-radius: 5px;
+    width: auto;
+    margin: auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Deeper shadow for more depth */
+}
+
+.toggle-title {
+    background-color: #d9534f; /* Keeping the red color for contrast */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase; /* For consistency with the rest of the design */
+}
+
+.scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.comment-card {
+    background-color: #282828; /* A shade of grey slightly lighter than the container for contrast */
+    border: 1px solid #333; /* Keeping borders consistent */
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    color: #f1f1f1; /* Light grey text for better readability on dark background */
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-username {
+    font-weight: bold;
+}
+
+
+
+.review-details {
+    border-top: 1px solid #444; /* Slightly lighter grey for separation */
+    padding-top: 10px;
+}
+
+.review-rating {
+    margin-bottom: 5px;
+}
+
+.review-label {
+    font-weight: bold;
+    color: #ddd; /* Light grey for label text */
+}
+
+
+
+.no-content-message {
+    text-align: center;
+    font-size: 16px;
+    color: #aaa; /* Grey text for the no-content message */
+}
+
+.review-comment {
+    font-style: italic;
+    color: #ccc; /* Slightly lighter than the main text for distinction */
+}
+
+/* Additional styling for scrollbar to match dark theme */
+.scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+    background: #2c2c2c;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+    background: #444;
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 
 
