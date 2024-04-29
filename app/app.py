@@ -1099,6 +1099,7 @@ def review(type):
         if request.method == 'POST':
                 comment = request.form['comment']
                 customer_id = session['userid']
+                username = session['username']
                 product_id = request.form.get('product_id')
 
                 try:
@@ -1111,17 +1112,17 @@ def review(type):
                     return redirect(url_for('review', type=type))
 
                     # Validate points are within the range 1-10
-                if not all(1 <= point <= 10 for point in [speed_point, quality_point, interest_point]):
+                if not all(1 <= point <= 5 for point in [speed_point, quality_point, interest_point]):
                     flash('All points must be between 1 and 10.')
                     return redirect(url_for('review', type=type))
 
                 average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
                 cursor.execute(
                     """   
-                                    INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point) 
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point, username) 
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                                 """,
-                    (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point))
+                    (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point, username))
                 conn.commit()
                 return redirect(url_for('profile'))
 

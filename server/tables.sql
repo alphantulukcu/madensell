@@ -145,4 +145,5 @@ CREATE TABLE IF NOT EXISTS review (
   quality INT NOT NULL,
   interest INT NOT NULL,
   avg_point INT NOT NULL,
+  username VARCHAR(45) NOT NULL,
   PRIMARY KEY (review_id));
