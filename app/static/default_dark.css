@@ -1594,16 +1594,6 @@ canvas#statsChart {
     box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Deeper shadow for more depth */
 }
 
-.toggle-title {
-    background-color: #d9534f; /* Keeping the red color for contrast */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 18px;
-    border-radius: 5px;
-    cursor: pointer;
-    text-transform: uppercase; /* For consistency with the rest of the design */
-}
 
 .scroll-container {
     max-height: 400px;
