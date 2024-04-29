@@ -84,8 +84,8 @@ Post
                 <div class="profile-header">
                     <img src="{{ product[12] }}" class="profile-image" alt="Profile Image">
                     <div class="profile-details">
-                         <form action="" method="get">
-                                    <button type="submit">
+                        <form action="{{ url_for('profile', user_id=product[0]) }}" method="get">
+                            <button type="submit">
                                         <p>
                                             {{ product[10] }}
                                         </p>
@@ -126,7 +126,7 @@ Post
                         <div class="comment-header">
                              <div class="profile-for_card">
                                     <img class="profile-for_card" src="{{ comment[7] }}" >
-                                    <form action="" method="post">
+                                    <form action="{{ url_for('profile', user_id=comment[1]) }}" method="get">
                                         <button type="submit">
                                             <p>{{comment[5]}} {{comment[6]}}</p>
                                         </button>
