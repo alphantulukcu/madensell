@@ -32,40 +32,39 @@ Post
                 </div>
             </div>
 <div class="comment-container">
-    <button class="toggle-title" >Reviews</button>
+    <button class="toggle-title">Reviews</button>
     <div class="scroll-container">
         {% for review in reviews %}
             <div class="comment-card">
-                <div class="review-details">
-                    <p class="review-average-point">
-                        <span class="review-label">Average Point:</span>
-                        {% for i in range(10) %}
+                <div class="review-header">
+                    <span class="review-username">Reviewed by: {{ review[8] }}</span>
+                    <div class="review-average-point">
+                        <span class="review-label">Average:</span>
+                        {% for i in range(5) %}
                             <span class="{{ 'yellow-star' if i < review[7] else 'gray-star' }}">★</span>
                         {% endfor %}
-                    </p>
-                    <div class="review-ratings">
-                        <p class="review-speed">
-                            <span class="review-label">Speed:</span>
-                            {% for i in range(10) %}
-                                <span class="{{ 'yellow-star' if i < review[4] else 'gray-star' }}">★</span>
-                            {% endfor %}
-                        </p>
-                        <p class="review-quality">
-                            <span class="review-label">Quality:</span>
-                            {% for i in range(10) %}
-                                <span class="{{ 'yellow-star' if i < review[5] else 'gray-star' }}">★</span>
-                            {% endfor %}
-                        </p>
-                        <p class="review-interest">
-                            <span class="review-label">Interest:</span>
-                            {% for i in range(10) %}
-                                <span class="{{ 'yellow-star' if i < review[6] else 'gray-star' }}">★</span>
-                            {% endfor %}
-                        </p>
-                        <p class="review-comment">
-                            <span class="review-label">Comment:</span> {{ review[3] }}
-                        </p>
                     </div>
+                </div>
+                <div class="review-details">
+                    <div class="review-rating review-speed">
+                        <span class="review-label">Speed:</span>
+                        {% for i in range(5) %}
+                            <span class="{{ 'yellow-star' if i < review[4] else 'gray-star' }}">★</span>
+                        {% endfor %}
+                    </div>
+                    <div class="review-rating review-quality">
+                        <span class="review-label">Quality:</span>
+                        {% for i in range(5) %}
+                            <span class="{{ 'yellow-star' if i < review[5] else 'gray-star' }}">★</span>
+                        {% endfor %}
+                    </div>
+                    <div class="review-rating review-interest">
+                        <span class="review-label">Interest:</span>
+                        {% for i in range(5) %}
+                            <span class="{{ 'yellow-star' if i < review[6] else 'gray-star' }}">★</span>
+                        {% endfor %}
+                    </div>
+                <p class="review-comment"><span class="review-label">Comment:</span> {{ review[3] }}</p>
                 </div>
             </div>
         {% else %}
@@ -75,6 +74,8 @@ Post
         {% endfor %}
     </div>
 </div>
+
+
 
 
 
