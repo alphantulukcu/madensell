@@ -79,10 +79,12 @@ Profile
                             <h3>{{post[2]}}₺</h3>
                         {% endif %}
                     </div>
+                    {% if viewing_own_profile %}
 
-                    <form action="{{ url_for('edit_product', product_id=post[1]) }}" method="get" style="position: absolute; right: 10px; bottom: 10px;">
-                        <button type="submit" class="edit-button">Edit</button>
-                    </form>
+                        <form action="{{ url_for('edit_product', product_id=post[1]) }}" method="get" style="position: absolute; right: 10px; bottom: 10px;">
+                            <button type="submit" class="edit-button">Edit</button>
+                        </form>
+                    {% endif %}
 
                 </div>
             {% endfor %}
