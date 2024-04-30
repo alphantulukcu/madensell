@@ -10,6 +10,7 @@ from firebase_admin import credentials, storage
 from flask import Flask, render_template, request
 import mysql.connector
 from flask import Flask, jsonify, render_template, request
+import urllib.parse  # for decoding URL-encoded paths
 
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
@@ -34,8 +35,15 @@ def delete_picture(pic_url):
     bucket = storage.bucket()
 
     # Assuming pic_url is the full URL to the object and needs parsing to get the exact path
-    parts = pic_url.split('madensell-dc0c4.appspot.com/')
-    desired_part = parts[-1] if len(parts) > 1 else parts[0]
+    if 'madensell-dc0c4.appspot.com/' in pic_url:
+        # Extract the part after the domain
+        parts = pic_url.split('madensell-dc0c4.appspot.com/')
+        desired_part = parts[1] if len(parts) > 1 else parts[0]
+    else:
+        desired_part = pic_url
+
+    # Decode URL-encoded characters
+    desired_part = urllib.parse.unquote(desired_part)
 
     blob = bucket.blob(desired_part)
     try:
@@ -44,6 +52,7 @@ def delete_picture(pic_url):
     except Exception as e:
         print(f"Failed to delete: {e}")
         return False
+
 
 
 def add_picture(pic, userid):
@@ -510,7 +519,7 @@ def add_product():
 
             for image in images:
                 if image:
-                    image_url = add_picture(image, session['userid'])
+                    image_url = add_picture(image, str(session['userid']) + "/" + str(product_id) )
                     cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
                     conn.commit()
                 else:
