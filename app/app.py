@@ -143,6 +143,12 @@ def customer_register():
                             """,
                 (user_id, first_name, last_name, pp_path))
             conn.commit()
+            cursor.execute("""   
+                                INSERT INTO wallet(user_id, balance)
+                                VALUES (%s, %s);
+                            """,
+                (user_id, 0))
+            conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, hashed_password))
@@ -186,6 +192,12 @@ def business_register():
                                 VALUES (%s, %s, %s, %s);
                             """,
                 (user_id, business_name, 0, pp_path))
+            conn.commit()
+            cursor.execute("""   
+                                INSERT INTO wallet(user_id, balance)
+                                VALUES (%s, %s);
+                            """,
+                (user_id, 0))
             conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
