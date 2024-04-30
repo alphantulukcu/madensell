@@ -9,7 +9,6 @@ Edit Product
         <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
         <h3 class="text-center text-3xl font-bold mb-6">Edit Product</h3>
         <form action="{{ url_for('edit_product', product_id=single_product['product_id']) }}" method="POST" enctype="multipart/form-data">
-
             {% if products %}
             <div class="mb-4">
                 <label for="product_name" class="label">Product name:</label>
@@ -29,15 +28,17 @@ Edit Product
             </div>
             <div class="mb-4">
                 <label for="product_images" class="label">Current Product Images:</label>
-                <div class="images-container">
+                <div class="images-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
                     {% for product in products %}
-                        {% if product['image_url'] %}
-                            <div class="image-preview">
-                                <img src="{{ product['image_url'] }}" alt="Product Image" style="width: 100px; height: 100px;">
-                                <input type="checkbox" name="delete_images" value="{{ product['image_url'] }}">
-                                Delete
-                            </div>
-                        {% endif %}
+                    {% if product['image_url'] %}
+                    <div class="image-preview" style="flex-basis: 100px; text-align: center;">
+                        <img src="{{ product['image_url'] }}" alt="Product Image" style="width: 100px; height: 100px;">
+                        <div>
+                            <input type="checkbox" name="delete_images" value="{{ product['image_url'] }}">
+                            <label for="delete_images">Delete</label>
+                        </div>
+                    </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -47,7 +48,7 @@ Edit Product
             </div>
             <button type="submit" class="btn">Update Product</button>
             {% else %}
-                <p>No product details available.</p>
+            <p>No product details available.</p>
             {% endif %}
         </form>
     </div>
