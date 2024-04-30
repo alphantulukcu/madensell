@@ -45,7 +45,7 @@
             <div class="wallet-card" id="walletCard">
                 <div class="detailed-post">
                      <div class="profile-for_card">
-                            <img id="profileImage2" class="profile-for_card" src="/static/blank.png" >
+                            <img id="profileImage2" class="profile-for_card" src="" >
                             <form action="" method="post">
                                 <button type="submit">
                                       <p id="businessName">Business Name</p>
@@ -205,7 +205,9 @@ async function updateWalletAmount(event) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const walletForm = document.querySelector('#walletForm');
-    walletForm.addEventListener('submit', updateWalletAmount);
+    if(walletForm){
+        walletForm.addEventListener('submit', updateWalletAmount);
+    }
     fetchWalletInfo(); // Fetch wallet info on page load
 });
 
