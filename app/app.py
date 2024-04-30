@@ -1222,7 +1222,9 @@ def edit_product(product_id):
         price = float(request.form['price'])
         stock_num = int(request.form['stock_num'])
         delete_image_urls = request.form.getlist('delete_images')  # Assume this comes from checkboxes with image URLs
-        new_images = request.files.getlist('new_images')
+        new_images = request.files.getlist('new_images[]')
+
+        print("Files uploaded:", len(new_images))
 
         if price < 0:
             flash('Price cannot be negative.', 'error')
@@ -1256,8 +1258,8 @@ def edit_product(product_id):
         # Add new images
         for image in new_images:
             if image:
-                new_image_url = add_picture(image, session['userid'])
-                cursor.execute("INSERT INTO images (product_id, image_url) VALUES (%s, %s)", (product_id, new_image_url))
+                new_image_url = add_picture(image, str(session['userid']) + "/" + str(product_id))
+                cursor.execute("INSERT INTO images (product_id, image_url, created_at) VALUES (%s, %s, %s)", (product_id, new_image_url, datetime.now()))
                 conn.commit()
 
         # Update product details
