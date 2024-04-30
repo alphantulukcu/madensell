@@ -7,6 +7,9 @@ from mysql.connector import errorcode
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import firebase_admin
 from firebase_admin import credentials, storage
+from flask import Flask, render_template, request
+import mysql.connector
+from flask import Flask, jsonify, render_template, request
 
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
@@ -86,7 +89,7 @@ def login():
             session['username'] = user[1]
             session['user_type'] = user[5]
             if session['user_type'] == 0:
-                return redirect(url_for('admin'))
+                return redirect(url_for('admin_page'))  # Update the redirect here
             return redirect(url_for('profile'))
         else:
             message = 'Please enter correct email / password !' + username + password
@@ -1253,13 +1256,71 @@ def edit_product(product_id):
     return render_template('edit_product.html', products=products)
 
 
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    if 'loggedin' in session and 'user_type' in session:
-        if session['user_type'] == 0:
-            return render_template('admin.html')
+@app.route('/admin')
+def admin_page():
+    if 'loggedin' in session and session['user_type'] == 0:  # Ensure admin access
+        # Fetch table names
+        cnx = mysql.connector.connect(**config)
+        cursor = cnx.cursor()
+        cursor.execute("SHOW TABLES")
+
+        tables = [table[0] for table in cursor.fetchall()]
+        cnx.close()
+
+        return render_template('admin.html', tables=tables)
+    else:
+        return redirect(url_for('login'))  # Redirect non-admins to login
+
+@app.route('/get_table_data', methods=['POST'])
+def get_table_data():
+    table_name = request.form['table_name']
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+
+    if table_name == 'users':
+        cursor.execute("SELECT user_id, username, email, created_at, user_type FROM users")
+    elif table_name == 'business':
+        cursor.execute("SELECT user_id, business_name, overall_point FROM business")
+    elif table_name == 'customer':
+        cursor.execute("SELECT user_id, first_name, last_name FROM customer")
+    elif table_name == 'wallet':
+        cursor.execute("SELECT user_id, wallet_id, balance FROM wallet")
+    elif table_name == 'category':
+        cursor.execute("SELECT category_id, category_name FROM category")
+    elif table_name == 'subcategory':
+        cursor.execute("SELECT category_id, subcategory_id, subcategory_name FROM subcategory")
+    elif table_name == 'product':
+        cursor.execute(
+            "SELECT business_id, product_id, price, title, description, stock_num, subcategory_id, created_at FROM product")
+    elif table_name == 'Comments':
+        cursor.execute("SELECT customer_id, product_id, comment_id, comment FROM Comments")
+    elif table_name == 'Shipping Info':
+        cursor.execute(
+            "SELECT info_id, customer_id, phone_number, address_title, address, city, town, postal_code FROM Shipping_Info")
+    elif table_name == 'Orders':
+        cursor.execute(
+            "SELECT order_id, info_id, product_id, num_of_products, status, created_at, updated_at FROM Orders")
+
+    else:
+        return "Invalid table name", 400
+    # Construct the HTML table
+    table_html = '<table><tr>'
+    for column_desc in cursor.description:  # Get column names
+        table_html += f'<th>{column_desc[0]}</th>'
+    table_html += '</tr>'
+
+    for row in cursor:
+        table_html += '<tr>'
+        for value in row:
+            table_html += f'<td>{value}</td>'
+        table_html += '</tr>'
+    table_html += '</table>'
+
+    cnx.close()
+    return table_html
 
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
     app.run(debug=True, host='0.0.0.0', port=port)
+
