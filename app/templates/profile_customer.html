@@ -120,7 +120,7 @@ Profile
                                                         <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
                                                         <input type="hidden" name="status" id="status" value=4>
                                                         <button type="submit" class="filter-button">Start Return Process <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                        <button type="button" class="toggle-title" onclick="showTab({{ post[2] }})">Make Review</button>
+                                                        <button type="button" class="settings-button" onclick="showTab({{ post[2] }})">Make Review</button>
                                                     </form>
                                             {% elif post[4] == 4 %}
                                                 <h2>Status: RETURNING PROCESS</h2>
@@ -259,6 +259,15 @@ Profile
     </div>
 </div>
 
+    <!-- Error Modal -->
+<div id="errorModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <p id="errorMessage">Error message goes here.</p>
+  </div>
+</div>
+
+
 <script>
     function toggleTabs(tabName) {
         var favorites = document.getElementById("favoritesTab");
@@ -300,6 +309,18 @@ Profile
         var overlay = document.getElementById('review');
         overlay.style.display = 'none';
     }
+
+    // When the user clicks on <span> (x), close the modal
+document.querySelector('.close').onclick = function() {
+  document.getElementById('errorModal').style.display = "none";
+}
+
+// Function to show the modal with the error message
+function showError(message) {
+  document.getElementById('errorMessage').innerText = message;
+  document.getElementById('errorModal').style.display = "block";
+}
+
 
 
 </script>

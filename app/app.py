@@ -1112,12 +1112,21 @@ def review(type):
                 except ValueError:
                     # Handle case where the input is not an integer
                     flash('Please enter valid integer values for points.')
-                    return redirect(url_for('review', type=type))
+                    return redirect(url_for('profile', type=type))
 
                     # Validate points are within the range 1-10
-                if not all(1 <= point <= 5 for point in [speed_point, quality_point, interest_point]):
-                    flash('All points must be between 1 and 10.')
-                    return redirect(url_for('review', type=type))
+                if not all(0 <= point <= 5 for point in [speed_point, quality_point, interest_point]):
+                    flash('All points must be between 0 and 5.')
+                    return redirect(url_for('profile', type=type))
+
+                cursor.execute(
+                    'SELECT * FROM review WHERE customer_id = %s AND product_id = %s',
+                    (customer_id, product_id)
+                )
+                existing_review = cursor.fetchone()
+                if existing_review:
+                    flash('You have already reviewed this product.')
+                    return redirect(url_for('profile', type=type))
 
                 average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
                 cursor.execute(
@@ -1128,6 +1137,7 @@ def review(type):
                     (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point, username))
                 conn.commit()
                 return redirect(url_for('profile'))
+
 
 
 @app.route('/search', methods=['GET'])
