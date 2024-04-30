@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id		INT AUTO_INCREMENT NOT NULL,
     username	VARCHAR (20) NOT NULL UNIQUE,
     email		VARCHAR(50) NOT NULL UNIQUE,
-    password	VARCHAR(20) NOT NULL,
+    password	VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     user_type	INT (5) NOT NULL,
     address     VARCHAR(255) NOT NULL,
