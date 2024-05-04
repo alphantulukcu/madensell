@@ -1307,9 +1307,27 @@ def get_table_data():
     elif table_name == 'Shipping Info':
         cursor.execute(
             "SELECT info_id, customer_id, phone_number, address_title, address, city, town, postal_code FROM Shipping_Info")
-    elif table_name == 'Orders':
+    elif table_name == 'orders':
         cursor.execute(
             "SELECT order_id, info_id, product_id, num_of_products, status, created_at, updated_at FROM Orders")
+    elif table_name == 'admins':
+        cursor.execute("SELECT user_id FROM admins")
+    elif table_name == 'basket':
+        cursor.execute("SELECT customer_id, product_id, basket_id, num_of FROM basket")
+    elif table_name == 'favorites':
+        cursor.execute("SELECT cust_id, product_id, created_at FROM favorites")
+    elif table_name == 'images':
+        cursor.execute("SELECT product_id, created_at, image_url FROM images")
+    elif table_name == 'review':
+        cursor.execute("SELECT customer_id, product_id, review_id, comment, speed, quality, interest, avg_point, username FROM review")
+    elif table_name == 'comments':
+        cursor.execute("SELECT customer_id, product_id, comment_id, comment FROM comments")
+    elif table_name == 'orders':
+        cursor.execute("SELECT order_id, info_id, product_id, num_of_products, status, created_at, updated_at FROM orders")
+    elif table_name == 'shipping_info':
+        cursor.execute("SELECT info_id, customer_id, phone_number, address_title, address, city, town, postal_code FROM shipping_info")
+
+
 
     else:
         return "Invalid table name", 400
