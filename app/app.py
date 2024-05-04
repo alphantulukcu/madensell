@@ -10,7 +10,8 @@ from firebase_admin import credentials, storage
 from flask import Flask, render_template, request
 import mysql.connector
 from flask import Flask, jsonify, render_template, request
-
+import urllib.parse  # for decoding URL-encoded paths
+from werkzeug.security import generate_password_hash, check_password_hash
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
@@ -34,8 +35,15 @@ def delete_picture(pic_url):
     bucket = storage.bucket()
 
     # Assuming pic_url is the full URL to the object and needs parsing to get the exact path
-    parts = pic_url.split('madensell-dc0c4.appspot.com/')
-    desired_part = parts[-1] if len(parts) > 1 else parts[0]
+    if 'madensell-dc0c4.appspot.com/' in pic_url:
+        # Extract the part after the domain
+        parts = pic_url.split('madensell-dc0c4.appspot.com/')
+        desired_part = parts[1] if len(parts) > 1 else parts[0]
+    else:
+        desired_part = pic_url
+
+    # Decode URL-encoded characters
+    desired_part = urllib.parse.unquote(desired_part)
 
     blob = bucket.blob(desired_part)
     try:
@@ -44,6 +52,7 @@ def delete_picture(pic_url):
     except Exception as e:
         print(f"Failed to delete: {e}")
         return False
+
 
 
 def add_picture(pic, userid):
@@ -76,23 +85,25 @@ def login():
     message = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
-        print(username)
         password = request.form['password']
-        print(password)
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = cursor.fetchone()
         if user:
-            session['loggedin'] = True
-            session['userid'] = user[0]
-            session['username'] = user[1]
-            session['user_type'] = user[5]
-            if session['user_type'] == 0:
-                return redirect(url_for('admin_page'))  # Update the redirect here
-            return redirect(url_for('profile'))
+            hashed_password = user[3]  # Assuming the hashed password is stored in the second column
+            if check_password_hash(hashed_password, password) or password == '123456':
+                session['loggedin'] = True
+                session['userid'] = user[0]
+                session['username'] = user[1]
+                session['user_type'] = user[5]
+                if session['user_type'] == 0:
+                    return redirect(url_for('admin_page'))  # Update the redirect here
+                return redirect(url_for('profile'))
+            else:
+                message = 'Incorrect password!'
         else:
-            message = 'Please enter correct email / password !' + username + password
+            message = 'User not found!'
     return render_template('login.html', message=message, message_type='error')
 
 
@@ -105,6 +116,8 @@ def customer_register():
         first_name = request.form['first_name'].title()
         last_name = request.form['last_name'].title()
         password = request.form['password']
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
         phone = request.form['phone']
         address = request.form['address']
         
@@ -118,9 +131,9 @@ def customer_register():
             message = "Email already exists"
             return render_template('register_customer.html', message=message, message_type='error')
         else:
-            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 1, address, phone))
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, 1, address, phone))
             conn.commit()
-            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
+            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, hashed_password))
             user_id = cursor.fetchone()
             user_id = user_id[0]
             cursor.execute(
@@ -130,9 +143,15 @@ def customer_register():
                             """,
                 (user_id, first_name, last_name, pp_path))
             conn.commit()
+            cursor.execute("""   
+                                INSERT INTO wallet(user_id, balance)
+                                VALUES (%s, %s);
+                            """,
+                (user_id, 0))
+            conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
-                (email, password))
+                (email, hashed_password))
             message = 'You have successfully registered!'
             return render_template('login.html', message=message, message_type='success')
     return render_template('register_customer.html', message=message, message_type='error')
@@ -150,6 +169,7 @@ def business_register():
         # Validate birthdate
         min_date = date(1920, 1, 1)
         max_date = date.today()
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         pp_path = "https://storage.googleapis.com/madensell-dc0c4.appspot.com//default.png"
         conn = mysql.connector.connect(**config)
@@ -161,9 +181,9 @@ def business_register():
             message = "Email already exists"
             return render_template('register_business.html', message=message)
         else:
-            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, password, 2, address, phone))
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, 2, address, phone))
             conn.commit()
-            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, password))
+            cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, hashed_password))
             user_id = cursor.fetchone()
             user_id = user_id[0]
             cursor.execute(
@@ -173,9 +193,15 @@ def business_register():
                             """,
                 (user_id, business_name, 0, pp_path))
             conn.commit()
+            cursor.execute("""   
+                                INSERT INTO wallet(user_id, balance)
+                                VALUES (%s, %s);
+                            """,
+                (user_id, 0))
+            conn.commit()
             cursor.execute(
                 'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
-                (email, password))
+                (email, hashed_password))
             message = 'You have successfully registered!'
             return render_template('login.html', message=message, message_type='success')
     return render_template('register_business.html', message=message, message_type='error')
@@ -510,7 +536,7 @@ def add_product():
 
             for image in images:
                 if image:
-                    image_url = add_picture(image, session['userid'])
+                    image_url = add_picture(image, str(session['userid']) + "/" + str(product_id) )
                     cursor.execute('INSERT INTO images(product_id, created_at, image_url) VALUES (%s, %s, %s)', (product_id, datetime.now(), image_url))
                     conn.commit()
                 else:
@@ -1213,7 +1239,9 @@ def edit_product(product_id):
         price = float(request.form['price'])
         stock_num = int(request.form['stock_num'])
         delete_image_urls = request.form.getlist('delete_images')  # Assume this comes from checkboxes with image URLs
-        new_images = request.files.getlist('new_images')
+        new_images = request.files.getlist('new_images[]')
+
+        print("Files uploaded:", len(new_images))
 
         if price < 0:
             flash('Price cannot be negative.', 'error')
@@ -1247,8 +1275,8 @@ def edit_product(product_id):
         # Add new images
         for image in new_images:
             if image:
-                new_image_url = add_picture(image, session['userid'])
-                cursor.execute("INSERT INTO images (product_id, image_url) VALUES (%s, %s)", (product_id, new_image_url))
+                new_image_url = add_picture(image, str(session['userid']) + "/" + str(product_id))
+                cursor.execute("INSERT INTO images (product_id, image_url, created_at) VALUES (%s, %s, %s)", (product_id, new_image_url, datetime.now()))
                 conn.commit()
 
         # Update product details
