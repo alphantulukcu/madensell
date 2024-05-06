@@ -5,19 +5,24 @@ Admin Page
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 style="color: #E0E0E0; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">Welcome to the Admin Page</h1> <!-- Updated style for title -->
+<div class="login-form-container" >
+    <div>
+        <h1 style="color: #E0E0E0; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">Welcome to the Admin Page</h1> <!-- Updated style for title -->
 
-    <select id="table-select" class="form-select" style="margin-bottom: 20px;">
+    <select id="table-select" class="form-input" style="margin-bottom: 20px;">
         <option selected>Select a Table</option>
         {% for table in tables %}
         <option value="{{ table }}">{{ table }}</option>
         {% endfor %}
     </select>
-
-    <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
+    <div class="scroll-container">
+        <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
         <!-- Table data will be loaded here -->
+        </div>
     </div>
+    </div>
+
+
 </div>
 
 <style>
