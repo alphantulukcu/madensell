@@ -22,16 +22,62 @@ Login
                       <label for="password" class="label">Password:</label>
                       <input type="password" class="form-input" id="password" name="password" placeholder="Enter Password" required>
                     </div>
+                     <div class="mb-4">
+                        <label class="label"><a href="#" onclick="showTab(0)">Forgot my password</a></label>
+                    </div>
                     <button type="submit" class="btn">Login</button>
                   </form>
+                <br>
+                     <h2 class="text-center text-1xl mb-6" style="color: #FFFFFF">Or Sign Up for</h2>
                   <form action="{{ url_for('customer_register') }}" id='addForm2'  method="GET">
-                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">Register for Customers</button>
+                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">New Customer</button>
                   </form>
                   <form action="{{ url_for('business_register') }}" id='addForm3'  method="GET">
-                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">Register for Businesses</button>
+                      <button type="submit" class="btn2 btn-primary w-full py-3 px-4 rounded-md text-white font-semibold bg-E05A4C hover:bg-D2382D">New Business</button>
                   </form>
             </div>
             </div>
+
+ <!-- Overlay for Making Review -->
+<div class="overlay" id="review" style="display: none">
+    <div class="form-container">
+        <button onclick="toggleForm()" class="close-btn" style="color: #FFFFFF">Close</button>
+        <form action="{{ url_for('review', type=0) }}" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">
+            <input type="hidden" id="product_id_field" name="product_id" value="">
+            <div class="mb-4">
+                <label for="email" class="label">Please Enter Your Email:</label>
+                <input type="text" class="form-input" id="email" name="email" required>
+            </div>
+            <button class="settings-button" type="submit">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function showTab(productId) {
+        document.getElementById('product_id_field').value = productId;
+        var overlay = document.getElementById('review');
+        overlay.style.display = 'flex';
+    }
+
+    function toggleForm() {
+        var overlay = document.getElementById('review');
+        overlay.style.display = 'none';
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    document.querySelector('.close').onclick = function() {
+      document.getElementById('errorModal').style.display = "none";
+    }
+
+    // Function to show the modal with the error message
+    function showError(message) {
+      document.getElementById('errorMessage').innerText = message;
+      document.getElementById('errorModal').style.display = "block";
+    }
+
+    // Toggle the Register button based on the terms checkbox
+</script>
 
    {% endblock %}
 

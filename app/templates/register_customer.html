@@ -40,13 +40,97 @@ Register for Customers
                     <label for="address" class="label">Address:</label>
                     <input type="text" class="form-input" id="address" name="address" placeholder="Enter address" required>
                   </div>
-                <button type="submit" class="btn">Register</button>
-            </form>
-            <form action="{{ url_for('login')}}">
-                <button type="submit" class="btn2">Back to Log in</button>
-            </form>
-
+                     <!-- Terms and Conditions checkbox -->
+            <div class="mb-4">
+                <input type="checkbox" id="terms" name="terms" onchange="toggleRegisterButton()">
+                <label for="terms" class="label">I accept the <a href="#" onclick="showTab(0)">Terms and Conditions</a>.</label>
             </div>
-        </div>
+
+            <button type="submit" class="btn" id="register-btn" disabled>Register</button>
+        </form>
+        <form action="{{ url_for('login') }}">
+            <button type="submit" class="btn2">Back to Log in</button>
+        </form>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="overlay" id="review" style="display: none">
+    <div class="form-container">
+        <button onclick="toggleForm()" class="close-btn" style="color: #FFFFFF">Close</button>
+        <form action="{{ url_for('review', type=0) }}" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">
+            <input type="hidden" id="product_id_field" name="product_id" value="">
+           <div class="terms-content" style="overflow-y: scroll; max-height: 300px; margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; color: #FFFFFF">
+                <p>
+                    Welcome to Our Website. If you continue to browse and use this website, you are agreeing to comply with and be bound by the following terms and conditions of use, which together with our privacy policy govern [Your Company Name]'s relationship with you in relation to this website.
+                </p>
+                <h3>1. Acceptance of Terms</h3>
+                <p>
+                    By accessing or using this site, you agree to comply with and be bound by these Terms. If you do not agree to these Terms, you should not use this site.
+                </p>
+                <h3>2. User Account</h3>
+                <p>
+                    You may need to create an account to use some features of this site. You agree to provide accurate and complete information when creating your account.
+                </p>
+                <h3>3. Privacy Policy</h3>
+                <p>
+                    We are committed to protecting your privacy. Our Privacy Policy explains how we collect, use, and protect your personal information.
+                </p>
+                <h3>4. Intellectual Property</h3>
+                <p>
+                    All content on this website is owned by or licensed to us and is protected by intellectual property laws. You agree not to reproduce or distribute this content without our permission.
+                </p>
+                <h3>5. User Conduct</h3>
+                <p>
+                    You agree not to use the website for unlawful purposes or to violate any applicable laws. You will not post offensive or defamatory content.
+                </p>
+                <h3>6. Limitation of Liability</h3>
+                <p>
+                    We will not be liable for any damages arising from your use of this site or for any information provided here. Your use of the website is at your own risk.
+                </p>
+                <h3>7. Changes to the Terms</h3>
+                <p>
+                    We reserve the right to change these Terms at any time. Your continued use of the site will signify your acceptance of any changes.
+                </p>
+                <h3>8. Contact Us</h3>
+                <p>
+                    If you have any questions or concerns about these Terms, you can reach out to us at [Your Contact Information].
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+function showTab(productId) {
+        document.getElementById('product_id_field').value = productId;
+        var overlay = document.getElementById('review');
+        overlay.style.display = 'flex';
+    }
+
+    function toggleForm() {
+        var overlay = document.getElementById('review');
+        overlay.style.display = 'none';
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    document.querySelector('.close').onclick = function() {
+      document.getElementById('errorModal').style.display = "none";
+    }
+
+    // Function to show the modal with the error message
+    function showError(message) {
+      document.getElementById('errorMessage').innerText = message;
+      document.getElementById('errorModal').style.display = "block";
+    }
+
+    // Toggle the Register button based on the terms checkbox
+    function toggleRegisterButton() {
+        var termsCheckbox = document.getElementById("terms");
+        var registerButton = document.getElementById("register-btn");
+        registerButton.disabled = !termsCheckbox.checked;
+    }
+</script>
 {% endblock %}
 
