@@ -108,7 +108,7 @@ Post
                             <h3>{{product[2]}}₺</h3>
                     {% endif %}
                     <h6>Available Stock: {{product[5]}} </h6>
-                    <h1>{{product[7]}} ago</h1>
+                    <h1 id="timeAgo"></h1>
                     <br>
                     <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
                         <input type="hidden" class="form-input" id="comment" name="comment" value="" >
@@ -216,6 +216,15 @@ function closeModal() {
 }
 
 
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      var dateFromServer = "{{product[7]}}"; // Replace this with your actual server-side date variable
+      var formattedTimeAgo = moment(dateFromServer).fromNow();
+      document.getElementById('timeAgo').textContent = formattedTimeAgo;
+  });
 </script>
 
 
