@@ -159,7 +159,48 @@ def confirm_email(token):
     except SignatureExpired:
         return render_template('login.html', message='The confirmation link has expired.', message_type='error')
 
+@app.route('/send_reset_email', methods=['GET', 'POST'])
+def send_reset_email():
+    email = request.form['email']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+    user = cursor.fetchone()
 
+    if user:
+        serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        token = serializer.dumps(email, salt='password-reset-salt')
+        reset_url = url_for('reset_password', token=token, _external=True)
+        email_body = f"Please click on the link to reset your password: {reset_url}"
+        msg = Message("Reset Your Password", sender=app.config['MAIL_USERNAME'], recipients=[email])
+        msg.body = email_body
+        mail.send(msg)
+        return render_template('login.html', message="A password reset link has been sent to your email.", message_type='success')
+    else:
+        return render_template('login.html', message="User not found!", message_type='error')
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = URLSafeTimedSerializer(app.config['SECRET_KEY']).loads(token, salt='password-reset-salt', max_age=3600)
+        if request.method == 'POST':
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+            if new_password == confirm_password:
+                hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
+                conn = mysql.connector.connect(**config)
+                cursor = conn.cursor()
+                cursor.execute('UPDATE users SET password = %s WHERE email = %s', (hashed_password, email))
+                conn.commit()
+                cursor.close()
+                conn.close()
+                return render_template('login.html', message="Your password has been updated.", message_type='success')
+            else:
+                return render_template('reset_password.html', token=token, message="Passwords do not match.", message_type='error')
+        return render_template('reset_password.html', token=token)
+    except SignatureExpired:
+        return render_template('login.html', message="The password reset link has expired.", message_type='error')
+    
 @app.route("/customer-register", methods=["POST", "GET"])
 def customer_register():
     message = ''

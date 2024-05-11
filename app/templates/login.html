@@ -42,8 +42,7 @@ Login
 <div class="overlay" id="review" style="display: none">
     <div class="form-container">
         <button onclick="toggleForm()" class="close-btn" style="color: #FFFFFF">Close</button>
-        <form action="{{ url_for('review', type=0) }}" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">
-            <input type="hidden" id="product_id_field" name="product_id" value="">
+        <form action="{{ url_for('send_reset_email') }}" method="POST" style="display: flex; flex-direction: column; font-size: 1rem;">            <input type="hidden" id="product_id_field" name="product_id" value="">
             <div class="mb-4">
                 <label for="email" class="label">Please Enter Your Email:</label>
                 <input type="text" class="form-input" id="email" name="email" required>
