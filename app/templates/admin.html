@@ -5,24 +5,23 @@ Admin Page
 {% endblock %}
 
 {% block content %}
-<div class="login-form-container" >
+<div class="login-form-container">
     <div>
-        <h1 style="color: #E0E0E0; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">Welcome to the Admin Page</h1> <!-- Updated style for title -->
+        <h1 style="color: #E0E0E0; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px;">Welcome to the Admin Page</h1>
 
-    <select id="table-select" class="form-input" style="margin-bottom: 20px;">
-        <option selected>Select a Table</option>
-        {% for table in tables %}
-        <option value="{{ table }}">{{ table }}</option>
-        {% endfor %}
-    </select>
-    <div class="scroll-container">
-        <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
-        <!-- Table data will be loaded here -->
+        <select id="table-select" class="form-input" style="margin-bottom: 20px;">
+            <option selected>Select a Table</option>
+            {% for table in tables %}
+            <option value="{{ table }}">{{ table }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="scroll-container">
+            <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
+                <!-- Table data will be loaded here -->
+            </div>
         </div>
     </div>
-    </div>
-
-
 </div>
 
 <style>
@@ -31,14 +30,27 @@ Admin Page
         width: 100%;
         border-collapse: collapse;
     }
+
     th, td {
         padding: 8px;
         text-align: left;
         border-bottom: 1px solid #ddd; /* Light grey line for separation */
     }
+
     th {
         background-color: #555; /* Darker shade for headers */
         color: white; /* White text for headers */
+    }
+
+    /* Styling the select element and its options */
+    select {
+        background-color: #333; /* Dark background for the dropdown */
+        color: white; /* Light color for the text */
+    }
+
+    select option {
+        background-color: #555; /* Slightly lighter shade for options */
+        color: white; /* White text for options */
     }
 </style>
 
@@ -46,7 +58,7 @@ Admin Page
 <script>
     $(document).ready(function() {
         $('#table-select').on('change', function() {
-            var selectedTable = $(this). val();
+            var selectedTable = $(this).val();
             if (selectedTable) {
                 $.ajax({
                     url: '/get_table_data', // Route in app.py
