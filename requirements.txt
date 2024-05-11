@@ -5,3 +5,5 @@ flask-mysql==1.5.2
 pymysql
 firebase-admin
 fontawesomefree
+flask_mail
+itsdangerous

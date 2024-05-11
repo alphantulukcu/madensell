@@ -1327,7 +1327,7 @@ img {vertical-align: middle;}
 /* Add the :before pseudo-element for the heart shape */
 .favorite-button:before {
     content: '\2665'; /* Unicode for black heart suit */
-    color: red; /* Set your desired heart color */
+    color: rgba(255, 0, 0, 0); /* Set your desired heart color */
     font-size: 2.5rem; /* Adjust size as you wish */
     line-height: 1; /* Adjust line height to fit the container */
 }
@@ -1335,7 +1335,7 @@ img {vertical-align: middle;}
 /* Change the color on hover */
 .favorite-button:hover:before,
 .favorite-button:focus:before {
-    color: #ff0000; /* Red color on hover/focus */
+    color: rgba(255, 0, 0, 0); /* Red color on hover/focus */
 }
 
 /* Styles for the wallet card container */
@@ -1465,6 +1465,7 @@ canvas#statsChart {
     font-size: 40px;
     font-weight: bold;
     cursor: pointer;
+    ;
 }
 
 #myModal .nav {
@@ -1728,12 +1729,14 @@ canvas#statsChart {
     text-transform: uppercase;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+     min-width: 3rem;
 }
 
 .edit-button:hover, .edit-button:focus {
     background-color: rgba(193, 31, 31, 0.8); /* Red accent on hover */
     color: #FFFFFF; /* Ensure text is white */
     transform: translateY(-1px); /* Slight lift effect */
+
 }
 
 .edit-button:active {
