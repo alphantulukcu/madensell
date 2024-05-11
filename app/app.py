@@ -1,4 +1,7 @@
 from flask import Flask, jsonify
+from flask_mail import Mail
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 import os
 from datetime import datetime, date
 from dotenv import load_dotenv
@@ -29,7 +32,17 @@ config = {
   'password':'Konur123',
   'database':'madensell'
 }
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'campusconnectfacid@gmail.com'
+app.config['MAIL_PASSWORD'] = 'nzmm sodh kvyh ndwg'
+
 app.secret_key = 'alphan'  # Replace with a unique and secret key
+
+mail = Mail(app)
 
 def delete_picture(pic_url):
     bucket = storage.bucket()
@@ -97,14 +110,54 @@ def login():
                 session['userid'] = user[0]
                 session['username'] = user[1]
                 session['user_type'] = user[5]
+                print(user[5])
                 if session['user_type'] == 0:
                     return redirect(url_for('admin_page'))  # Update the redirect here
+                if user[5] < 0:
+                    return render_template('login.html', message='Please confirm your email address to complete the registration.', message_type='error')
                 return redirect(url_for('profile'))
             else:
                 message = 'Incorrect password!'
         else:
             message = 'User not found!'
     return render_template('login.html', message=message, message_type='error')
+
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt='email-confirm-salt')
+
+
+def send_confirmation_email(email):
+    token = generate_confirmation_token(email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    email_body = f"Please click on the link to verify your email address and activate your account: {confirm_url}"
+    msg = Message("Confirm Your Email", sender=app.config['MAIL_USERNAME'], recipients=[email])
+    msg.body = email_body
+    mail.send(msg)
+
+@app.route('/confirm/<token>')
+def confirm_email(token):
+    try:
+        serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+        email = serializer.loads(token, salt='email-confirm-salt', max_age=3600)
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute('SELECT user_type FROM users WHERE email = %s', (email,))
+        user = cursor.fetchone()
+        
+        if user and user[0] < 0:  # Check if the user exists and is unverified
+            # Update user_type to its positive value to indicate verification
+            cursor.execute('UPDATE users SET user_type = %s WHERE email = %s', (-user[0], email))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return render_template('login.html', message='Your email has been confirmed. Please log in.', message_type='success')
+        else:
+            cursor.close()
+            conn.close()
+            return render_template('login.html', message='Invalid or expired token.', message_type='error')
+    except SignatureExpired:
+        return render_template('login.html', message='The confirmation link has expired.', message_type='error')
 
 
 @app.route("/customer-register", methods=["POST", "GET"])
@@ -131,7 +184,8 @@ def customer_register():
             message = "Email already exists"
             return render_template('register_customer.html', message=message, message_type='error')
         else:
-            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, 1, address, phone))
+            send_confirmation_email(email)  # Send the verification email
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, -1, address, phone))
             conn.commit()
             cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, hashed_password))
             user_id = cursor.fetchone()
@@ -152,6 +206,8 @@ def customer_register():
             cursor.execute(
                 'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, hashed_password))
+            return render_template('login.html', message='Please confirm your email address to complete the registration.',message_type='success')
+
             message = 'You have successfully registered!'
             return render_template('login.html', message=message, message_type='success')
     return render_template('register_customer.html', message=message, message_type='error')
@@ -181,7 +237,8 @@ def business_register():
             message = "Email already exists"
             return render_template('register_business.html', message=message)
         else:
-            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, 2, address, phone))
+            send_confirmation_email(email)  # Send the verification email
+            cursor.execute('INSERT INTO users(username, email, password, user_type, address, phone_number) VALUES (%s, %s, %s, %s, %s, %s)',(username, email, hashed_password, -2, address, phone))
             conn.commit()
             cursor.execute('SELECT user_id FROM users u WHERE u.email = %s AND u.password = %s', (email, hashed_password))
             user_id = cursor.fetchone()
@@ -202,6 +259,8 @@ def business_register():
             cursor.execute(
                 'SELECT * FROM users u, business b WHERE b.user_id = u.user_id AND u.email = %s AND u.password = %s',
                 (email, hashed_password))
+            return render_template('login.html', message='Please confirm your email address to complete the registration.',message_type='success')
+
             message = 'You have successfully registered!'
             return render_template('login.html', message=message, message_type='success')
     return render_template('register_business.html', message=message, message_type='error')
