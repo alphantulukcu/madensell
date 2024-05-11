@@ -146,4 +146,6 @@ CREATE TABLE IF NOT EXISTS review (
   interest INT NOT NULL,
   avg_point INT NOT NULL,
   username VARCHAR(45) NOT NULL,
-  PRIMARY KEY (review_id));
+  PRIMARY KEY (review_id),
+  foreign key (product_id) references product(product_id),
+  foreign key (customer_id) references customer(user_id));

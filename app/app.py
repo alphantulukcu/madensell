@@ -689,6 +689,9 @@ def market():
         else:
             products = get_products(cursor,sort='newest')
 
+        cursor.execute('SELECT product_id FROM favorites WHERE cust_id = %s', (session['userid'],))
+        fav = [item[0] for item in cursor.fetchall()]
+
         cursor.execute('SELECT category_id, category_name FROM category')
         categories = cursor.fetchall()
         cursor.execute('SELECT subcategory_id, subcategory_name FROM subcategory')
@@ -698,7 +701,7 @@ def market():
         products_with_images = [prod for prod in products if prod[-1] is not None]
         products_without_images = [prod for prod in products if prod[-1] is None]
 
-        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories)
+        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories, fav=fav)
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))
@@ -1351,7 +1354,6 @@ def edit_product(product_id):
         return redirect(url_for('edit_product', product_id=product_id))
 
     return render_template('edit_product.html', products=products)
-
 
 @app.route('/admin')
 def admin_page():
