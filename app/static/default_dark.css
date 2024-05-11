@@ -1728,12 +1728,14 @@ canvas#statsChart {
     text-transform: uppercase;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+     min-width: 3rem;
 }
 
 .edit-button:hover, .edit-button:focus {
     background-color: rgba(193, 31, 31, 0.8); /* Red accent on hover */
     color: #FFFFFF; /* Ensure text is white */
     transform: translateY(-1px); /* Slight lift effect */
+
 }
 
 .edit-button:active {

@@ -177,7 +177,39 @@ def create_tables():
                 UPDATE business SET profile_image = p_profile_image WHERE user_id = p_user_id;
             END IF;
         END
-        """)  # Include the whole procedure creation statement here.
+        """)
+
+    cursor.execute(
+        """ 
+        CREATE TRIGGER IF NOT EXISTS update_business_point
+            AFTER INSERT ON review
+            FOR EACH ROW
+            BEGIN
+                DECLARE new_average DECIMAL(10,2);
+                DECLARE related_business_id INT;
+            
+                -- Retrieve the business_id directly from the inserted product
+                SELECT p.business_id INTO related_business_id
+                FROM product p
+                WHERE p.product_id = NEW.product_id;
+            
+                -- Ensure the business_id was successfully retrieved
+                IF related_business_id IS NOT NULL THEN
+            
+                    -- Calculate the new average points for the business based on all reviews of its products
+                    SELECT IFNULL(AVG(r.avg_point), 0) INTO new_average
+                    FROM review r
+                    JOIN product p ON r.product_id = p.product_id
+                    WHERE p.business_id = related_business_id;
+            
+                    -- Update the business's overall point with the new average
+                    UPDATE business
+                    SET overall_point = new_average
+                    WHERE user_id = related_business_id;
+            
+                END IF;
+            END;
+        """)
     print('Tables created')
     connection.commit()
     connection.close()
