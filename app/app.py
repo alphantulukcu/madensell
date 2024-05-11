@@ -1341,7 +1341,7 @@ def get_table_data():
     elif table_name == 'admins':
         cursor.execute("SELECT user_id FROM admins")
     elif table_name == 'basket':
-        cursor.execute("SELECT customer_id, product_id, basket_id, num_of FROM basket")
+        cursor.execute("SELECT customer_id, product_id, basket_id, num_of_products FROM basket")
     elif table_name == 'favorites':
         cursor.execute("SELECT cust_id, product_id, created_at FROM favorites")
     elif table_name == 'images':
