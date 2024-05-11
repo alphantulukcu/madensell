@@ -851,7 +851,7 @@ def toggle_favorite(product_id):
     conn.close()
 
     # Redirect back to the market page
-    return redirect(url_for('market'))
+    return redirect(request.referrer)
 
 
 @app.route("/wallet", methods=["POST", "GET"])
