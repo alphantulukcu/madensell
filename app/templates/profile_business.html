@@ -79,6 +79,9 @@ Profile
                             <h3>{{post[2]}}₺</h3>
                         {% endif %}
                     </div>
+                    <div class="card-bottom">
+                        <h1 id="timeAgo{{ post[1] }}">{{ post[7] }}</h1>
+                    </div>
                     {% if viewing_own_profile %}
 
                         <form action="{{ url_for('edit_product', product_id=post[1]) }}" method="get" style="position: absolute; right: 10px; bottom: 10px;">
@@ -206,5 +209,27 @@ Profile
     };
 
 
+</script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script>
+  // Function to update the time-ago text based on a given element ID and date string
+  function updateTimeAgo(timeID, date) {
+      var targetElement = document.getElementById(timeID);
+      if (targetElement) {
+          var formattedTimeAgo = moment(date).fromNow();
+          targetElement.textContent = formattedTimeAgo;
+      } else {
+          console.warn('Element with ID ' + timeID + ' not found.');
+      }
+  }
+
+  // Wait for the DOM content to load
+  document.addEventListener('DOMContentLoaded', function() {
+      // Example arrays representing each post's ID and creation date
+      {% for post in products %}
+          updateTimeAgo("timeAgo{{ post[1] }}", "{{ post[7] }}");
+      {% endfor %}
+  });
 </script>
 {% endblock %}
