@@ -15,6 +15,10 @@ import mysql.connector
 from flask import Flask, jsonify, render_template, request
 import urllib.parse  # for decoding URL-encoded paths
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, session, redirect, url_for, Response
+import mysql.connector
+import pandas as pd
+from io import StringIO
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
     'storageBucket': 'madensell-dc0c4.appspot.com'
@@ -1462,6 +1466,39 @@ def get_table_columns():
     cnx.close()
     return {'columns': columns}
 
+@app.route('/export_csv', methods=['POST'])
+def export_csv():
+    table_name = request.form['table_name']
+    filter_column = request.form.get('filter_column')
+    filter_value = request.form.get('filter_value', '').strip()
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+
+    # Dynamically retrieve columns
+    cursor.execute(f"DESCRIBE {table_name}")
+    columns = [column[0] for column in cursor.fetchall()]
+
+    query = f"SELECT {', '.join(columns)} FROM {table_name}"
+    if filter_column and filter_value:
+        query += f" WHERE {filter_column} = %s"
+        cursor.execute(query, (filter_value,))
+    else:
+        cursor.execute(query)
+
+    data = cursor.fetchall()
+    df = pd.DataFrame(data, columns=columns)
+
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_data = csv_buffer.getvalue()
+
+    cnx.close()
+
+    return Response(
+        csv_data,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment;filename={table_name}.csv'}
+    )
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))

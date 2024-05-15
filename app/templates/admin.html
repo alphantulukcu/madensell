@@ -19,6 +19,8 @@ Admin Page
         <!-- Filter container that will be populated based on the selected table -->
         <div id="filter-container" style="margin-bottom: 20px;"></div>
 
+        <button id="export-csv-button" class="btn" style="display: none; margin-bottom: 20px;">Export to CSV</button>
+
         <div class="scroll-container">
             <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
                 <!-- Table data will be loaded here -->
@@ -69,7 +71,7 @@ Admin Page
                     data: { table_name: selectedTable },
                     success: function(response) {
                         $('#table-data').html(response);
-                        // Apply styles directly to the table when the data is loaded
+                        $('#export-csv-button').show();
                         $('#table-data table').css('color', '#E0E0E0'); // Light grey font for data
                     }
                 });
@@ -94,6 +96,7 @@ Admin Page
             } else {
                 $('#table-data').html('Please select a table.');
                 $('#filter-container').html('');
+                $('#export-csv-button').hide();
             }
         });
 
@@ -112,12 +115,35 @@ Admin Page
                 },
                 success: function(response) {
                     $('#table-data').html(response);
+                    $('#export-csv-button').show();
                 },
                 error: function(error) {
                     console.error('Error fetching data:', error);
                 }
             });
         };
+
+        $('#export-csv-button').on('click', function() {
+            var table = $('#table-select').val();
+            var filterColumn = $('#filter-column').val();
+            var filterValue = $('#filter-value').val() || '';
+
+            var form = $('<form></form>');
+            form.attr("method", "POST");
+            form.attr("action", "/export_csv");
+
+            var tableInput = $('<input></input>').attr("type", "hidden").attr("name", "table_name").attr("value", table);
+            form.append(tableInput);
+
+            var filterColumnInput = $('<input></input>').attr("type", "hidden").attr("name", "filter_column").attr("value", filterColumn);
+            form.append(filterColumnInput);
+
+            var filterValueInput = $('<input></input>').attr("type", "hidden").attr("name", "filter_value").attr("value", filterValue);
+            form.append(filterValueInput);
+
+            $('body').append(form);
+            form.submit();
+        });
     });
 </script>
 {% endblock %}
