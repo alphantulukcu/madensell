@@ -64,7 +64,7 @@ Admin Page
             var selectedTable = $(this).val();
             if (selectedTable) {
                 $.ajax({
-                    url: '/get_table_data', // Route in app.py
+                    url: '/get_table_data',
                     type: 'POST',
                     data: { table_name: selectedTable },
                     success: function(response) {
@@ -73,103 +73,42 @@ Admin Page
                         $('#table-data table').css('color', '#E0E0E0'); // Light grey font for data
                     }
                 });
+
+                $.ajax({
+                    url: '/get_table_columns',
+                    type: 'POST',
+                    data: { table_name: selectedTable },
+                    success: function(response) {
+                        let columns = response.columns;
+                        let filterHTML = '<select id="filter-column" class="form-input" style="margin-bottom: 10px;">';
+                        filterHTML += '<option value="">Select a Column</option>';
+                        for (let column of columns) {
+                            filterHTML += `<option value="${column}">${column}</option>`;
+                        }
+                        filterHTML += '</select>';
+                        filterHTML += '<input type="text" id="filter-value" placeholder="Enter Filter Value">';
+                        filterHTML += '<button type="button" onclick="fetchData()">Filter</button>';
+                        $('#filter-container').html(filterHTML);
+                    }
+                });
             } else {
                 $('#table-data').html('Please select a table.');
+                $('#filter-container').html('');
             }
-            updateFilters(selectedTable);
-            //fetchData(selectedTable);
         });
 
-        function updateFilters(table) {
-            let filterHTML = '';
-            if (table === 'users') {
-                filterHTML += '<input type="text" id="user_id_filter" placeholder="Enter User ID">';
-                filterHTML += '<button type="button" onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'business') {
-                filterHTML += '<input type="text" id="business_id_filter" placeholder="Enter Business ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'customer') {
-                filterHTML += '<input type="text" id="customer_id_filter" placeholder="Enter Customer ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'wallet') {
-                filterHTML += '<input type="text" id="wallet_id_filter" placeholder="Enter Wallet ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'category') {
-                filterHTML += '<input type="text" id="category_id_filter" placeholder="Enter Category ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'subcategory') {
-                filterHTML += '<input type="text" id="subcategory_id_filter" placeholder="Enter Subcategory ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'product') {
-                filterHTML += '<input type="text" id="product_id_filter" placeholder="Enter Product ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'orders') {
-                filterHTML += '<input type="text" id="order_id_filter" placeholder="Enter Order ID">';
-                filterHTML += '<button type="button" onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'admins') {
-                filterHTML += '<input type="text" id="admin_id_filter" placeholder="Enter Admin ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'basket') {
-                filterHTML += '<input type="text" id="basket_id_filter" placeholder="Enter Basket ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'favorites') {
-                filterHTML += '<input type="text" id="favorite_id_filter" placeholder="Enter Customer ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'images') {
-                filterHTML += '<input type="text" id="image_id_filter" placeholder="Enter Image ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'review') {
-                filterHTML += '<input type="text" id="review_id_filter" placeholder="Enter Review ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'comments') {
-                filterHTML += '<input type="text" id="comment_id_filter" placeholder="Enter Comment ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            if (table === 'shipping_info') {
-                filterHTML += '<input type="text" id="shippingInfo_id_filter" placeholder="Enter Shipping Info ID">';
-                filterHTML += '<button onclick="fetchData(\'' + table + '\')">Filter</button>';
-            }
-            // Add similar cases for other tables if needed
-            $('#filter-container').html(filterHTML);
-        }
-        //function fetchData(table) {
-        //    let filterValue = $('#filter-container input').val() || '';
-        //    $.ajax({
-        //        url: '/get_table_data',
-        //        type: 'POST',
-        //        data: {
-        //            table_name: table,
-        //            filter: filterValue
-        //        },
-        //        success: function(response) {
-        //            $('#table-data').html(response);
-        //        }
-        //    });
-        //}
-
-        window.fetchData = function(table) {
+        window.fetchData = function() {
             event.preventDefault(); // Prevent the default form submission behavior
-            var filterValue = $('#filter-container input').val() || '';
-            console.log('Fetching data for table:', table, 'with filter:', filterValue);  // Log the filter value
+            var table = $('#table-select').val();
+            var filterColumn = $('#filter-column').val();
+            var filterValue = $('#filter-value').val() || '';
             $.ajax({
                 url: '/get_table_data',
                 type: 'POST',
                 data: {
                     table_name: table,
-                    filter: filterValue
+                    filter_column: filterColumn,
+                    filter_value: filterValue
                 },
                 success: function(response) {
                     $('#table-data').html(response);
@@ -178,246 +117,6 @@ Admin Page
                     console.error('Error fetching data:', error);
                 }
             });
-            //let userIDFilter = $('#user_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', userIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: userIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let businessIDFilter = $('#business_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', businessIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: businessIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let customerIDFilter = $('#customer_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', customerIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: customerIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let walletIDFilter = $('#wallet_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', walletIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: walletIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let categoryIDFilter = $('#category_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', categoryIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: categoryIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let subcategoryIDFilter = $('#subcategory_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', subcategoryIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: subcategoryIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let productIDFilter = $('#product_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', productIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: productIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let orderIDFilter = $('#order_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', orderIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: orderIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let adminIDFilter = $('#admin_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', adminIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: adminIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let basketIDFilter = $('#basket_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', basketIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: basketIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let favoriteIDFilter = $('#favorite_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', favoriteIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: favoriteIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let imageIDFilter = $('#image_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', imageIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: imageIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let reviewIDFilter = $('#review_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', reviewIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: reviewIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let commentIDFilter = $('#comment_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', commentIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: commentIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
-            //let shippingInfoIDFilter = $('#shippingInfo_id_filter').val() || '';
-            //console.log('Fetching data for table:', table, 'with filter:', shippingInfoIDFilter);  // Log the filter value
-            //$.ajax({
-            //    url: '/get_table_data',
-            //    type: 'POST',
-            //    data: {
-            //        table_name: table,
-            //        filter: shippingInfoIDFilter
-            //    },
-            //    success: function(response) {
-            //        $('#table-data').html(response);
-            //    },
-            //    error: function(error) {
-            //        console.error('Error fetching data:', error);
-            //    }
-            //});
         };
     });
 </script>

@@ -1376,111 +1376,26 @@ def admin_page():
 @app.route('/get_table_data', methods=['POST'])
 def get_table_data():
     table_name = request.form['table_name']
-    filter_value = request.form.get('filter', '').strip()
+    filter_column = request.form.get('filter_column')
+    filter_value = request.form.get('filter_value', '').strip()
     cnx = mysql.connector.connect(**config)
     cursor = cnx.cursor()
 
-    if table_name == 'users':
-        if filter_value:
-            query = "SELECT user_id, username, email, created_at, user_type FROM users WHERE user_id = %s"
-            cursor.execute(query, (filter_value,))
-        else:
-            cursor.execute("SELECT user_id, username, email, created_at, user_type FROM users")
-    elif table_name == 'business':
-        if filter_value:
-            query = "SELECT user_id, business_name, overall_point FROM business WHERE user_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT user_id, business_name, overall_point FROM business")
-    elif table_name == 'customer':
-        if filter_value:
-            query = "SELECT user_id, first_name, last_name FROM customer WHERE user_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT user_id, first_name, last_name FROM customer")
-    elif table_name == 'wallet':
-        if filter_value:
-            query = "SELECT user_id, wallet_id, balance FROM wallet WHERE user_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT user_id, wallet_id, balance FROM wallet")
-    elif table_name == 'category':
-        if filter_value:
-            query = "SELECT category_id, category_name FROM category WHERE category_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT category_id, category_name FROM category")
-    elif table_name == 'subcategory':
-        if filter_value:
-            query = "SELECT category_id, subcategory_id, subcategory_name FROM subcategory WHERE subcategory_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT category_id, subcategory_id, subcategory_name FROM subcategory")
-    elif table_name == 'product':
-        if filter_value:
-            query = "SELECT business_id, product, id, price, title, description, stock_num, subcategory_id, created_at FROM product WHERE product_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT business_id, product_id, price, title, description, stock_num, subcategory_id, created_at FROM product")
-    elif table_name == 'orders':
-        if filter_value:
-            query = "SELECT order_id, info_id, product_id, num_of_products, status, created_at, updated_at FROM orders WHERE order_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT order_id, info_id, product_id, num_of_products, status, created_at, updated_at FROM orders")
-    elif table_name == 'admins':
-        if filter_value:
-            query = "SELECT user_id FROM admins WHERE user_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT user_id FROM admins")
-    elif table_name == 'basket':
-        if filter_value:
-            query = "SELECT customer_id, product_id, basket_id, num_of_products FROM basket WHERE basket_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT customer_id, product_id, basket_id, num_of_products FROM basket")
-    elif table_name == 'favorites':
-        if filter_value:
-            query = "SELECT cust_id, product_id, created_at FROM favorites WHERE cust_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT cust_id, product_id, created_at FROM favorites")
-    elif table_name == 'images':
-        if filter_value:
-            query = "SELECT product_id, created_at, image_url FROM images WHERE image_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT product_id, created_at, image_url FROM images")
-    elif table_name == 'review':
-        if filter_value:
-            query = "SELECT customer_id, product_id, review_id, comment, speed, quality, interest, avg_point, username FROM review WHERE review_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT customer_id, product_id, review_id, comment, speed, quality, interest, avg_point, username FROM review")
-    elif table_name == 'comments':
-        if filter_value:
-            query = "SELECT customer_id, product_id, comment_id, comment FROM comments WHERE comment_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT customer_id, product_id, comment_id, comment FROM comments")
-    elif table_name == 'shipping_info':
-        if filter_value:
-            query = "SELECT info_id, customer_id, phone_number, address_title, address, city, town, postal_code FROM shipping_info WHERE info_id = %s"
-            cursor.execute(query, (filter_value, ))
-        else:
-            cursor.execute("SELECT info_id, customer_id, phone_number, address_title, address, city, town, postal_code FROM shipping_info")
+    # Dynamically retrieve columns
+    cursor.execute(f"DESCRIBE {table_name}")
+    columns = [column[0] for column in cursor.fetchall()]
 
-
-
+    query = f"SELECT {', '.join(columns)} FROM {table_name}"
+    if filter_column and filter_value:
+        query += f" WHERE {filter_column} = %s"
+        cursor.execute(query, (filter_value,))
     else:
-        cnx.close()
-        return "Invalid table name", 400
+        cursor.execute(query)
 
     # Construct the HTML table
     table_html = '<table><tr>'
-    for column_desc in cursor.description:  # Get column names
-        table_html += f'<th>{column_desc[0]}</th>'
+    for column in columns:
+        table_html += f'<th>{column}</th>'
     table_html += '</tr>'
 
     for row in cursor:
@@ -1493,6 +1408,18 @@ def get_table_data():
     cnx.close()
     return table_html
 
+@app.route('/get_table_columns', methods=['POST'])
+def get_table_columns():
+    table_name = request.form['table_name']
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+
+    # Dynamically retrieve columns
+    cursor.execute(f"DESCRIBE {table_name}")
+    columns = [column[0] for column in cursor.fetchall()]
+
+    cnx.close()
+    return {'columns': columns}
 
 
 if __name__ == "__main__":
