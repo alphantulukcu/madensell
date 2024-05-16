@@ -1403,6 +1403,7 @@ def edit_product(product_id):
 
     return render_template('edit_product.html', products=products)
 
+
 @app.route('/admin')
 def admin_page():
     if 'loggedin' in session and session['user_type'] == 0:  # Ensure admin access
@@ -1410,19 +1411,19 @@ def admin_page():
         cnx = mysql.connector.connect(**config)
         cursor = cnx.cursor()
         cursor.execute("SHOW TABLES")
-
         tables = [table[0] for table in cursor.fetchall()]
         cnx.close()
-
         return render_template('admin.html', tables=tables)
     else:
         return redirect(url_for('login'))  # Redirect non-admins to login
+
 
 @app.route('/get_table_data', methods=['POST'])
 def get_table_data():
     table_name = request.form['table_name']
     filter_column = request.form.get('filter_column')
     filter_value = request.form.get('filter_value', '').strip()
+    filter_operator = request.form.get('filter_operator', '=')
     cnx = mysql.connector.connect(**config)
     cursor = cnx.cursor()
 
@@ -1432,7 +1433,7 @@ def get_table_data():
 
     query = f"SELECT {', '.join(columns)} FROM {table_name}"
     if filter_column and filter_value:
-        query += f" WHERE {filter_column} = %s"
+        query += f" WHERE {filter_column} {filter_operator} %s"
         cursor.execute(query, (filter_value,))
     else:
         cursor.execute(query)
@@ -1453,6 +1454,7 @@ def get_table_data():
     cnx.close()
     return table_html
 
+
 @app.route('/get_table_columns', methods=['POST'])
 def get_table_columns():
     table_name = request.form['table_name']
@@ -1466,11 +1468,13 @@ def get_table_columns():
     cnx.close()
     return {'columns': columns}
 
+
 @app.route('/export_csv', methods=['POST'])
 def export_csv():
     table_name = request.form['table_name']
     filter_column = request.form.get('filter_column')
     filter_value = request.form.get('filter_value', '').strip()
+    filter_operator = request.form.get('filter_operator', '=')
     cnx = mysql.connector.connect(**config)
     cursor = cnx.cursor()
 
@@ -1480,7 +1484,7 @@ def export_csv():
 
     query = f"SELECT {', '.join(columns)} FROM {table_name}"
     if filter_column and filter_value:
-        query += f" WHERE {filter_column} = %s"
+        query += f" WHERE {filter_column} {filter_operator} %s"
         cursor.execute(query, (filter_value,))
     else:
         cursor.execute(query)
@@ -1499,6 +1503,7 @@ def export_csv():
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment;filename={table_name}.csv'}
     )
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))

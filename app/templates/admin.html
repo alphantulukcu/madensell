@@ -17,7 +17,19 @@ Admin Page
         </select>
 
         <!-- Filter container that will be populated based on the selected table -->
-        <div id="filter-container" style="margin-bottom: 20px;"></div>
+        <div id="filter-container" style="margin-bottom: 20px;">
+            <select id="filter-column" class="form-input" style="margin-bottom: 10px;">
+                <!-- Options will be populated dynamically -->
+            </select>
+            <select id="filter-operator" class="form-input" style="margin-bottom: 10px;">
+                <option value="=">=</option>
+                <option value="<"><</option>
+                <option value=">">></option>
+            </select>
+            <input type="text" id="filter-value" placeholder="Enter Filter Value">
+            <button type="button" class="filter-button" onclick="fetchData()">Filter</button>
+        </div>
+
 
         <button id="export-csv-button" class="btn" style="display: none; margin-bottom: 20px;">Export to CSV</button>
 
@@ -88,8 +100,13 @@ Admin Page
                             filterHTML += `<option value="${column}">${column}</option>`;
                         }
                         filterHTML += '</select>';
+                        filterHTML += '<select id="filter-operator" class="form-input" style="margin-bottom: 10px;">';
+                        filterHTML += '<option value="=">=</option>';
+                        filterHTML += '<option value="<"><</option>';
+                        filterHTML += '<option value=">">></option>';
+                        filterHTML += '</select>';
                         filterHTML += '<input type="text" id="filter-value" placeholder="Enter Filter Value">';
-                        filterHTML += '<button type="button" onclick="fetchData()">Filter</button>';
+                        filterHTML += '<button type="button" class="filter-button" onclick="fetchData()">Filter</button>';
                         $('#filter-container').html(filterHTML);
                     }
                 });
@@ -105,13 +122,15 @@ Admin Page
             var table = $('#table-select').val();
             var filterColumn = $('#filter-column').val();
             var filterValue = $('#filter-value').val() || '';
+            var filterOperator = $('#filter-operator').val();
             $.ajax({
                 url: '/get_table_data',
                 type: 'POST',
                 data: {
                     table_name: table,
                     filter_column: filterColumn,
-                    filter_value: filterValue
+                    filter_value: filterValue,
+                    filter_operator: filterOperator
                 },
                 success: function(response) {
                     $('#table-data').html(response);
@@ -127,6 +146,7 @@ Admin Page
             var table = $('#table-select').val();
             var filterColumn = $('#filter-column').val();
             var filterValue = $('#filter-value').val() || '';
+            var filterOperator = $('#filter-operator').val();
 
             var form = $('<form></form>');
             form.attr("method", "POST");
@@ -141,9 +161,14 @@ Admin Page
             var filterValueInput = $('<input></input>').attr("type", "hidden").attr("name", "filter_value").attr("value", filterValue);
             form.append(filterValueInput);
 
+            var filterOperatorInput = $('<input></input>').attr("type", "hidden").attr("name", "filter_operator").attr("value", filterOperator);
+            form.append(filterOperatorInput);
+
             $('body').append(form);
             form.submit();
         });
     });
 </script>
+
+
 {% endblock %}
