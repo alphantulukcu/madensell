@@ -12,6 +12,15 @@ Basket
                                     <h6> </h6>
                                 </div>
                         </div>
+
+                    {% elif not products %}
+                        <div class="horizontal-card">
+                                <div class="card-content">
+                                    <h2>There is no product in your basket</h2>
+                                    <h6> </h6>
+                                </div>
+                        </div>
+                    
                     {% else %}
                         {% for post in products %}
                              <div class="horizontal-card">
@@ -45,18 +54,29 @@ Basket
             </div>
         </div>
         <div class="right-container">
-            <div class="detailed-post">
-                    <div class="detailed-post-content">
-                    <h2>Order Summary:</h2>
-                    <h1 style="color: #FFFFFF">Total Price:</h1>
-                        <h3>{{total_sum}}₺</h3>
-                    <br>
-                    </div>
-                    <form action="{{ url_for('order', type=0) }}" method="GET" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Order Now!</button>
+
+            {%if not products %}
+                <div class="detailed-post">
+                    <form action="{{ url_for('market') }}" method="GET" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Return back to market</button>
                     </form>
                 </div>
-            </div>
+
+            {% else %}
+                <div class="detailed-post">
+                    <div class="detailed-post-content">
+                        <h2>Order Summary:</h2>
+                        <h1 style="color: #FFFFFF">Total Price:</h1>
+                            <h3>{{total_sum}}₺</h3>
+                        <br>
+                        </div>
+                        <form action="{{ url_for('order', type=0) }}" method="GET" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                            <button class="settings-button" type="submit" style="margin-left: 0.5rem">Order Now!</button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
         </div>
 </div>
 
