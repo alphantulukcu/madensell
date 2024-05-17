@@ -128,12 +128,10 @@ Post
                 </div>
                 <div class="mb-4">
                     <form id="comment-form" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                        {% if user_type == 1%}
-                            <input type="text" class="form-input" id="comment" name="comment" placeholder="Add your comment" >
-                            <br>
-                            <button class="settings-button" type="submit" style="margin-left: 0.5rem">Ask</button>
-                        {% endif %}
+                        <input type="text" class="form-input" id="comment" name="comment" placeholder="Add your comment" >
                         <input type="hidden" class="form-input" id="product_id" name="product_id" value="{{ product[1] }}">
+                        <br>
+                        <button class="settings-button" type="submit" style="margin-left: 0.5rem">Ask</button>
                     </form>
                 </div>
             </div>
