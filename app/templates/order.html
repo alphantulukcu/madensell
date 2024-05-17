@@ -122,5 +122,12 @@ function toggleForm() {
     var overlay = document.getElementById('overlay');
     overlay.style.display = 'none';
 }
+document.getElementById('orderForm').addEventListener('submit', function(event) {
+    var shippingInfoId = document.getElementById('shipping_info_id').value;
+    if (!shippingInfoId) {
+        event.preventDefault();
+        alert("Please select a shipping info before ordering.");
+    }
+});
 </script>
 {% endblock %}
