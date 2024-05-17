@@ -762,7 +762,6 @@ def post_detail(product_id):
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
         if request.method == 'POST': # comment
-            comment = request.form['comment']
             numofproducts = request.form['numofproducts']
 
             if numofproducts: # add to basket

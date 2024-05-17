@@ -18,21 +18,12 @@ Admin Page
 
         <!-- Filter container that will be populated based on the selected table -->
         <div id="filter-container" style="margin-bottom: 20px;">
-            <select id="filter-column" class="form-input" style="margin-bottom: 10px;">
-                <!-- Options will be populated dynamically -->
-            </select>
-            <select id="filter-operator" class="form-input" style="margin-bottom: 10px;">
-                <option value="=">=</option>
-                <option value="<"><</option>
-                <option value=">">></option>
-            </select>
-            <input type="text" class="form-input" id="filter-value" placeholder="Enter Filter Value">
-            <br>
-            <button type="button" class="filter-button" onclick="fetchData()">Filter</button>
+
+
         </div>
 
 
-        <button id="export-csv-button" class="btn" style="display: none; margin-bottom: 20px;">Export to CSV</button>
+        <button id="export-csv-button" class="btn" style="display: none; margin-bottom: 20px;">Create a report (CSV)</button>
 
         <div class="scroll-container">
             <div id="table-data" style="color: #E0E0E0; margin-top: 20px;">
@@ -106,9 +97,10 @@ Admin Page
                         filterHTML += '<option value="<"><</option>';
                         filterHTML += '<option value=">">></option>';
                         filterHTML += '</select>';
-                        filterHTML += '<input type="text" id="filter-value" class="form-input" placeholder="Enter Filter Value">';
-                        filterHTML += '<br>';
-                        filterHTML += '<button type="button" class="filter-button" onclick="fetchData()">Filter</button>';
+                        filterHTML += ' <div style="display: flex; flex-direction: row">\n' +
+                            '                <input type="text" class="form-input" id="filter-value" placeholder="Enter Filter Value">\n' +
+                            '                <button type="button" class="filter-button" style="margin-left: 0.5rem" onclick="fetchData()">Filter</button>\n' +
+                            '            </div>';
                         $('#filter-container').html(filterHTML);
                     }
                 });
