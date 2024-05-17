@@ -26,7 +26,8 @@ Admin Page
                 <option value="<"><</option>
                 <option value=">">></option>
             </select>
-            <input type="text" id="filter-value" placeholder="Enter Filter Value">
+            <input type="text" class="form-input" id="filter-value" placeholder="Enter Filter Value">
+            <br>
             <button type="button" class="filter-button" onclick="fetchData()">Filter</button>
         </div>
 
@@ -105,7 +106,8 @@ Admin Page
                         filterHTML += '<option value="<"><</option>';
                         filterHTML += '<option value=">">></option>';
                         filterHTML += '</select>';
-                        filterHTML += '<input type="text" id="filter-value" placeholder="Enter Filter Value">';
+                        filterHTML += '<input type="text" id="filter-value" class="form-input" placeholder="Enter Filter Value">';
+                        filterHTML += '<br>';
                         filterHTML += '<button type="button" class="filter-button" onclick="fetchData()">Filter</button>';
                         $('#filter-container').html(filterHTML);
                     }

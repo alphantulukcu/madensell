@@ -764,16 +764,8 @@ def post_detail(product_id):
         if request.method == 'POST': # comment
             comment = request.form['comment']
             numofproducts = request.form['numofproducts']
-            if comment:
-                cursor.execute(
-                    """   
-                                    INSERT INTO comments(product_id, customer_id, comment) 
-                                    VALUES (%s,%s,%s)
-                                """,
-                    (product_id, session['userid'], comment))
-                conn.commit()
 
-            elif numofproducts: # add to basket
+            if numofproducts: # add to basket
                 numofproducts = int(numofproducts)
                 cursor.execute(
                     """   
@@ -807,11 +799,6 @@ def post_detail(product_id):
         product = cursor.fetchone()
 
         cursor.execute(
-            'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
-            (product_id,))
-        comments = cursor.fetchall()
-
-        cursor.execute(
             'SELECT * FROM review WHERE product_id = %s',
             (product_id,)
         )
@@ -823,7 +810,60 @@ def post_detail(product_id):
             (product_id,))
         images = cursor.fetchall()
 
-        return render_template('post_detail.html',user_type=session['user_type'], product=product, comments=comments, images=images, reviews=reviews)
+        return render_template('post_detail.html',user_type=session['user_type'], product=product, images=images, reviews=reviews)
+
+
+@app.route("/api/comments/<int:product_id>", methods=["GET", "POST"])
+def comments(product_id):
+    if 'loggedin' in session:
+        if request.method == "POST":
+            # Handle adding a comment
+            comment = request.form.get('comment')
+            print("Received Comment:", comment)
+            print("Received Product ID:", product_id)
+
+            if comment:
+                try:
+                    conn = mysql.connector.connect(**config)
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        """   
+                            INSERT INTO comments(product_id, customer_id, comment) 
+                            VALUES (%s,%s,%s)
+                        """,
+                        (product_id, session['userid'], comment))
+                    conn.commit()
+                    return jsonify({"success": True, "message": "Comment added successfully."})
+                except Exception as e:
+                    print(f"Error adding comment: {e}")
+                    return jsonify({"success": False, "message": "Error adding comment."}), 500
+            return jsonify({"success": False, "message": "No comment provided."})
+
+        elif request.method == "GET":
+            # Handle fetching comments
+            try:
+                conn = mysql.connector.connect(**config)
+                cursor = conn.cursor()
+                cursor.execute(
+                    'SELECT * FROM (comments com NATURAL JOIN customer c) NATURAL JOIN product p WHERE p.product_id = %s AND c.user_id = com.customer_id',
+                    (product_id,))
+                comments = cursor.fetchall()
+
+                comments_list = []
+                for comment in comments:
+                    comments_list.append({
+                        "user_id": comment[1],
+                        "comment_id": comment[2],
+                        "comment_text": comment[3],
+                        "user_name": f"{comment[5]} {comment[6]}",
+                        "user_image": comment[7]
+                    })
+
+                return jsonify(comments_list)
+            except Exception as e:
+                print(f"Error fetching comments: {e}")
+                return jsonify({"success": False, "message": "Error fetching comments."}), 500
+    return jsonify({"success": False, "message": "User not logged in."}), 401
 
 
 @app.route("/basket/<int:product_id> ", methods=["POST", "GET"])

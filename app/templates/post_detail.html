@@ -111,7 +111,6 @@ Post
                     <h1 id="timeAgo"></h1>
                     <br>
                     <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                        <input type="hidden" class="form-input" id="comment" name="comment" value="" >
                          <input type="number" max="{{product[5]}}" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
                         <br>
                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Add to Basket</button>
@@ -121,31 +120,13 @@ Post
             </div>
             <div class="comment-container" >
                 <button class="toggle-title" >Questions</button>
-                <div class="scroll-container">
-                 {% for comment in comments %}
-                    <div class="comment-card">
-                        <div class="comment-header">
-                             <div class="profile-for_card">
-                                    <img class="profile-for_card" src="{{ comment[7] }}" >
-                                    <form action="{{ url_for('profile', user_id=comment[1]) }}" method="get">
-                                        <button type="submit">
-                                            <p>{{comment[5]}} {{comment[6]}}</p>
-                                        </button>
-                                    </form>
+                <div class="scroll-container" id="comment-container">
 
-                                </div>
-                            <div class="comment-details">
-                                <h2 style="color: #FFFFFF">{{comment[3]}}</h2>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
                 </div>
                 <div class="mb-4">
-                    <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                         <input type="text" class="form-input" id="comment" name="comment" placeholder="Add your comment" >
-                        <input type="hidden" class="form-input" id="numofproducts" name="numofproducts" value="" >
-
+                    <form id="comment-form" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
+                        <input type="text" class="form-input" id="comment" name="comment" placeholder="Add your comment" >
+                        <input type="hidden" class="form-input" id="product_id" name="product_id" value="{{ product[1] }}">
                         <br>
                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Ask</button>
                     </form>
@@ -224,8 +205,81 @@ function closeModal() {
       var dateFromServer = "{{product[7]}}"; // Replace this with your actual server-side date variable
       var formattedTimeAgo = moment(dateFromServer).fromNow();
       document.getElementById('timeAgo').textContent = formattedTimeAgo;
+      var product_id = document.getElementById('product_id').value;
+      fetchComments(product_id);
   });
 </script>
+
+<script>
+document.getElementById('comment-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var comment = document.getElementById('comment').value;
+    var product_id = document.getElementById('product_id').value;
+
+    console.log('Comment:', comment);
+    console.log('Product ID:', product_id);
+
+    fetch(`/api/comments/${product_id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'comment': comment
+        })
+    })
+    .then(response => {
+        console.log('Response:', response);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            document.getElementById('comment').value = '';
+            alert(data.message);
+            fetchComments(product_id); // Fetch and display comments after adding a new one
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error adding comment:', error));
+});
+
+function fetchComments(product_id) {
+    fetch(`/api/comments/${product_id}`)
+    .then(response => {
+        console.log('Fetch Response:', response);
+        return response.json();
+    })
+    .then(comments => {
+        let commentsContainer = document.getElementById("comment-container");
+        commentsContainer.innerHTML = ''; // Clear current comments
+
+        comments.forEach(comment => {
+            let commentCard = document.createElement('div');
+            commentCard.className = 'comment-card';
+            commentCard.innerHTML = `
+                <div class="comment-header">
+                    <div class="profile-for_card">
+                        <img class="profile-for_card" src="${comment.user_image}" >
+                        <form action="/profile/${comment.user_id}" method="get">
+                            <button type="submit">
+                                <p>${comment.user_name}</p>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="comment-details">
+                        <h2 style="color: #FFFFFF">${comment.comment_text}</h2>
+                    </div>
+                </div>
+            `;
+            commentsContainer.appendChild(commentCard);
+        });
+    })
+    .catch(error => console.error('Error fetching comments:', error));
+}
+</script>
+
 
 
 {% endblock %}
