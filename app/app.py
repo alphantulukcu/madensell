@@ -753,7 +753,14 @@ def market():
         products_with_images = [prod for prod in products if prod[-1] is not None]
         products_without_images = [prod for prod in products if prod[-1] is None]
 
-        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories, fav=fav, sellers=sellers)
+        cursor.execute('SELECT category_id, subcategory_id, subcategory_name FROM subcategory')
+        all_subcategories = cursor.fetchall()
+        subcategories_dict = {}
+        for category_id, subcategory_id, subcategory_name in all_subcategories:
+            if category_id not in subcategories_dict:
+                subcategories_dict[category_id] = []
+            subcategories_dict[category_id].append((subcategory_id, subcategory_name))
+        return render_template('market.html', user_type=session['user_type'], products_with_images=products_with_images, products_without_images=products_without_images, categories=categories, subcategories=subcategories, fav=fav, sellers=sellers, subcategories_dict=subcategories_dict)
     else:
         # User is not logged in, redirect to login page
         return redirect(url_for('login'))
@@ -1557,6 +1564,13 @@ def export_csv():
         headers={'Content-Disposition': f'attachment;filename={table_name}.csv'}
     )
 
+@app.route("/get-subcategories/<int:category_id>")
+def get_subcategories(category_id):
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute("SELECT subcategory_id, subcategory_name FROM subcategory WHERE category_id = %s", (category_id,))
+    subcategories = cursor.fetchall()
+    return jsonify(subcategories)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
