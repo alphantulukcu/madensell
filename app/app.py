@@ -611,7 +611,29 @@ def customer_edit_profile():
         return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
 
 
-
+@app.route('/change_password', methods=["POST", "GET"])
+def user_change_password():
+    if 'loggedin' in session and 'user_type' in session:
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            (session['userid'],))
+        user = cursor.fetchone()
+        message = ''
+        if request.method == 'POST' and 'new_password' in request.form:
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+            if new_password == confirm_password:
+                hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
+                cursor.execute('UPDATE users SET password = %s WHERE user_id = %s', (hashed_password, session['userid']))
+                conn.commit()
+                message = 'Password updated successfully!'
+                return render_template('edit_profile_customer.html', message=message, message_type='success', user=user)
+            else:
+                message = 'Passwords do not match!'
+        return render_template('edit_profile_customer.html', message=message, message_type='error', user=user)
+            
 
 @app.route("/add-product", methods=["POST", "GET"])
 def add_product():

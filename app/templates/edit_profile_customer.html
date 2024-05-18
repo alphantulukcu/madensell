@@ -10,40 +10,57 @@ Edit Your Profile
             <button id="toggle-theme-btn" onclick="toggleTheme()"><i class="icon-color fa-solid fa-moon"></i></button>
 
             <h3 class="text-center text-3xl font-bold mb-6">Edit Profile</h3>
-            <form action="{{ url_for( 'customer_edit_profile') }}" method="POST" enctype="multipart/form-data">
 
-                <div class="mb-4">
-                    <label for="username" class="label">Your Username:</label>
-                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter Username"  value="{{ user[1] }}" required>
+            <div class="flex">
+                <div class="w-1/2 mr-8">
+                    <form action="{{ url_for( 'customer_edit_profile') }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="username" class="label">Your Username:</label>
+                            <input type="text" class="form-input" id="username" name="username" placeholder="Enter Username"  value="{{ user[1] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="first_name" class="label">Name:</label>
+                            <input type="text" class="form-input" id="first_name" name="first_name" placeholder="Name" value="{{ user[9] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="last_name" class="label">Surname:</label>
+                            <input type="text" class="form-input" id="last_name" name="last_name" placeholder="Surname:"  value="{{ user[10] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="label">Your mail:</label>
+                            <input type="text" class="form-input" id="email" name="email" placeholder="Enter Email"  value="{{ user[2] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="phone" class="label">Phone Number:</label>
+                            <input type="tel" class="form-input" id="phone" name="phone" placeholder="Enter phone number"  value="{{ user[7] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="address" class="label">Address:</label>
+                            <input type="text" class="form-input" id="address" name="address" placeholder="Enter address"  value="{{ user[6] }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="profile_pic" class="label">Profile Picture:</label>
+                            <input type="file" class="form-input" id="profile_pic" name="profile_pic" accept="image/*" value="{{user[11]}}">
+                        </div>
+                        <button type="submit" class="btn">Update</button>
+                    </form>
                 </div>
-                <div class="mb-4">
-                    <label for="first_name" class="label">Name:</label>
-                    <input type="text" class="form-input" id="first_name" name="first_name" placeholder="Name" value="{{ user[9] }}" required>
+                <div class="w-1/2 ml-8">
+                    <form action="{{ url_for( 'user_change_password') }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="new_password" class="label">New Password:</label>
+                            <input type="password" class="form-input" id="new_password" name="new_password" placeholder="Enter new password" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirm_password" class="label">Confirm Password:</label>
+                            <input type="password" class="form-input" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required>
+                        </div>
+                        <button type="submit" class="btn">Change Password</button>
+                    </form>
                 </div>
-                <div class="mb-4">
-                    <label for="last_name" class="label">Surname:</label>
-                    <input type="text" class="form-input" id="last_name" name="last_name" placeholder="Surname:"  value="{{ user[10] }}" required>
-                </div>
-                <div class="mb-4">
-                    <label for="email" class="label">Your Bilkent mail:</label>
-                    <input type="text" class="form-input" id="email" name="email" placeholder="Enter Bilkent Email"  value="{{ user[2] }}" required>
-                </div>
-                <div class="mb-4">
-                    <label for="phone" class="label">Phone Number:</label>
-                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="Enter phone number"  value="{{ user[7] }}" required>
-                </div>
-                  <div class="mb-4">
-                    <label for="address" class="label">Address:</label>
-                    <input type="text" class="form-input" id="address" name="address" placeholder="Enter address"  value="{{ user[6] }}" required>
-                  </div>
-                </div>
-                  <div class="mb-4">
-                    <label for="profile_pic" class="label">Profile Picture:</label>
-                    <input type="file" class="form-input" id="profile_pic" name="profile_pic" accept="image/*" value="{{user[11]}}">
-                </div>
-                <button type="submit" class="btn">Update</button>
-            </form>
-
+            </div>
+            </div>
             </div>
         </div>
+        
 {% endblock %}
