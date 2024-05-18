@@ -149,3 +149,13 @@ CREATE TABLE IF NOT EXISTS review (
   PRIMARY KEY (review_id),
   foreign key (product_id) references product(product_id),
   foreign key (customer_id) references customer(user_id));
+
+CREATE VIEW user_details AS
+    SELECT u.*, c.first_name, c.last_name, c.profile_image
+    FROM users u
+    JOIN customer c ON u.user_id = c.user_id;
+
+CREATE VIEW review_check AS
+    SELECT customer_id, product_id
+    FROM review;
+

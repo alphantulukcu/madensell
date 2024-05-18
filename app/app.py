@@ -1270,48 +1270,58 @@ def review(type):
     if 'loggedin' in session and 'user_type' in session:
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
+
+        # Use the user_details view to fetch user details
         cursor.execute(
-            'SELECT * FROM users u, customer c WHERE c.user_id = u.user_id AND u.user_id = %s',
+            'SELECT * FROM user_details WHERE user_id = %s',
             (session['userid'],))
         user = cursor.fetchone()
+
         if request.method == 'POST':
-                comment = request.form['comment']
-                customer_id = session['userid']
-                username = session['username']
-                product_id = request.form.get('product_id')
+            comment = request.form['comment']
+            customer_id = session['userid']
+            username = session['username']
+            product_id = request.form.get('product_id')
 
-                try:
-                    speed_point = int(request.form['speed_point'])
-                    quality_point = int(request.form['quality_point'])
-                    interest_point = int(request.form['interest_point'])
-                except ValueError:
-                    # Handle case where the input is not an integer
-                    flash('Please enter valid integer values for points.')
-                    return redirect(url_for('profile', type=type))
+            try:
+                speed_point = int(request.form['speed_point'])
+                quality_point = int(request.form['quality_point'])
+                interest_point = int(request.form['interest_point'])
+            except ValueError:
+                # Handle case where the input is not an integer
+                flash('Please enter valid integer values for points.')
+                return redirect(url_for('profile', type=type))
 
-                    # Validate points are within the range 1-10
-                if not all(0 <= point <= 5 for point in [speed_point, quality_point, interest_point]):
-                    flash('All points must be between 0 and 5.')
-                    return redirect(url_for('profile', type=type))
+            # Validate points are within the range 0-5
+            if not all(0 <= point <= 5 for point in [speed_point, quality_point, interest_point]):
+                flash('All points must be between 0 and 5.')
+                return redirect(url_for('profile', type=type))
 
-                cursor.execute(
-                    'SELECT * FROM review WHERE customer_id = %s AND product_id = %s',
-                    (customer_id, product_id)
-                )
-                existing_review = cursor.fetchone()
-                if existing_review:
-                    flash('You have already reviewed this product.')
-                    return redirect(url_for('profile', type=type))
+            # Use the review_check view to check if the user has already reviewed this product
+            cursor.execute(
+                'SELECT * FROM review_check WHERE customer_id = %s AND product_id = %s',
+                (customer_id, product_id)
+            )
+            existing_review = cursor.fetchone()
 
-                average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
-                cursor.execute(
-                    """   
-                                    INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point, username) 
-                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                                """,
-                    (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point, username))
-                conn.commit()
-                return redirect(url_for('profile'))
+            if existing_review:
+                flash('You have already reviewed this product.')
+                return redirect(url_for('profile', type=type))
+
+            average_point = (int(speed_point) + int(quality_point) + int(interest_point)) / 3
+            cursor.execute(
+                """   
+                INSERT INTO review(customer_id, product_id, comment, speed, quality, interest, avg_point, username) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (customer_id, product_id, comment, speed_point, quality_point, interest_point, average_point, username))
+            conn.commit()
+            return redirect(url_for('profile'))
+
+        conn.close()
+
+    return render_template('review.html', user=user)
+
 
 
 
