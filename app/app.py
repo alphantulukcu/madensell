@@ -1564,14 +1564,6 @@ def export_csv():
         headers={'Content-Disposition': f'attachment;filename={table_name}.csv'}
     )
 
-@app.route("/get-subcategories/<int:category_id>")
-def get_subcategories(category_id):
-    conn = mysql.connector.connect(**config)
-    cursor = conn.cursor()
-    cursor.execute("SELECT subcategory_id, subcategory_name FROM subcategory WHERE category_id = %s", (category_id,))
-    subcategories = cursor.fetchall()
-    return jsonify(subcategories)
-
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
     app.run(debug=True, host='0.0.0.0', port=port)
