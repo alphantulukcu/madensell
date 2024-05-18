@@ -370,7 +370,9 @@ def profile(user_id):
                     si.city,   -- Shipping address from the shipping info
                     si.town,   -- Shipping address from the shipping info
                     si.postal_code,   -- Shipping address from the shipping info
+                    IF(r.review_id IS NOT NULL, TRUE, FALSE) AS isReviewed,
                     MIN(i.image_url) as single_image           -- Image URL for the product
+                   
                     
                 FROM orders o
                 JOIN product p ON o.product_id = p.product_id
@@ -378,6 +380,7 @@ def profile(user_id):
                 JOIN category c ON s.category_id = c.category_id
                 LEFT JOIN images i ON p.product_id = i.product_id
                 JOIN shipping_info si ON o.info_id = si.info_id
+                LEFT JOIN review r ON o.product_id = r.product_id AND si.customer_id = r.customer_id
                 WHERE si.customer_id = %s
                 GROUP BY o.order_id, 
                     o.info_id,       
@@ -394,7 +397,8 @@ def profile(user_id):
                     si.phone_number,
                     si.city,   -- Shipping address from the shipping info
                     si.town,   -- Shipping address from the shipping info
-                    si.postal_code
+                    si.postal_code,
+                    isReviewed
                 ORDER BY o.order_id DESC
 
                 ''', (customer_id,))

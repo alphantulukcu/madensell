@@ -57,7 +57,7 @@ Profile
 
                                         <div class="horizontal-card">
 
-                                        <img style="width: 10%" class="horizontal-card-img" src="{{post[16]}}">
+                                        <img style="width: 10%" class="horizontal-card-img" src="{{post[17]}}">
                                         <div class="card-content">
                                             <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
                                                 <button type="submit">
@@ -120,7 +120,9 @@ Profile
                                                         <input type="hidden" name="order_id" id="order_id" value="{{ post[0] }}">
                                                         <input type="hidden" name="status" id="status" value=4>
                                                         <button type="submit" class="filter-button">Start Return Process <i class="fas fa-filter" style="color: #ffffff;"></i></button>
-                                                        <button type="button" class="settings-button" onclick="showTab({{ post[2] }})">Make Review</button>
+                                                        {% if post[16] == False %}
+                                                            <button type="button" class="settings-button" onclick="showTab({{ post[2] }})">Make Review</button>
+                                                        {% endif %}
                                                     </form>
                                             {% elif post[4] == 4 %}
                                                 <h2>Status: RETURNING PROCESS</h2>
