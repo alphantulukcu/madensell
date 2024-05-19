@@ -38,9 +38,7 @@ Add
                 <label for="subcategory" class="label">Subcategory:</label>
                 <select id="subcategory" name="subcategory" class="form-input">
                     <option value="" selected>Select a subcategory</option>
-                    {% for subcategory in subcategories %}
-                        <option value="{{ subcategory[0] }}">{{ subcategory[1] }}</option>
-                    {% endfor %}
+
                 </select>
             </div>
             <div class="mb-4">
@@ -82,6 +80,21 @@ function previewImages() {
         }
     }
 }
+</script>
+
+<script>
+    document.getElementById('category').addEventListener('change', function() {
+        var categoryId = this.value;
+        var subcategories = subcategoriesByCategory[categoryId] || [];
+        var subcategorySelect = document.getElementById('subcategory');
+        subcategorySelect.innerHTML = '<option value="">Select a Subcategory</option>';
+        subcategories.forEach(function(subcategory) {
+            subcategorySelect.innerHTML += `<option value="${subcategory[0]}">${subcategory[1]}</option>`;
+        });
+    });
+</script>
+<script>
+    var subcategoriesByCategory = {{ subcategories_dict | tojson }};
 </script>
 
 {% endblock %}
