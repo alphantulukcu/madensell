@@ -115,7 +115,7 @@ Profile
                     {% else %}
                         {% for post in orders %}
                              <div class="horizontal-card">
-                                <div class="horizontal-card">
+                                <div class="horizontal-card"  style="background: none; box-shadow: none">
 
                                     <img style="width: 10%" class="horizontal-card-img" src="{{post[19]}}">
                                     <div class="card-content">
@@ -131,7 +131,7 @@ Profile
                                         </div>
                                     </div>
                                 </div>
-                                <div class="detailed-post">
+                                <div class="detailed-post" style="background: none; box-shadow: none">
                                     <div class="profile-for_card">
                                     <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture" style="margin: 0.5rem;">
                                         <button type="submit">
@@ -145,7 +145,7 @@ Profile
                                         <h1>Address: {{ post[14] }}, {{ post[17] }}/{{ post[16] }}, {{post[18] }}</h1>
                                     </div>
                                 </div>
-                                <div class="detailed-post">
+                                <div class="detailed-post"  style="background: none; box-shadow: none">
                                     <div class="detailed-post-content">
                                         {% if post[4] == 0 %}
                                                 <h2>Status: CANCELLED</h2>

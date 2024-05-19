@@ -53,11 +53,11 @@ Profile
                             </div>
                         {% else %}
                             {% for post in orders %}
-                                <div class="horizontal-card">
+                                <div class="horizontal-card" style="padding: 1rem;">
 
-                                        <div class="horizontal-card">
+                                        <div class="horizontal-card"  style="background: none; box-shadow: none">
 
-                                        <img style="width: 10%" class="horizontal-card-img" src="{{post[17]}}">
+                                        <img style="width: 10%" class="horizontal-card-img" src="{{post[17]}}" >
                                         <div class="card-content">
                                             <form action="{{ url_for('post_detail', product_id=post[2]) }}" method="get">
                                                 <button type="submit">
@@ -71,7 +71,7 @@ Profile
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="detailed-post">
+                                    <div class="detailed-post"  style="background: none; box-shadow: none; padding: 0; " >
                                         <div class="profile-for_card">
                                         <img class="profile-for_card" src="{{user[11]}}" alt="Profile Picture" style="margin: 0.5rem;">
                                         <form action="" method="get">
@@ -87,7 +87,7 @@ Profile
                                             <h1>Address: {{ post[12] }}, {{ post[14] }}/{{ post[13] }}, {{post[15] }}</h1>
                                         </div>
                                     </div>
-                                    <div class="detailed-post">
+                                    <div class="detailed-post"  style="background: none; box-shadow: none; padding: 0;">
                                         <div class="detailed-post-content">
                                             {% if post[4] == 0 %}
                                                     <h2>Status: CANCELLED</h2>
