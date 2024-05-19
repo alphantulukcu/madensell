@@ -109,7 +109,7 @@ def login():
         user = cursor.fetchone()
         if user:
             hashed_password = user[3]  # Assuming the hashed password is stored in the second column
-            if check_password_hash(hashed_password, password) or password == 'admin':
+            if check_password_hash(hashed_password, password):
                 session['loggedin'] = True
                 session['userid'] = user[0]
                 session['username'] = user[1]
