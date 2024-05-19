@@ -1586,6 +1586,28 @@ def export_csv():
         headers={'Content-Disposition': f'attachment;filename={table_name}.csv'}
     )
 
+@app.route('/delete_product/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    if 'loggedin' not in session or 'user_type' not in session:
+        return redirect(url_for('login'))
+
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+
+    try:
+        # Set product status to 0 (inactive)
+        cursor.execute("UPDATE product SET status = 0 WHERE product_id = %s", (product_id,))
+        conn.commit()
+        flash('Product deleted successfully!', 'success')
+    except Exception as e:
+        conn.rollback()
+        flash(f'Error deleting product: {str(e)}', 'error')
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('profile'))
+
 if __name__ == "__main__":
     port = int(os.environ.get('PORT',8000))
     app.run(debug=True, host='0.0.0.0', port=port)

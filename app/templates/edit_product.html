@@ -51,6 +51,11 @@ Edit Product
             <p>No product details available.</p>
             {% endif %}
         </form>
+        {% if products %}
+        <form action="{{ url_for('delete_product', product_id=single_product['product_id']) }}" method="POST" style="margin-top: 20px;">
+            <button type="submit" class="btn btn-danger">Delete Product</button>
+        </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
