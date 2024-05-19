@@ -51,14 +51,11 @@ Profile
             </div>
         </div>
     {% else %}
-        <div class="flex overflow-x-auto" style="padding: 2%;">
+        <div class="scroll-container" style="min-height: 700px;">
+            <div class="card-container" style="margin-top: 0">
 
             {% for post in products %}
-                {% if post[1] == products[0][1] %}
-                    <div class="card inline-block mr-4" style="position: relative; margin-left: 20%;">
-                {% else %}
                     <div class="card inline-block mr-4" style="position: relative;">
-                {% endif %}
                     <div class="profile-for_card">
                         <img class="profile-for_card" src="{{post[12]}}" alt="Profile Picture">
                         <form action="{{ url_for('profile', user_id=post[0]) }}" method="get">
@@ -97,6 +94,7 @@ Profile
 
                 </div>
             {% endfor %}
+        </div>
         </div>
     {% endif %}
 </div>
