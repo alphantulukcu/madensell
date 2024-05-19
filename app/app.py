@@ -853,31 +853,52 @@ def post_detail(product_id):
         return render_template('post_detail.html',user_type=session['user_type'], product=product, images=images, reviews=reviews)
 
 
-@app.route("/api/comments/<int:product_id>", methods=["GET", "POST"])
-def comments(product_id):
+@app.route("/api/comments/<int:product_id>/<int:type>", methods=["GET", "POST"])
+def comments(product_id, type):
     if 'loggedin' in session:
         if request.method == "POST":
-            # Handle adding a comment
-            comment = request.form.get('comment')
-            print("Received Comment:", comment)
-            print("Received Product ID:", product_id)
+            if type == 0:
+                # Handle adding a comment
+                comment = request.form.get('comment')
+                print("Received Comment:", comment)
+                print("Received Product ID:", product_id)
 
-            if comment:
-                try:
-                    conn = mysql.connector.connect(**config)
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        """   
-                            INSERT INTO comments(product_id, customer_id, comment) 
-                            VALUES (%s,%s,%s)
-                        """,
-                        (product_id, session['userid'], comment))
-                    conn.commit()
-                    return jsonify({"success": True, "message": "Comment added successfully."})
-                except Exception as e:
-                    print(f"Error adding comment: {e}")
-                    return jsonify({"success": False, "message": "Error adding comment."}), 500
-            return jsonify({"success": False, "message": "No comment provided."})
+                if comment:
+                    try:
+                        conn = mysql.connector.connect(**config)
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            """   
+                                INSERT INTO comments(product_id, customer_id, comment) 
+                                VALUES (%s,%s,%s)
+                            """,
+                            (product_id, session['userid'], comment))
+                        conn.commit()
+                        return jsonify({"success": True, "message": "Comment added successfully."})
+                    except Exception as e:
+                        print(f"Error adding comment: {e}")
+                        return jsonify({"success": False, "message": "Error adding comment."}), 500
+                return jsonify({"success": False, "message": "No comment provided."})
+
+            elif type == 1:
+                answer = request.form.get('answer')
+                comment_id = request.form.get('comment_id')
+                if answer and comment_id:
+                    try:
+                        conn = mysql.connector.connect(**config)
+                        cursor = conn.cursor()
+                        cursor.execute(
+                            """   
+                                UPDATE comments SET answer=%s WHERE comment_id=%s
+                            """,
+                            (answer, comment_id))
+                        conn.commit()
+                        return jsonify({"success": True, "message": "Comment added successfully."})
+                    except Exception as e:
+                        print(f"Error adding comment: {e}")
+                        return jsonify({"success": False, "message": "Error adding comment."}), 500
+                return jsonify({"success": False, "message": "No comment provided."})
+
 
         elif request.method == "GET":
             # Handle fetching comments
@@ -895,8 +916,10 @@ def comments(product_id):
                         "user_id": comment[1],
                         "comment_id": comment[2],
                         "comment_text": comment[3],
-                        "user_name": f"{comment[5]} {comment[6]}",
-                        "user_image": comment[7]
+                        "answer": comment[4],
+                        "user_name": f"{comment[6]} {comment[7]}",
+                        "user_image": comment[8],
+                        "user_type": session['user_type']
                     })
 
                 return jsonify(comments_list)

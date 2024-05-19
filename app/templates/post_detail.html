@@ -216,6 +216,8 @@ function closeModal() {
   });
 </script>
 
+
+
 <script>
 document.getElementById('comment-form').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -226,7 +228,7 @@ document.getElementById('comment-form').addEventListener('submit', function(even
     console.log('Comment:', comment);
     console.log('Product ID:', product_id);
 
-    fetch(`/api/comments/${product_id}`, {
+    fetch(`/api/comments/${product_id}/0`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -251,8 +253,37 @@ document.getElementById('comment-form').addEventListener('submit', function(even
     .catch(error => console.error('Error adding comment:', error));
 });
 
+function answerQuestion(event, form) {
+    event.preventDefault();
+
+    var answer = form.querySelector('input[name="answer"]').value;
+    var comment_id = form.querySelector('input[name="comment_id"]').value;
+    var product_id = form.querySelector('input[name="product_id"]').value;
+
+    fetch(`/api/comments/0/1`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'answer': answer,
+            'comment_id': comment_id
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            fetchComments(product_id); // Fetch and display comments after adding a new one
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => console.error('Error adding answer:', error));
+}
+
 function fetchComments(product_id) {
-    fetch(`/api/comments/${product_id}`)
+    fetch(`/api/comments/${product_id}/0`)
     .then(response => {
         console.log('Fetch Response:', response);
         return response.json();
@@ -264,7 +295,30 @@ function fetchComments(product_id) {
         comments.forEach(comment => {
             let commentCard = document.createElement('div');
             commentCard.className = 'comment-card';
-            commentCard.innerHTML = `
+            if (comment.answer) {
+                commentCard.innerHTML = `
+                <div class="comment-header">
+                    <div class="profile-for_card">
+                        <img class="profile-for_card" src="${comment.user_image}" >
+                        <form action="/profile/${comment.user_id}" method="get">
+                            <button type="submit">
+                                <p>${comment.user_name}</p>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="comment-details">
+                        <h2 style="color: #FFFFFF">${comment.comment_text}</h2>
+                        <div class="review-comment" style="margin-top: 1rem;">
+                        <p style="color: rgb(255,255,255)" >Replied by the business:</p>
+                        <h2 style="color: #FFFFFF">${comment.answer}</h2>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+            }
+            else {
+                commentCard.innerHTML = `
                 <div class="comment-header">
                     <div class="profile-for_card">
                         <img class="profile-for_card" src="${comment.user_image}" >
@@ -278,7 +332,20 @@ function fetchComments(product_id) {
                         <h2 style="color: #FFFFFF">${comment.comment_text}</h2>
                     </div>
                 </div>
+                {% if user_type == 2 %}
+                    <div class="answer-form">
+                         <form onsubmit="answerQuestion(event, this)" data-comment-id="${comment.comment_id}">
+                            <div style="display: flex; flex-direction: row; margin-top: 1rem;">
+                                <input class="form-input" name="answer" placeholder="Your answer...">
+                                <input type="hidden" name="comment_id" value="${comment.comment_id}">
+                                <input type="hidden" class="form-input" name="product_id" value="${product_id}">
+                                <button class="settings-button" type="submit" style="margin-left: 0.5rem">Answer</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
             `;
+            }
             commentsContainer.appendChild(commentCard);
         });
     })
