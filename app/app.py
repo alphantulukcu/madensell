@@ -1515,7 +1515,7 @@ def edit_product(product_id):
         )
         conn.commit()
         flash('Product updated successfully!', 'success')
-        return redirect(url_for('edit_product', product_id=product_id))
+        return redirect(url_for('post_detail', product_id=product_id))
 
     return render_template('edit_product.html', products=products)
 
