@@ -19,9 +19,12 @@ from flask import Flask, render_template, request, session, redirect, url_for, R
 import mysql.connector
 import pandas as pd
 from io import StringIO
+
+load_dotenv()
+print(os.getenv('HOST'))
 cred = credentials.Certificate("madensell-dc0c4-firebase-adminsdk-e1l49-c41a93f84c.json")
 app1 = firebase_admin.initialize_app(cred, {
-    'storageBucket': 'madensell-dc0c4.appspot.com'
+    'storageBucket': os.getenv('STORAGE_BUCKET')
 })
 
 
@@ -31,18 +34,18 @@ app = Flask(__name__)
 # Obtain connection string information from the portal
 
 config = {
-  'host':'madensell.mysql.database.azure.com',
-  'user':'fackd',
-  'password':'Konur123',
-  'database':'madensell'
+  'host': os.getenv('HOST'),
+  'user': os.getenv('USER'),
+  'password': os.getenv('PASSWORD'),
+  'database': os.getenv('DATABASE')
 }
-
+print(config)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'campusconnectfacid@gmail.com'
-app.config['MAIL_PASSWORD'] = 'nzmm sodh kvyh ndwg'
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
 
 app.secret_key = 'alphan'  # Replace with a unique and secret key
 
