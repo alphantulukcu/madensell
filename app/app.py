@@ -100,6 +100,9 @@ def add_picture(pic, userid):
 @app.route('/login', methods =['GET', 'POST'])
 def login():
     message = ''
+    if 'loggedin' in session:
+        return redirect(url_for('profile'))
+
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
         password = request.form['password']
