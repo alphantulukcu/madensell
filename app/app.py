@@ -350,7 +350,7 @@ def profile(user_id):
                     JOIN category c ON s.category_id = c.category_id
                     LEFT JOIN images i ON p.product_id = i.product_id
                     JOIN favorites f ON p.product_id = f.product_id
-                    WHERE f.cust_id = %s
+                    WHERE f.cust_id = %s and p.status = 1
                     GROUP BY p.product_id, b.user_id, s.subcategory_id, c.category_id
                 ''', (customer_id,))
                 favorites = cursor.fetchall()
