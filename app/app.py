@@ -803,6 +803,7 @@ def market():
 def post_detail(product_id):
     message = ''
     if 'loggedin' in session and 'user_type' in session:
+        viewing_own_profile = False
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
         if request.method == 'POST': # comment
@@ -840,7 +841,7 @@ def post_detail(product_id):
             'SELECT * FROM product p, business b, users u, subcategory s, category c WHERE b.user_id = u.user_id AND p.business_id = b.user_id AND s.subcategory_id = p.subcategory_id AND s.category_id = c.category_id AND p.product_id = %s',
             (product_id,))
         product = cursor.fetchone()
-
+        viewing_own_profile = session['userid'] == product[0]
         cursor.execute(
             'SELECT * FROM review WHERE product_id = %s',
             (product_id,)
@@ -853,7 +854,7 @@ def post_detail(product_id):
             (product_id,))
         images = cursor.fetchall()
 
-        return render_template('post_detail.html',user_type=session['user_type'], product=product, images=images, reviews=reviews)
+        return render_template('post_detail.html',user_type=session['user_type'], product=product, images=images, reviews=reviews, viewing_own_profile=viewing_own_profile)
 
 
 @app.route("/api/comments/<int:product_id>/<int:type>", methods=["GET", "POST"])

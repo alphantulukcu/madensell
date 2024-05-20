@@ -333,7 +333,7 @@ function fetchComments(product_id) {
                         <h2 style="color: #FFFFFF">${comment.comment_text}</h2>
                     </div>
                 </div>
-                {% if user_type == 2 %}
+                {% if user_type == 2 and viewing_own_profile %}
                     <div class="answer-form">
                          <form onsubmit="answerQuestion(event, this)" data-comment-id="${comment.comment_id}">
                             <div style="display: flex; flex-direction: row; margin-top: 1rem;">

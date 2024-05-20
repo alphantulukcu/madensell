@@ -19,12 +19,12 @@ Market
             <option value="{{ category[0] }}">{{ category[1] }}</option>
             {% endfor %}
         </select>
-        
+
         <select class="form-input" id="post_subcategories" name="post_subcategories" style="margin-left: 0.5rem">
             <option value="">Select a Subcategory</option>
             <!-- Subcategories will be dynamically populated by JavaScript -->
         </select>
-        
+
 
             <select class="form-input" id="post_sort" name="post_sort" style="margin-left: 0.5rem">
                 <option value="">Sort by:</option>
@@ -196,5 +196,5 @@ Market
 <script>
     var subcategoriesByCategory = {{ subcategories_dict | tojson }};
 </script>
-    
+
 {% endblock %}
