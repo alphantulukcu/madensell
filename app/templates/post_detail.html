@@ -112,7 +112,7 @@ Post
                     <br>
                     {% if user_type == 1%}
                         <form action="" method="post" style="width: 100%;display: flex;flex-direction: row;height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                            <input type="number" max="{{product[5]}}" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
+                            <input type="number" min=0 max="{{product[5]}}" class="form-input" style="width: 1rem;" id="numofproducts" name="numofproducts" placeholder="0" >
                         <br>
                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Add to Basket</button>
                     </form>

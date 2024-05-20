@@ -246,15 +246,15 @@ Profile
             </div>
             <div class="mb-4">
                 <label for="speed_point" class="label">Speed:</label>
-                <input type="number" max=5 class="form-input" id="speed_point" name="speed_point" required>
+                <input type="number" min=0 max=5 class="form-input" id="speed_point" name="speed_point" required>
             </div>
             <div class="mb-4">
                 <label for="quality_point" class="label">Quality:</label>
-                <input type="number" max=5 class="form-input" id="quality_point" name="quality_point" required>
+                <input type="number" min=0 max=5 class="form-input" id="quality_point" name="quality_point" required>
             </div>
             <div class="mb-4">
                 <label for="interest_point" class="label">Interest:</label>
-                <input type="number" max=5 class="form-input" id="interest_point" name="interest_point" required>
+                <input type="number" min=0 max=5 class="form-input" id="interest_point" name="interest_point" required>
             </div>
             <button class="settings-button" type="submit">Save</button>
         </form>
