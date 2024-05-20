@@ -13,34 +13,31 @@ Edit Your Profile
             <div class="flex">
                 <div class="w-1/2 mr-8">
                     <form action="{{ url_for( 'business_edit_profile') }}" method="POST" enctype="multipart/form-data">
-                        <div class="mb-4">
-                            <label for="username" class="label">Your Username:</label>
-                            <input type="text" class="form-input" id="username" name="username" placeholder="Enter Username"  value="{{ user[1] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="first_name" class="label">Name:</label>
-                            <input type="text" class="form-input" id="first_name" name="first_name" placeholder="Name" value="{{ user[9] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="last_name" class="label">Surname:</label>
-                            <input type="text" class="form-input" id="last_name" name="last_name" placeholder="Surname:"  value="{{ user[10] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="email" class="label">Your mail:</label>
-                            <input type="text" class="form-input" id="email" name="email" placeholder="Enter Email"  value="{{ user[2] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="phone" class="label">Phone Number:</label>
-                            <input type="tel" class="form-input" id="phone" name="phone" placeholder="Enter phone number"  value="{{ user[7] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="address" class="label">Address:</label>
-                            <input type="text" class="form-input" id="address" name="address" placeholder="Enter address"  value="{{ user[6] }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="profile_pic" class="label">Profile Picture:</label>
-                            <input type="file" class="form-input" id="profile_pic" name="profile_pic" accept="image/*" value="{{user[11]}}">
-                        </div>
+                       <div class="mb-4">
+                    <label for="username" class="label">Username:</label>
+                    <input type="text" class="form-input" id="username" name="username" placeholder="Enter Username"  value="{{ user[1] }}" required>
+                </div>
+                <div class="mb-4">
+                    <label for="businessname" class="label">Business name:</label>
+                    <input type="text" class="form-input" id="businessname" name="businessname" placeholder="Business name" value="{{ user[9] }}" required>
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="label">Business mail:</label>
+                    <input type="text" class="form-input" id="email" name="email" placeholder="Enter Business Email"  value="{{ user[2] }}" required>
+                </div>
+                <div class="mb-4">
+                    <label for="phone" class="label">Phone Number:</label>
+                    <input type="tel" class="form-input" id="phone" name="phone" placeholder="Enter phone number"  value="{{ user[7] }}" required>
+                </div>
+                  <div class="mb-4">
+                    <label for="address" class="label">Address:</label>
+                    <input type="text" class="form-input" id="address" name="address" placeholder="Enter address"  value="{{ user[6] }}" required>
+                  </div>
+                </div>
+                  <div class="mb-4">
+                    <label for="profile_pic" class="label">Profile Picture:</label>
+                    <input type="file" class="form-input" id="profile_pic" name="profile_pic" accept="image/*" value="{{user[11]}}">
+                </div>
                         <button type="submit" class="btn">Update</button>
                     </form>
                 </div>

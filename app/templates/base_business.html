@@ -64,7 +64,7 @@
                         <h3 id="walletBalance">Loading...</h3> <!-- Element to display the wallet balance -->
                     </div>
                     <form id="walletForm" style="width: 100%; display: flex; flex-direction: row; height: 3rem; font-size: 1rem; margin-top: 0.5rem">
-                        <input type="number" class="form-input" style="width: 1rem;" name="insert_amount">
+                        <input type="number" min=0 class="form-input" style="width: 1rem;" name="insert_amount">
                         <button class="settings-button" type="submit" style="margin-left: 0.5rem">Transfer</button>
                     </form>
                 </div>
@@ -97,7 +97,10 @@
         <div class="col-span-2 md:col-span-1">
             <h4 class="text-lg font-semibold mb-2">Navigation</h4>
             <ul class="list-none p-0 m-0">
-
+                <a href="{{url_for('market')}}" class="btn" style="opacity: 80%">Market</a>
+                <a href="{{url_for('stats')}}" class="btn" style="opacity: 80%" >Stats</a>
+                <a href="{{url_for('profile')}}" class="btn"><i class="icon-color fa-solid fa-cart-shopping"></i>Profile</a>
+                <a href="{{url_for('logout')}}" class="btn"><i class="icon-color fa-solid fa-right-from-bracket"></i> Logout</a>
             </ul>
         </div>
         <div class="col-span-2 md:col-span-1 mx-auto justify-center">

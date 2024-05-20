@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS comments (
     product_id   INT (10) NOT NULL,
     comment_id   INT AUTO_INCREMENT NOT NULL,
     comment     VARCHAR(255) NOT NULL,
+    answer     VARCHAR(255) NOT NULL,
     primary key (comment_id),
     foreign key (product_id) references product(product_id),
     foreign key (customer_id) references customer(user_id)

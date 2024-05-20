@@ -18,6 +18,7 @@ config = {
 
 def create_tables():
     connection = mysql.connector.connect(**config)
+    # put the path in your system
     run_sql_file('/Users/alphantulukcu/Desktop/CS353/madensell/server/tables.sql', connection)
     cursor = connection.cursor()
     cursor.execute(
